@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hospital - User Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html {
+            scroll-behavior: auto;
+        }
+        .section-anchor {
+            scroll-margin-top: 80px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Sidebar -->
+    <nav class="fixed left-0 top-0 h-full w-64 bg-blue-900 text-white overflow-y-auto z-40 hidden lg:block">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold mb-8 flex items-center">
+                <i class="fas fa-stethoscope mr-3 text-blue-300"></i>
+                AI Hospital
+            </h1>
+            <ul class="space-y-2">
+                <li><a href="#introduction" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-book-open mr-3 w-5"></i>Introduction</a></li>
+                <li><a href="#technology-stack" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-code mr-3 w-5"></i>Technology Stack</a></li>
+                <li><a href="#installation" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-download mr-3 w-5"></i>Installation</a></li>
+                <li><a href="#getting-started" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-rocket mr-3 w-5"></i>Getting Started</a></li>
+                <li><a href="#dashboard" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-tachometer-alt mr-3 w-5"></i>Dashboard</a></li>
+                <li><a href="#patients" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-users mr-3 w-5"></i>Patient Management</a></li>
+                <li><a href="#appointments" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-calendar-alt mr-3 w-5"></i>Appointments</a></li>
+                <li><a href="#public-website" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-globe mr-3 w-5"></i>Public Website & Booking</a></li>
+                <li><a href="#reports" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-file-medical mr-3 w-5"></i>Medical Reports</a></li>
+                <li><a href="#doctors-staff" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-user-md mr-3 w-5"></i>Doctors & Staff</a></li>
+                <li><a href="#laboratory" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-vial mr-3 w-5"></i>Laboratory + LIS</a></li>
+                <li><a href="#device-integration" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-plug mr-3 w-4"></i>LIS Integration Guide</a></li>
+                <li><a href="#inpatient" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-procedures mr-3 w-5"></i>Inpatient</a></li>
+                <li><a href="#radiology" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-x-ray mr-3 w-5"></i>Radiology + DICOM</a></li>
+                <li><a href="#pharmacy" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-prescription-bottle-medical mr-3 w-5"></i>Pharmacy</a></li>
+                <li><a href="#inventory" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-boxes-stacked mr-3 w-5"></i>Inventory</a></li>
+                <li><a href="#billing" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-file-invoice-dollar mr-3 w-5"></i>Billing</a></li>
+                <li><a href="#documents" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-folder-open mr-3 w-5"></i>Document Management</a></li>
+                <li><a href="#emergency" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-ambulance mr-3 w-5"></i>Emergency</a></li>
+                <li><a href="#telemedicine" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-video mr-3 w-5"></i>Telemedicine</a></li>
+                <li><a href="#ambulance" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-ambulance mr-3 w-5"></i>Ambulance</a></li>
+                <li><a href="#analytical-reports" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-chart-line mr-3 w-5"></i>Analytical Reports</a></li>
+                <li><a href="#internationalization" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-language mr-3 w-5"></i>Language (i18n)</a></li>
+                <li><a href="#ai-features" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-brain mr-3 w-5"></i>AI Features</a></li>
+                <li><a href="#ai-assistant" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-robot mr-3 w-4"></i>AI Assistant</a></li>
+                <li><a href="#ai-treatment" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-stethoscope mr-3 w-4"></i>Treatment Plans</a></li>
+                <li><a href="#ai-drug-interaction" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-pills mr-3 w-4"></i>Drug Interaction</a></li>
+                <li><a href="#ai-image" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-x-ray mr-3 w-4"></i>Image Analysis</a></li>
+                <li><a href="#ai-voice" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-microphone mr-3 w-4"></i>Voice Input</a></li>
+                <li><a href="#ai-optimizer" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-calendar-check mr-3 w-4"></i>Appointment Optimizer</a></li>
+                <li><a href="#ai-risk" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-shield-alt mr-3 w-4"></i>Risk Assessment</a></li>
+                <li><a href="#ai-trends" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-chart-line mr-3 w-4"></i>Health Trends</a></li>
+                <li><a href="#ai-analytics" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-chart-bar mr-3 w-4"></i>Health Analytics</a></li>
+                <li><a href="#ai-symptom" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-search mr-3 w-4"></i>Symptom Analyzer</a></li>
+                <li><a href="#ai-report" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-file-alt mr-3 w-4"></i>Report Generator</a></li>
+                <li><a href="#settings" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-cog mr-3 w-5"></i>Settings & Profile</a></li>
+                <li><a href="#tips" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-lightbulb mr-3 w-5"></i>Tips & Best Practices</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 shadow-lg">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-4xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-stethoscope mr-4 text-blue-200"></i>
+                    AI Hospital
+                </h1>
+                <p class="text-xl text-blue-100">AI Hospital - Complete AI Powered Healthcare / Hospital Management System (HMS)</p>
+                <p class="mt-4 text-blue-200">Comprehensive User Documentation</p>
+                <p class="mt-2 text-blue-200 text-sm">Last updated: March 2026</p>
+            </div>
+        </header>
+
+        <!-- Content Container -->
+        <div class="max-w-4xl mx-auto p-8 space-y-12">
+            
+            <!-- Introduction -->
+            <section id="introduction" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-book-open text-blue-600 mr-3"></i>
+                    Introduction
+                </h2>
+                <div class="prose max-w-none">
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        Welcome to <strong>AI Hospital</strong>, a comprehensive healthcare practice / hospital management system with <strong>built-in DICOM and LIS device integration</strong>. The platform combines core HMS features (patients, appointments, reports, laboratory, inpatient, radiology/imaging, pharmacy, inventory, billing, documents, emergency, telemedicine, ambulance) with <strong>direct connectivity to laboratory analyzers and imaging equipment</strong>, plus AI-assisted tools to support clinical workflows.
+                    </p>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
+                        <p class="text-blue-800"><strong>Key Benefits:</strong></p>
+                        <ul class="list-disc list-inside text-blue-700 mt-2 space-y-1">
+                            <li>Streamlined patient management and record keeping</li>
+                            <li>Intelligent appointment scheduling and optimization</li>
+                            <li><strong>LIS Integration:</strong> Connect hematology, biochemistry, and other lab analyzers via HL7/FHIR/ASTM</li>
+                            <li><strong>DICOM Integration:</strong> Connect CT, MRI, X-ray, ultrasound, and other imaging modalities</li>
+                            <li>Documents, emergency, telemedicine, and ambulance modules</li>
+                            <li>AI-powered medical assistance and image analysis</li>
+                            <li>Comprehensive reporting and analytics</li>
+                            <li>Secure data management with role-based access and hashed passwords</li>
+                            <li><strong>Public hospital website:</strong> CMS-driven landing page, multilingual (EN/ES/FR), book-appointment flow</li>
+                            <li><strong>Online appointment requests:</strong> Optional SMS (Twilio) OTP for returning patients; doctor schedules and public time slots</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technology Stack & Dependencies -->
+            <section id="technology-stack" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-code text-indigo-600 mr-3"></i>
+                    Technology Stack & Dependencies
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        This application is built with modern, secure, and up-to-date technologies. All dependencies have been updated to meet the latest security requirements and best practices.
+                    </p>
+                    
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-lg mb-6">
+                        <h3 class="font-semibold text-indigo-900 mb-3 flex items-center">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            Security Status
+                        </h3>
+                        <p class="text-indigo-800 text-sm mb-2">All packages are up-to-date with security vulnerabilities resolved:</p>
+                        <ul class="list-disc list-inside text-indigo-700 text-sm space-y-1">
+                            <li>✅ 0 security vulnerabilities</li>
+                            <li>✅ All critical security patches applied</li>
+                            <li>✅ Latest stable versions installed</li>
+                        </ul>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">Core Framework</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="text-blue-800">Next.js</span>
+                                    <code class="bg-blue-100 px-2 py-1 rounded text-blue-900">15.5.9</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-blue-800">React</span>
+                                    <code class="bg-blue-100 px-2 py-1 rounded text-blue-900">19.2.1</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-blue-800">React DOM</span>
+                                    <code class="bg-blue-100 px-2 py-1 rounded text-blue-900">19.2.1</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-blue-800">TypeScript</span>
+                                    <code class="bg-blue-100 px-2 py-1 rounded text-blue-900">^5</code>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">Authentication & Database</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="text-green-800">NextAuth.js</span>
+                                    <code class="bg-green-100 px-2 py-1 rounded text-green-900">^4.24.13</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-green-800">Mongoose</span>
+                                    <code class="bg-green-100 px-2 py-1 rounded text-green-900">^9.0.0</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-green-800">MongoDB</span>
+                                    <code class="bg-green-100 px-2 py-1 rounded text-green-900">^6.18.0</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-green-800">@auth/mongodb-adapter</span>
+                                    <code class="bg-green-100 px-2 py-1 rounded text-green-900">^3.10.0</code>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h3 class="text-lg font-semibold text-purple-900 mb-3">UI & Styling</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="text-purple-800">Tailwind CSS</span>
+                                    <code class="bg-purple-100 px-2 py-1 rounded text-purple-900">^4</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-purple-800">Lucide React</span>
+                                    <code class="bg-purple-100 px-2 py-1 rounded text-purple-900">^0.555.0</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-purple-800">React Hot Toast</span>
+                                    <code class="bg-purple-100 px-2 py-1 rounded text-purple-900">^2.6.0</code>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                            <h3 class="text-lg font-semibold text-orange-900 mb-3">Additional Libraries</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">next-intl</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^4.3.6</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">html2canvas</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^1.4.1</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">jspdf</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^4.0.0</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">recharts</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^3.7.0</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">cookies-next</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^6.1.0</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">bcryptjs</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^3.0.2</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">twilio</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^5.12</code>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-orange-800">libphonenumber-js</span>
+                                    <code class="bg-orange-100 px-2 py-1 rounded text-orange-900">^1.12</code>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Installation -->
+            <section id="installation" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-download text-indigo-600 mr-3"></i>
+                    Installation
+                </h2>
+                
+                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-lg mb-8">
+                    <h3 class="font-semibold text-indigo-900 mb-2 flex items-center">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        Downloading from CodeCanyon
+                    </h3>
+                    <p class="text-indigo-800 text-sm mb-2">This script is available on CodeCanyon. After purchase, you'll receive:</p>
+                    <ol class="list-decimal list-inside text-indigo-700 text-sm space-y-1 ml-4">
+                        <li><strong>main_files.zip</strong> - The initial download package</li>
+                        <li>After extracting main_files.zip, you'll get <strong>ai-doctor.zip</strong> - This is the actual script file</li>
+                        <li>Extract ai-doctor.zip to begin installation</li>
+                    </ol>
+                </div>
+
+                <!-- Prerequisites -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Prerequisites
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h4 class="font-semibold text-gray-900 mb-3">1. Install Node.js</h4>
+                            <p class="text-gray-700 mb-3">Download and install Node.js from the official website:</p>
+                            <div class="bg-gray-100 rounded p-4 mb-3">
+                                <p class="text-sm text-gray-800 mb-2"><strong>Download:</strong> <a href="https://nodejs.org/" target="_blank" class="text-blue-600 hover:underline">https://nodejs.org/</a></p>
+                                <p class="text-sm text-gray-800">Choose the LTS (Long Term Support) version for stability.</p>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">Verify installation:</p>
+                            <div class="bg-gray-900 text-green-400 rounded p-3 font-mono text-sm">
+                                <code>node --version</code><br>
+                                <code>npm --version</code>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h4 class="font-semibold text-gray-900 mb-3">2. Install MongoDB</h4>
+                            <p class="text-gray-700 mb-3">Choose one of the following options:</p>
+                            <div class="space-y-3">
+                                <div class="bg-blue-50 rounded p-4 border border-blue-200">
+                                    <h5 class="font-semibold text-blue-900 mb-2">Option A: MongoDB Atlas (Cloud - Recommended)</h5>
+                                    <ul class="list-disc list-inside text-blue-800 text-sm space-y-1">
+                                        <li>Sign up at <a href="https://www.mongodb.com/cloud/atlas" target="_blank" class="text-blue-600 hover:underline">MongoDB Atlas</a></li>
+                                        <li>Create a free cluster (M0 tier available)</li>
+                                        <li>Get your connection string</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-green-50 rounded p-4 border border-green-200">
+                                    <h5 class="font-semibold text-green-900 mb-2">Option B: Local MongoDB Installation</h5>
+                                    <ul class="list-disc list-inside text-green-800 text-sm space-y-1">
+                                        <li>Download from <a href="https://www.mongodb.com/try/download/community" target="_blank" class="text-green-600 hover:underline">MongoDB Community Server</a></li>
+                                        <li>Install and start MongoDB service</li>
+                                        <li>Default connection: <code class="bg-gray-200 px-2 py-1 rounded">mongodb://localhost:27017</code></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Installation Steps -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-cog text-purple-600 mr-2"></i>
+                        Installation Steps
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="border-l-4 border-purple-500 pl-6">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Step 1: Download and Extract Files</h4>
+                            <p class="text-gray-700 mb-3">Download the script from CodeCanyon:</p>
+                            <ol class="list-decimal list-inside text-gray-700 space-y-2 mb-4">
+                                <li>Log in to your CodeCanyon account</li>
+                                <li>Navigate to your downloads section</li>
+                                <li>Download <code class="bg-gray-200 px-2 py-1 rounded">main_files.zip</code></li>
+                                <li>Extract <code class="bg-gray-200 px-2 py-1 rounded">main_files.zip</code> to get <code class="bg-gray-200 px-2 py-1 rounded">ai-doctor.zip</code></li>
+                                <li>Extract <code class="bg-gray-200 px-2 py-1 rounded">ai-doctor.zip</code> to your desired location</li>
+                            </ol>
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-3">
+                                <p class="text-blue-800 text-sm"><strong>Note:</strong> After extraction, you should have a folder named <code class="bg-blue-100 px-2 py-1 rounded">ai-doctor</code> (or similar) containing all the project files.</p>
+                            </div>
+                            <p class="text-gray-700 mb-3">Navigate to the extracted folder:</p>
+                            <div class="bg-gray-900 text-green-400 rounded p-4 font-mono text-sm">
+                                <code>cd ai-doctor</code>
+                            </div>
+                        </div>
+
+                        <div class="border-l-4 border-blue-500 pl-6">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Step 2: Install Dependencies</h4>
+                            <p class="text-gray-700 mb-3">Navigate to the project directory and install all required packages:</p>
+                            <div class="bg-gray-900 text-green-400 rounded p-4 font-mono text-sm mb-3">
+                                <code>npm install</code>
+                            </div>
+                            <p class="text-sm text-gray-600">This will install all dependencies listed in <code class="bg-gray-200 px-2 py-1 rounded">package.json</code>. This process may take a few minutes.</p>
+                        </div>
+
+                        <div class="border-l-4 border-green-500 pl-6">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Step 3: Configure Environment Variables</h4>
+                            <p class="text-gray-700 mb-4">Create a <code class="bg-gray-200 px-2 py-1 rounded">.env.local</code> file in the root directory with the following variables:</p>
+                            <div class="bg-gray-900 text-green-400 rounded p-4 font-mono text-sm mb-4">
+                                <code>MONGODB_URI=mongodb://localhost:27017/ai-doc</code><br>
+                                <code>NEXTAUTH_URL=http://localhost:3000</code><br>
+                                <code>NEXTAUTH_SECRET=your-secret-key-here</code>
+                            </div>
+                            <div class="bg-slate-800 text-green-400 rounded p-4 font-mono text-sm mb-4">
+                                <p class="text-slate-300 text-xs font-sans mb-2">Optional — SMS (Twilio) for public booking OTP (can also be set in Admin → Notification Settings):</p>
+                                <code>TWILIO_ACCOUNT_SID=</code><br>
+                                <code>TWILIO_AUTH_TOKEN=</code><br>
+                                <code>TWILIO_PHONE_NUMBER=+1...</code> <span class="text-slate-400"># or use Messaging Service below</span><br>
+                                <code>TWILIO_MESSAGING_SERVICE_SID=MG...</code>
+                            </div>
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-4">
+                                <p class="text-blue-800 text-sm mb-2"><strong>Environment Variables Explained:</strong></p>
+                                <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                    <li><strong>MONGODB_URI:</strong> Your MongoDB connection string. For MongoDB Atlas, use: <code class="bg-blue-100 px-1 py-0.5 rounded">mongodb+srv://username:password@cluster.mongodb.net/ai-doc</code></li>
+                                    <li><strong>NEXTAUTH_URL:</strong> The base URL of your application (use your production domain in production)</li>
+                                    <li><strong>NEXTAUTH_SECRET:</strong> A random secret key for encrypting JWT tokens. Generate one using: <code class="bg-blue-100 px-1 py-0.5 rounded">openssl rand -base64 32</code></li>
+                                    <li><strong>Twilio (optional):</strong> Required only if you enable SMS verification for returning patients on the public appointment form. Configure either a verified <strong>From</strong> number or a <strong>Messaging Service SID</strong> (<code class="bg-blue-100 px-1 rounded">MG…</code>) in line with your Twilio account geo permissions.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                                <p class="text-yellow-800 text-sm"><strong>Important:</strong></p>
+                                <ul class="list-disc list-inside text-yellow-700 text-sm mt-2 space-y-1">
+                                    <li>Keep your <code class="bg-yellow-100 px-1 py-0.5 rounded">.env.local</code> file secure and never share it</li>
+                                    <li>GPT-4.1 API key can be configured later through the Settings → AI Settings page</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="border-l-4 border-orange-500 pl-6">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Step 4: Set Up Database</h4>
+                            <p class="text-gray-700 mb-3">Ensure MongoDB is running and accessible:</p>
+                            <div class="space-y-3">
+                                <div class="bg-gray-50 rounded p-4 border border-gray-200">
+                                    <h5 class="font-semibold text-gray-900 mb-2">For Local MongoDB:</h5>
+                                    <div class="bg-gray-900 text-green-400 rounded p-3 font-mono text-sm mb-2">
+                                        <code># Start MongoDB service</code><br>
+                                        <code># Windows: net start MongoDB</code><br>
+                                        <code># macOS: brew services start mongodb-community</code><br>
+                                        <code># Linux: sudo systemctl start mongod</code>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 rounded p-4 border border-blue-200">
+                                    <h5 class="font-semibold text-blue-900 mb-2">For MongoDB Atlas:</h5>
+                                    <ul class="list-disc list-inside text-blue-800 text-sm space-y-1">
+                                        <li>Ensure your IP address is whitelisted in Atlas Network Access</li>
+                                        <li>Create a database user with read/write permissions</li>
+                                        <li>Use the connection string provided by Atlas</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-l-4 border-teal-500 pl-6">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Step 5: Seed Database (Optional)</h4>
+                            <p class="text-gray-700 mb-3">Populate the database with sample data for testing:</p>
+                            <div class="bg-gray-900 text-green-400 rounded p-4 font-mono text-sm mb-3">
+                                <code>npm run seed</code>
+                            </div>
+                            <p class="text-sm text-gray-600">This creates sample patients, appointments, and reports for demonstration purposes.</p>
+                        </div>
+
+                        <div class="border-l-4 border-indigo-500 pl-6">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Step 6: Start Development Server</h4>
+                            <p class="text-gray-700 mb-3">Run the application in development mode:</p>
+                            <div class="bg-gray-900 text-green-400 rounded p-4 font-mono text-sm mb-3">
+                                <code>npm run dev</code>
+                            </div>
+                            <p class="text-gray-700 mb-3">The application will start on <code class="bg-gray-200 px-2 py-1 rounded">http://localhost:3000</code></p>
+                            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                                <p class="text-green-800 text-sm"><strong>Success!</strong> You should see:</p>
+                                <div class="bg-gray-900 text-green-400 rounded p-3 font-mono text-sm mt-2">
+                                    <code>✓ Ready in X seconds</code><br>
+                                    <code>○ Local: http://localhost:3000</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Configuration -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-brain text-indigo-600 mr-2"></i>
+                        AI API Configuration
+                    </h3>
+                    <p class="text-gray-700 mb-4">To use AI features, you need to configure an API key for GPT-4.1 through the Settings page:</p>
+                    <div class="space-y-4">
+                        <div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+                            <h4 class="font-semibold text-indigo-900 mb-3">Configure GPT-4.1 API Key</h4>
+                            <ol class="list-decimal list-inside text-indigo-800 space-y-2 text-sm">
+                                <li>Log in to the application</li>
+                                <li>Navigate to <strong>Settings → AI Settings</strong></li>
+                                <li>Add your OpenAI API key for GPT-4.1:
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
+                                        <li><strong>OpenAI:</strong> Get key from <a href="https://platform.openai.com/api-keys" target="_blank" class="text-indigo-600 hover:underline">OpenAI Platform</a></li>
+                                    </ul>
+                                </li>
+                                <li>Test the connection</li>
+                                <li>Activate GPT-4.1 as your AI model</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Production Build -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-rocket text-red-600 mr-2"></i>
+                        Production Build
+                    </h3>
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <p class="text-gray-700 mb-4">To build the application for production:</p>
+                        <div class="space-y-3">
+                            <div class="bg-gray-900 text-green-400 rounded p-4 font-mono text-sm">
+                                <code># Build the application</code><br>
+                                <code>npm run build</code><br>
+                                <br>
+                                <code># Start production server</code><br>
+                                <code>npm run start</code>
+                            </div>
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                                <p class="text-blue-800 text-sm"><strong>Note:</strong> Make sure to:</p>
+                                <ul class="list-disc list-inside text-blue-700 text-sm mt-2 space-y-1">
+                                    <li>Set <code class="bg-blue-100 px-1 py-0.5 rounded">NEXTAUTH_URL</code> to your production domain</li>
+                                    <li>Use a strong <code class="bg-blue-100 px-1 py-0.5 rounded">NEXTAUTH_SECRET</code></li>
+                                    <li>Configure production MongoDB connection string</li>
+                                    <li>Enable HTTPS for secure connections</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-tools text-yellow-600 mr-2"></i>
+                        Troubleshooting
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+                            <h4 class="font-semibold text-red-900 mb-3">Common Issues and Solutions</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <h5 class="font-semibold text-red-800 mb-2">Issue: MongoDB Connection Failed</h5>
+                                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1 ml-4">
+                                        <li>Verify MongoDB is running: <code class="bg-red-100 px-2 py-1 rounded">mongosh</code> or check service status</li>
+                                        <li>Check connection string in <code class="bg-red-100 px-2 py-1 rounded">.env.local</code></li>
+                                        <li>For Atlas: Verify IP whitelist and credentials</li>
+                                        <li>Check firewall settings</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-red-800 mb-2">Issue: Port 3000 Already in Use</h5>
+                                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1 ml-4">
+                                        <li>Stop other applications using port 3000</li>
+                                        <li>Or use a different port: <code class="bg-red-100 px-2 py-1 rounded">PORT=3001 npm run dev</code></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-red-800 mb-2">Issue: Module Not Found Errors</h5>
+                                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1 ml-4">
+                                        <li>Delete <code class="bg-red-100 px-2 py-1 rounded">node_modules</code> folder</li>
+                                        <li>Delete <code class="bg-red-100 px-2 py-1 rounded">package-lock.json</code></li>
+                                        <li>Run <code class="bg-red-100 px-2 py-1 rounded">npm install</code> again</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-red-800 mb-2">Issue: Build Errors</h5>
+                                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1 ml-4">
+                                        <li>Clear Next.js cache: <code class="bg-red-100 px-2 py-1 rounded">rm -rf .next</code></li>
+                                        <li>Check TypeScript errors: <code class="bg-red-100 px-2 py-1 rounded">npm run lint</code></li>
+                                        <li>Ensure all environment variables are set</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-red-800 mb-2">Issue: AI Features Not Working</h5>
+                                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1 ml-4">
+                                        <li>Verify GPT-4.1 API key is correctly configured</li>
+                                        <li>Check API key permissions and quotas</li>
+                                        <li>Test API connection in Settings → AI Settings</li>
+                                        <li>Check browser console for error messages</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Scripts -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-terminal text-gray-600 mr-2"></i>
+                        Available Scripts
+                    </h3>
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <code class="bg-gray-200 px-3 py-1 rounded font-mono text-sm mr-4">npm run dev</code>
+                                <p class="text-gray-700 text-sm flex-1">Start development server with hot reload on <code class="bg-gray-200 px-1 py-0.5 rounded">http://localhost:3000</code></p>
+                            </div>
+                            <div class="flex items-start">
+                                <code class="bg-gray-200 px-3 py-1 rounded font-mono text-sm mr-4">npm run build</code>
+                                <p class="text-gray-700 text-sm flex-1">Build the application for production using Turbopack</p>
+                            </div>
+                            <div class="flex items-start">
+                                <code class="bg-gray-200 px-3 py-1 rounded font-mono text-sm mr-4">npm run start</code>
+                                <p class="text-gray-700 text-sm flex-1">Start the production server (requires build first)</p>
+                            </div>
+                            <div class="flex items-start">
+                                <code class="bg-gray-200 px-3 py-1 rounded font-mono text-sm mr-4">npm run lint</code>
+                                <p class="text-gray-700 text-sm flex-1">Run ESLint to check code quality and find errors</p>
+                            </div>
+                            <div class="flex items-start">
+                                <code class="bg-gray-200 px-3 py-1 rounded font-mono text-sm mr-4">npm run seed</code>
+                                <p class="text-gray-700 text-sm flex-1">Populate database with sample data for testing</p>
+                            </div>
+                            <div class="flex items-start">
+                                <code class="bg-gray-200 px-3 py-1 rounded font-mono text-sm mr-4">npm run test:ai-results</code>
+                                <p class="text-gray-700 text-sm flex-1">Test AI results functionality</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Getting Started -->
+            <section id="getting-started" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-rocket text-green-600 mr-3"></i>
+                    Getting Started
+                </h2>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Login to Your Account</h3>
+                        <p class="text-gray-600 mb-4">Access the system by navigating to the login page and entering your credentials.</p>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                            <p class="text-sm text-gray-600 mb-2"><strong>Demo Credentials (created by <code class="bg-gray-200 px-1 py-0.5 rounded">npm run seed</code>):</strong></p>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                                <li><strong>Admin:</strong> admin@aidoc.com / password123</li>
+                                <li><strong>Doctor:</strong> doctor@aidoc.com / password123</li>
+                                <li><strong>Patient (portal):</strong> patient@aidoc.com / password123</li>
+                            </ul>
+                            <p class="text-xs text-gray-600 mt-3">
+                                Authentication requires bcrypt-hashed passwords. There are no hardcoded/mock credentials in the login logic.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">2. Navigate the Dashboard</h3>
+                        <p class="text-gray-600 mb-4">After logging in, you'll be taken to the main dashboard where you can see:</p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                            <li>Practice statistics and key metrics</li>
+                            <li>Recent activities and appointments</li>
+                            <li>Quick access to common tasks</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">3. Explore Features</h3>
+                        <p class="text-gray-600">Use the left sidebar navigation to access all features of the system, including patient management, appointments, reports, and AI-powered tools.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard -->
+            <section id="dashboard" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-tachometer-alt text-purple-600 mr-3"></i>
+                    Dashboard
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        The dashboard is your central command center, providing an overview of your practice at a glance.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                Statistics Cards
+                            </h3>
+                            <p class="text-blue-800 text-sm mb-2">View key metrics including:</p>
+                            <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                <li>Total Patients</li>
+                                <li>Appointments Today</li>
+                                <li>Reports Generated</li>
+                                <li>AI Insights</li>
+                            </ul>
+                            <p class="text-blue-600 text-xs mt-3">Click on any card to navigate to the related section.</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3 flex items-center">
+                                <i class="fas fa-clock mr-2"></i>
+                                Recent Activity
+                            </h3>
+                            <p class="text-green-800 text-sm">Track your recent actions including:</p>
+                            <ul class="list-disc list-inside text-green-700 text-sm space-y-1 mt-2">
+                                <li>New patient registrations</li>
+                                <li>Appointment bookings</li>
+                                <li>Report generations</li>
+                                <li>System updates</li>
+                            </ul>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h3 class="text-lg font-semibold text-purple-900 mb-3 flex items-center">
+                                <i class="fas fa-calendar-check mr-2"></i>
+                                Upcoming Appointments
+                            </h3>
+                            <p class="text-purple-800 text-sm">Quick view of your next appointments with:</p>
+                            <ul class="list-disc list-inside text-purple-700 text-sm space-y-1 mt-2">
+                                <li>Patient names</li>
+                                <li>Appointment times</li>
+                                <li>Status indicators</li>
+                            </ul>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                            <h3 class="text-lg font-semibold text-orange-900 mb-3 flex items-center">
+                                <i class="fas fa-bolt mr-2"></i>
+                                Quick Actions
+                            </h3>
+                            <p class="text-orange-800 text-sm">Fast access to common tasks:</p>
+                            <ul class="list-disc list-inside text-orange-700 text-sm space-y-1 mt-2">
+                                <li>Add New Patient</li>
+                                <li>Schedule Appointment</li>
+                                <li>Generate Report</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Patient Management -->
+            <section id="patients" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-users text-blue-600 mr-3"></i>
+                    Patient Management
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Manage your patient records efficiently with comprehensive patient management features.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Patient List</h3>
+                            <p class="text-gray-600 mb-3">View all your patients in an organized list with search and filter capabilities.</p>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                                <li>Search patients by name, ID, or contact information</li>
+                                <li>Filter by status, date, or other criteria</li>
+                                <li>Quick access to patient details</li>
+                                <li>Delete patient records from the actions menu (with confirmation)</li>
+                            </ul>
+                        </div>
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Add New Patient</h3>
+                            <p class="text-gray-600 mb-3">Create new patient records with comprehensive information:</p>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                                <li>Personal information (name, DOB, contact details)</li>
+                                <li>Medical history and allergies</li>
+                                <li>Insurance information</li>
+                                <li>Emergency contacts</li>
+                            </ul>
+                        </div>
+                        <div class="border-l-4 border-purple-500 pl-4">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Patient Details</h3>
+                            <p class="text-gray-600 mb-3">Access comprehensive patient information:</p>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                                <li>Complete medical history</li>
+                                <li>Past appointments and visits</li>
+                                <li>Prescriptions and medications</li>
+                                <li>Test results and reports</li>
+                                <li>Case notes and documentation</li>
+                            </ul>
+                        </div>
+                        <div class="border-l-4 border-orange-500 pl-4">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Edit Patient Information</h3>
+                            <p class="text-gray-600">Update patient records as needed, with full audit trail of changes.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Appointments -->
+            <section id="appointments" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt text-green-600 mr-3"></i>
+                    Appointment Management
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Efficiently manage your appointment schedule with advanced scheduling features.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">
+                                <i class="fas fa-plus-circle mr-2"></i>
+                                Schedule New Appointment
+                            </h3>
+                            <ul class="list-disc list-inside text-green-700 text-sm space-y-1">
+                                <li>Select patient from your database</li>
+                                <li>Select a doctor (admin/staff can choose via searchable doctor select; doctors auto-fill to themselves)</li>
+                                <li>Choose date and time slot</li>
+                                <li>Set appointment type and duration</li>
+                                <li>Add notes and reminders</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                                <i class="fas fa-list mr-2"></i>
+                                View Appointments
+                            </h3>
+                            <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                <li>Daily, weekly, or monthly views</li>
+                                <li>Filter by status or doctor</li>
+                                <li>Role-based visibility: doctors see only their assigned appointments; patients see only their own</li>
+                                <li>Quick status updates</li>
+                                <li>Patient information at a glance</li>
+                            </ul>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h3 class="text-lg font-semibold text-purple-900 mb-3">
+                                <i class="fas fa-edit mr-2"></i>
+                                Edit Appointments
+                            </h3>
+                            <ul class="list-disc list-inside text-purple-700 text-sm space-y-1">
+                                <li>Modify appointment details</li>
+                                <li>Change time or date</li>
+                                <li>Update status</li>
+                                <li>Add or modify notes</li>
+                            </ul>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                            <h3 class="text-lg font-semibold text-orange-900 mb-3">
+                                <i class="fas fa-calendar-times mr-2"></i>
+                                Reschedule Appointments
+                            </h3>
+                            <ul class="list-disc list-inside text-orange-700 text-sm space-y-1">
+                                <li>Quick rescheduling options</li>
+                                <li>Automatic patient notifications</li>
+                                <li>Conflict detection</li>
+                                <li>History tracking</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-teal-50 rounded-lg p-6 border border-teal-200">
+                        <h3 class="text-lg font-semibold text-teal-900 mb-3">
+                            <i class="fas fa-user-clock mr-2"></i>
+                            Doctor schedules &amp; public slots
+                        </h3>
+                        <p class="text-teal-800 text-sm mb-2">Staff can define per-doctor schedules; the public booking form shows available time slots from those schedules.</p>
+                        <ul class="list-disc list-inside text-teal-700 text-sm space-y-1">
+                            <li>Configure schedules in the staff/doctor scheduling area linked to each doctor</li>
+                            <li>Patients choose doctor, date, and an open slot on <code class="bg-teal-100 px-1 rounded">/request-appointment</code> when online booking is enabled</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Public website & online booking -->
+            <section id="public-website" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-globe text-teal-600 mr-3"></i>
+                    Public Website &amp; Online Booking
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        The home page is a <strong>hospital marketing site</strong> driven by CMS content (Admin → Hospital website). It uses a professional clinical layout (teal accent theme), sticky header, section navigation, optional announcement bar, and multilingual support on public pages.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+                            <h3 class="text-lg font-semibold text-slate-900 mb-3"><i class="fas fa-home mr-2 text-teal-600"></i>Landing page</h3>
+                            <ul class="list-disc list-inside text-slate-700 text-sm space-y-1">
+                                <li>Hero, stats, highlights, about/values, services, departments, stories, visit/booking CTA, contact, map embed</li>
+                                <li><strong>Staff portal</strong> in the header opens the internal app (<code class="bg-gray-100 px-1 rounded">/login</code> or dashboard) in a <strong>new browser tab</strong> so visitors keep the public site open</li>
+                                <li>Language switcher (e.g. EN / ES / FR) on the public site</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+                            <h3 class="text-lg font-semibold text-slate-900 mb-3"><i class="fas fa-calendar-check mr-2 text-teal-600"></i>Request appointment</h3>
+                            <ul class="list-disc list-inside text-slate-700 text-sm space-y-1">
+                                <li>Public URL: <code class="bg-gray-100 px-1 rounded">/request-appointment</code> (toggle in website settings)</li>
+                                <li><strong>New patient:</strong> full details; optional patient portal account fields</li>
+                                <li><strong>Returning patient (default path):</strong> verify mobile with <strong>SMS OTP</strong> when Twilio is configured</li>
+                                <li>Phone numbers are normalized to E.164 using <strong>default SMS country</strong> from Notification Settings (and organisation address as fallback)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
+                        <p class="text-amber-900 text-sm"><strong>Twilio tips:</strong> International SMS may require geo permissions and a valid From number or Messaging Service (<code class="bg-amber-100 px-1 rounded">MG…</code>) in the Twilio Console. Configure credentials and SMS options under <strong>Settings → Notifications</strong> (default country code, Messaging Service SID, From number).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports -->
+            <section id="reports" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-file-medical text-purple-600 mr-3"></i>
+                    Medical Reports
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Create, manage, and track medical reports and test results efficiently.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h3 class="text-lg font-semibold text-purple-900 mb-3">
+                                <i class="fas fa-file-plus mr-2"></i>
+                                Create New Report
+                            </h3>
+                            <p class="text-purple-800 text-sm mb-2">Generate comprehensive medical reports with:</p>
+                            <ul class="list-disc list-inside text-purple-700 text-sm space-y-1">
+                                <li>Patient information and test results</li>
+                                <li>Diagnosis and findings</li>
+                                <li>Recommendations and follow-up</li>
+                                <li>Attachments and images</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                                <i class="fas fa-folder-open mr-2"></i>
+                                Report Management
+                            </h3>
+                            <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                <li>View all reports in organized list</li>
+                                <li>Filter by patient, date, or type</li>
+                                <li>Search functionality</li>
+                                <li>Status tracking (draft, completed, reviewed)</li>
+                                <li>Priority-based organization</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">
+                                <i class="fas fa-download mr-2"></i>
+                                Report Actions
+                            </h3>
+                            <ul class="list-disc list-inside text-green-700 text-sm space-y-1">
+                                <li>Edit existing reports</li>
+                                <li>Download as PDF</li>
+                                <li>Share with patients</li>
+                                <li>Print reports</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Doctors & Staff -->
+            <section id="doctors-staff" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-user-md text-blue-600 mr-3"></i>
+                    Doctors & Staff
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Administrators can manage user accounts for doctors and staff. The Doctors list shows only users with the <code class="bg-gray-100 px-2 py-1 rounded">doctor</code> role, and staff are managed via a dedicated Staff module.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                                <i class="fas fa-id-card mr-2"></i>
+                                Doctor Profile Fields
+                            </h3>
+                            <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                <li>Phone, specialization, department</li>
+                                <li>License number, qualifications</li>
+                                <li>Years of experience, bio</li>
+                                <li>Address, date of birth, gender</li>
+                                <li>Per-doctor <strong>schedule</strong> for public appointment slot generation</li>
+                            </ul>
+                            <p class="text-xs text-blue-700 mt-3">Doctor edit uses a dedicated page (not a modal).</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">
+                                <i class="fas fa-user-shield mr-2"></i>
+                                Permissions & Safety
+                            </h3>
+                            <ul class="list-disc list-inside text-green-700 text-sm space-y-1">
+                                <li>Role-based access control (admin/doctor/staff/patient)</li>
+                                <li>Role is protected during edit to prevent accidental changes</li>
+                                <li>Passwords are stored as bcrypt hashes (no plaintext fallback)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inpatient -->
+            <section id="inpatient" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-procedures text-purple-600 mr-3"></i>
+                    Inpatient Management
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Manage wards, beds, and admissions. Editing is handled via dedicated pages to ensure a reliable, full-page experience.
+                    </p>
+                    <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                        <ul class="list-disc list-inside text-purple-700 text-sm space-y-1">
+                            <li>Wards: list/create/edit</li>
+                            <li>Beds: list/edit (ward assignment, type/status, notes/features)</li>
+                            <li>Admissions: create/edit and patient assignment</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Laboratory -->
+            <section id="laboratory" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-vial text-teal-600 mr-3"></i>
+                    Laboratory Management with LIS Integration
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Complete laboratory information system with <strong>built-in LIS integration</strong> for direct connectivity to laboratory analyzers. Connect hematology, biochemistry, immunoassay, coagulation, and urinalysis analyzers for automated, bi-directional result flow. Supports industry-standard protocols including HL7 v2, FHIR R4, ASTM E1381, and REST API.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-teal-50 rounded-lg p-6 border border-teal-200">
+                            <h3 class="text-lg font-semibold text-teal-900 mb-3">
+                                <i class="fas fa-flask mr-2"></i>
+                                Lab Tests & Orders
+                            </h3>
+                            <ul class="list-disc list-inside text-teal-700 text-sm space-y-1">
+                                <li>Create new test orders and assign to patients</li>
+                                <li>View and filter tests by status (pending, in progress, completed)</li>
+                                <li>Enter and manage test results with normal ranges</li>
+                                <li>View completed results and link to patient records</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                                <i class="fas fa-wifi mr-2"></i>
+                                LIS Device Integration
+                            </h3>
+                            <p class="text-blue-800 text-sm mb-2">Enterprise-grade Laboratory Information System connectivity:</p>
+                            <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                <li><strong>Multi-Protocol Support:</strong> HL7 v2, FHIR R4, ASTM E1381/LIS2-A2, and REST API</li>
+                                <li><strong>Device Registration:</strong> Register analyzers with device code, manufacturer, model, serial number, and location</li>
+                                <li><strong>Supported Analyzers:</strong> Hematology, biochemistry, immunoassay, coagulation, urinalysis, blood gas, and more</li>
+                                <li><strong>Vendor Compatible:</strong> Works with Roche, Abbott, Siemens, Beckman Coulter, Sysmex, Mindray, and others</li>
+                                <li><strong>Secure API Keys:</strong> Generate per-device API keys for authenticated result transmission</li>
+                                <li><strong>Incoming Results Queue:</strong> Review, validate, and accept results with automatic patient/order mapping</li>
+                                <li><strong>Auto-Flagging:</strong> Critical and abnormal values automatically highlighted</li>
+                                <li><strong>Real-time Monitoring:</strong> Connection status, last communication, and result counts per device</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lab Device Integration Guide -->
+            <section id="device-integration" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-plug text-cyan-600 mr-3"></i>
+                    LIS Device Integration Guide
+                </h2>
+                <div class="space-y-6">
+                    <div class="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg p-4 mb-4">
+                        <p class="text-cyan-900 font-medium"><i class="fas fa-info-circle mr-2"></i>Enterprise LIS Connectivity</p>
+                        <p class="text-cyan-800 text-sm mt-1">Connect your laboratory analyzers directly to the HMS for automated, bi-directional result flow. Eliminate manual data entry, reduce transcription errors, and accelerate turnaround times.</p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed">
+                        Step-by-step instructions for connecting lab analyzers to the HMS using industry-standard communication protocols. Our LIS integration supports equipment from all major manufacturers.
+                    </p>
+
+                    <!-- Supported Protocols Overview -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-network-wired mr-2"></i>
+                            Supported Communication Protocols
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-blue-900 mb-2"><i class="fas fa-code mr-2"></i>REST API</h4>
+                                <p class="text-sm text-gray-600">HTTP JSON API for modern middleware and custom integrations. Requires API key authentication.</p>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-green-900 mb-2"><i class="fas fa-fire mr-2"></i>FHIR R4</h4>
+                                <p class="text-sm text-gray-600">HL7 FHIR standard for modern LIS systems. Accepts DiagnosticReport, Observation, and Bundle resources.</p>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-purple-900 mb-2"><i class="fas fa-exchange-alt mr-2"></i>HL7 v2</h4>
+                                <p class="text-sm text-gray-600">Industry standard messaging via MLLP (TCP port 2575). Supports ORU^R01 observation result messages.</p>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-orange-900 mb-2"><i class="fas fa-microchip mr-2"></i>ASTM E1381</h4>
+                                <p class="text-sm text-gray-600">Direct analyzer connection via TCP port 5000. Also known as LIS2-A2 protocol.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Register Device -->
+                    <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                        <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-sm mr-2">1</span>
+                            Register Device in HMS
+                        </h3>
+                        <ol class="list-decimal list-inside text-blue-800 text-sm space-y-2 ml-8">
+                            <li>Navigate to <strong>Lab &rarr; Devices</strong></li>
+                            <li>Click <strong>Add Device</strong></li>
+                            <li>Select your device profile (manufacturer + model) from the dropdown - this auto-configures parameter mappings</li>
+                            <li>Enter a unique <strong>Device Code</strong> (e.g., HEM-001)
+                                <ul class="list-disc list-inside ml-4 mt-1 text-blue-700">
+                                    <li>For HL7: Use the same value as your analyzer's MSH-3 (Sending Application)</li>
+                                    <li>For ASTM: Use the same value as your analyzer's Header sender name</li>
+                                </ul>
+                            </li>
+                            <li>Enter a display name and location</li>
+                            <li>Click <strong>Add Device</strong> - an API key will be generated and displayed <strong>once</strong></li>
+                            <li><strong>Important:</strong> Copy and save the API key securely - it cannot be retrieved later</li>
+                        </ol>
+                    </div>
+
+                    <!-- Protocol-Specific Instructions -->
+                    <h3 class="text-xl font-semibold text-gray-800 mt-8 mb-4">Protocol-Specific Setup</h3>
+
+                    <!-- REST API -->
+                    <div class="bg-cyan-50 rounded-lg p-6 border border-cyan-200 mb-4">
+                        <h4 class="text-lg font-semibold text-cyan-900 mb-3">
+                            <i class="fas fa-code mr-2"></i>
+                            REST API Integration
+                        </h4>
+                        <p class="text-cyan-800 text-sm mb-3">Best for: Modern middleware, custom software integrations</p>
+                        <ol class="list-decimal list-inside text-cyan-800 text-sm space-y-2">
+                            <li>Configure your middleware/LIS to send HTTP POST requests to:
+                                <code class="bg-cyan-100 px-2 py-1 rounded text-xs block mt-1">POST https://your-hms-server/api/lab/device-results</code>
+                            </li>
+                            <li>Add the API key header:
+                                <code class="bg-cyan-100 px-2 py-1 rounded text-xs block mt-1">X-Device-API-Key: dk_your_api_key_here</code>
+                            </li>
+                            <li>Send results as JSON:
+                                <pre class="bg-cyan-100 p-3 rounded text-xs mt-1 overflow-x-auto">{
+  "sampleId": "LAB-240215-001",
+  "analyzedAt": "2024-02-15T10:30:00Z",
+  "results": [
+    { "code": "WBC", "value": "7.5", "unit": "10^9/L", "flag": "N" },
+    { "code": "RBC", "value": "4.8", "unit": "10^12/L", "flag": "N" }
+  ]
+}</pre>
+                            </li>
+                            <li>Verify results appear in <strong>Lab &rarr; Incoming Results</strong></li>
+                        </ol>
+                    </div>
+
+                    <!-- FHIR -->
+                    <div class="bg-green-50 rounded-lg p-6 border border-green-200 mb-4">
+                        <h4 class="text-lg font-semibold text-green-900 mb-3">
+                            <i class="fas fa-fire mr-2"></i>
+                            FHIR R4 Integration
+                        </h4>
+                        <p class="text-green-800 text-sm mb-3">Best for: Modern LIS systems, cloud-connected devices</p>
+                        <ol class="list-decimal list-inside text-green-800 text-sm space-y-2">
+                            <li>Configure your LIS to send FHIR resources to:
+                                <code class="bg-green-100 px-2 py-1 rounded text-xs block mt-1">POST https://your-hms-server/api/fhir/Bundle</code>
+                                <span class="text-xs text-green-700">Or use /api/fhir/DiagnosticReport or /api/fhir/Observation</span>
+                            </li>
+                            <li>Add the API key header:
+                                <code class="bg-green-100 px-2 py-1 rounded text-xs block mt-1">X-Device-API-Key: dk_your_api_key_here</code>
+                            </li>
+                            <li>Set Content-Type:
+                                <code class="bg-green-100 px-2 py-1 rounded text-xs block mt-1">Content-Type: application/fhir+json</code>
+                            </li>
+                            <li>Send FHIR Bundle with DiagnosticReport and Observations</li>
+                            <li>Verify results appear in <strong>Lab &rarr; Incoming Results</strong></li>
+                        </ol>
+                    </div>
+
+                    <!-- HL7 v2 -->
+                    <div class="bg-purple-50 rounded-lg p-6 border border-purple-200 mb-4">
+                        <h4 class="text-lg font-semibold text-purple-900 mb-3">
+                            <i class="fas fa-exchange-alt mr-2"></i>
+                            HL7 v2 Integration (MLLP)
+                        </h4>
+                        <p class="text-purple-800 text-sm mb-3">Best for: Most hospital analyzers (Sysmex, Beckman, Roche, Siemens, etc.)</p>
+                        <ol class="list-decimal list-inside text-purple-800 text-sm space-y-2">
+                            <li><strong>Network Setup:</strong> Ensure the HMS server port <code class="bg-purple-100 px-1 rounded">2575</code> is accessible from your analyzer network</li>
+                            <li><strong>Device Registration:</strong> Set the Device Code to match your analyzer's <strong>Sending Application</strong> (MSH-3 field)
+                                <div class="bg-purple-100 p-2 rounded text-xs mt-1 font-mono">Example: If analyzer sends MSH|...|SYSMEX|LAB|..., use Device Code: SYSMEX</div>
+                            </li>
+                            <li><strong>Analyzer Configuration:</strong>
+                                <ul class="list-disc list-inside ml-4 mt-1 text-purple-700">
+                                    <li>Host/IP: Your HMS server IP address</li>
+                                    <li>Port: <code class="bg-purple-100 px-1 rounded">2575</code></li>
+                                    <li>Protocol: HL7 v2.x with MLLP framing</li>
+                                    <li>Message Type: ORU^R01 (Observation Results)</li>
+                                </ul>
+                            </li>
+                            <li><strong>Test Connection:</strong> Run a test sample and verify results appear in Incoming Results</li>
+                        </ol>
+                        <div class="bg-purple-100 rounded p-3 mt-3 text-xs">
+                            <strong>Note:</strong> No API key needed - device is identified by the Sending Application in the HL7 message header.
+                        </div>
+                    </div>
+
+                    <!-- ASTM -->
+                    <div class="bg-orange-50 rounded-lg p-6 border border-orange-200 mb-4">
+                        <h4 class="text-lg font-semibold text-orange-900 mb-3">
+                            <i class="fas fa-microchip mr-2"></i>
+                            ASTM E1381/E1394 Integration
+                        </h4>
+                        <p class="text-orange-800 text-sm mb-3">Best for: Older analyzers, point-of-care devices, direct serial/TCP connections</p>
+                        <ol class="list-decimal list-inside text-orange-800 text-sm space-y-2">
+                            <li><strong>Network Setup:</strong> Ensure the HMS server port <code class="bg-orange-100 px-1 rounded">5000</code> is accessible from your analyzer network</li>
+                            <li><strong>Device Registration:</strong> Set the Device Code to match your analyzer's <strong>Sender Name</strong> (from Header record)
+                                <div class="bg-orange-100 p-2 rounded text-xs mt-1 font-mono">Example: If analyzer sends H|\^&|||ANALYZER1|||..., use Device Code: ANALYZER1</div>
+                            </li>
+                            <li><strong>Analyzer Configuration:</strong>
+                                <ul class="list-disc list-inside ml-4 mt-1 text-orange-700">
+                                    <li>Host/IP: Your HMS server IP address</li>
+                                    <li>Port: <code class="bg-orange-100 px-1 rounded">5000</code></li>
+                                    <li>Protocol: ASTM E1381 / LIS2-A2</li>
+                                </ul>
+                            </li>
+                            <li><strong>Test Connection:</strong> Run a test sample and verify results appear in Incoming Results</li>
+                        </ol>
+                        <div class="bg-orange-100 rounded p-3 mt-3 text-xs">
+                            <strong>Note:</strong> No API key needed - device is identified by the sender name in the ASTM Header record.
+                        </div>
+                    </div>
+
+                    <!-- Parameter Mapping -->
+                    <div class="bg-teal-50 rounded-lg p-6 border border-teal-200">
+                        <h3 class="text-lg font-semibold text-teal-900 mb-3">
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-teal-600 text-white rounded-full text-sm mr-2">2</span>
+                            Configure Parameter Mappings
+                        </h3>
+                        <p class="text-teal-800 text-sm mb-3">
+                            Parameter mappings convert device-specific codes to standardized test names displayed in the HMS.
+                        </p>
+                        <ol class="list-decimal list-inside text-teal-800 text-sm space-y-2 ml-8">
+                            <li>Go to <strong>Lab &rarr; Devices</strong> and click the <strong>View/Edit</strong> icon on your device</li>
+                            <li>Navigate to the <strong>Parameter Mappings</strong> tab</li>
+                            <li>For each parameter your device sends:
+                                <ul class="list-disc list-inside ml-4 mt-1 text-teal-700">
+                                    <li><strong>Device Code:</strong> The code your analyzer sends (e.g., WBC, RBC, HGB)</li>
+                                    <li><strong>Test Name:</strong> Display name in HMS (e.g., White Blood Cell Count)</li>
+                                    <li><strong>Unit:</strong> Measurement unit (e.g., 10^9/L)</li>
+                                    <li><strong>Normal Range:</strong> Reference range (e.g., 4.0-11.0)</li>
+                                    <li><strong>Critical Low/High:</strong> Values that trigger critical alerts</li>
+                                </ul>
+                            </li>
+                            <li>Click <strong>Save Changes</strong></li>
+                        </ol>
+                        <div class="bg-teal-100 rounded p-3 mt-3 text-xs">
+                            <strong>Tip:</strong> If you selected a device profile when registering, common mappings are pre-configured. Edit as needed for your lab's preferences.
+                        </div>
+                    </div>
+
+                    <!-- Troubleshooting -->
+                    <div class="bg-red-50 rounded-lg p-6 border border-red-200 mt-6">
+                        <h3 class="text-lg font-semibold text-red-900 mb-3">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Troubleshooting
+                        </h3>
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <p class="font-semibold text-red-800">Results not appearing</p>
+                                <ul class="list-disc list-inside text-red-700 ml-4 mt-1">
+                                    <li>Check firewall allows ports 2575 (HL7), 5000 (ASTM), or 3000 (HTTP)</li>
+                                    <li>Verify the Device Code matches the analyzer's sending identifier</li>
+                                    <li>Check the protocol servers are running (<code>npm run servers</code>)</li>
+                                    <li>Review server logs for connection or parsing errors</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-red-800">Parameter names show raw codes</p>
+                                <ul class="list-disc list-inside text-red-700 ml-4 mt-1">
+                                    <li>Device was not matched (check Device Code matches)</li>
+                                    <li>Parameter mapping not configured for this code</li>
+                                    <li>Edit device and add the missing parameter mapping</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-red-800">Auto-match fails (Unmatched status)</p>
+                                <ul class="list-disc list-inside text-red-700 ml-4 mt-1">
+                                    <li>Sample ID from device doesn't match any Lab Test number</li>
+                                    <li>Ensure barcode/sample ID on specimen matches the HMS test number</li>
+                                    <li>Manually match in Incoming Results if needed</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-red-800">Device shows "Offline"</p>
+                                <ul class="list-disc list-inside text-red-700 ml-4 mt-1">
+                                    <li>No data received in last 5 minutes</li>
+                                    <li>Check network connectivity between analyzer and HMS server</li>
+                                    <li>Verify analyzer is configured and sending data</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Radiology & Imaging -->
+            <section id="radiology" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-x-ray text-indigo-600 mr-3"></i>
+                    Radiology & Imaging with DICOM Integration
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Complete radiology information system with <strong>built-in DICOM integration</strong> for direct connectivity to imaging equipment. Connect CT, MRI, X-ray, ultrasound, mammography, and other DICOM-compliant modalities for automated image acquisition. Supports DICOM 3.0, DICOM STOW-RS, and Modality Worklist (MWL) for seamless workflow integration.
+                    </p>
+                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-4 mb-4">
+                        <p class="text-indigo-900 font-medium"><i class="fas fa-info-circle mr-2"></i>Enterprise DICOM Connectivity</p>
+                        <p class="text-indigo-800 text-sm mt-1">Connect your imaging equipment directly to the HMS. Receive images automatically, eliminate film/CD handling, and integrate with PACS for enterprise-wide image access.</p>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+                            <h3 class="text-lg font-semibold text-indigo-900 mb-3">
+                                <i class="fas fa-image mr-2"></i>
+                                Studies & Reports
+                            </h3>
+                            <ul class="list-disc list-inside text-indigo-700 text-sm space-y-1">
+                                <li>Create new radiology studies and link to patients</li>
+                                <li>View study list with modality, date, and status</li>
+                                <li>Attach images and generate radiology reports</li>
+                                <li>Referring doctor and comparison with prior studies</li>
+                                <li>AI-assisted image analysis with GPT-4.1 Vision</li>
+                            </ul>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h3 class="text-lg font-semibold text-purple-900 mb-3">
+                                <i class="fas fa-desktop mr-2"></i>
+                                DICOM Device Integration
+                            </h3>
+                            <p class="text-purple-800 text-sm mb-2">Enterprise-grade DICOM connectivity for all imaging modalities:</p>
+                            <ul class="list-disc list-inside text-purple-700 text-sm space-y-1">
+                                <li><strong>Full DICOM 3.0 Compliance:</strong> Industry-standard medical imaging integration</li>
+                                <li><strong>Multi-Modality Support:</strong> CR, DR, CT, MRI, US, Mammography, PET-CT, C-Arm, and more</li>
+                                <li><strong>AE Title Configuration:</strong> Configure Application Entity titles for DICOM network routing</li>
+                                <li><strong>DICOM STOW-RS:</strong> Receive images via web-based STOW protocol from modern equipment</li>
+                                <li><strong>Modality Worklist (MWL):</strong> Push scheduled exams to imaging devices automatically</li>
+                                <li><strong>Vendor Compatible:</strong> Works with Siemens, GE, Philips, Canon, Fujifilm, and others</li>
+                                <li><strong>Incoming Images Queue:</strong> Review and assign images with DICOM tag parsing</li>
+                                <li><strong>PACS-Ready:</strong> Designed for integration with Picture Archiving and Communication Systems</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pharmacy -->
+            <section id="pharmacy" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-prescription-bottle-medical text-green-600 mr-3"></i>
+                    Pharmacy
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Manage medicines and pharmacy inventory. Medicine view and edit pages provide a full details screen (including stock and expiry info).
+                    </p>
+                </div>
+            </section>
+
+            <!-- Inventory -->
+            <section id="inventory" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-boxes-stacked text-orange-600 mr-3"></i>
+                    Inventory
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Manage suppliers, items, and purchase orders. Supplier view/edit and purchase-order view screens are available as dedicated pages.
+                    </p>
+                    <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                        <ul class="list-disc list-inside text-orange-700 text-sm space-y-1">
+                            <li>Suppliers: view and edit</li>
+                            <li>Items: create and manage medical supplies/equipment</li>
+                            <li>Purchase Orders: view details, items, totals, and status</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Billing -->
+            <section id="billing" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-file-invoice-dollar text-blue-600 mr-3"></i>
+                    Billing & Invoices
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Create and manage invoices and payments. Invoice edit uses a dedicated edit page for a stable, full-form workflow.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Document Management -->
+            <section id="documents" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-folder-open text-amber-600 mr-3"></i>
+                    Document Management
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Store and manage documents (consent forms, certificates, referrals, and other files) linked to patients or general use.
+                    </p>
+                    <div class="bg-amber-50 rounded-lg p-6 border border-amber-200">
+                        <ul class="list-disc list-inside text-amber-800 text-sm space-y-1">
+                            <li>Upload documents with title, category, and optional patient link</li>
+                            <li>List and search documents; filter by category or patient</li>
+                            <li>View document details and download files</li>
+                            <li>Edit metadata or delete documents as needed</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Emergency Department -->
+            <section id="emergency" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-ambulance text-red-600 mr-3"></i>
+                    Emergency Department
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Manage emergency cases with triage, quick patient lookup, and case tracking. Uses the same patient registration; no separate ER registration required.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-red-50 rounded-lg p-6 border border-red-200">
+                            <h3 class="text-lg font-semibold text-red-900 mb-3">Emergency Cases</h3>
+                            <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
+                                <li>Create new emergency case and link to existing patient</li>
+                                <li>Triage priority (e.g. critical, urgent, non-urgent)</li>
+                                <li>Chief complaint, vital signs, and triage notes</li>
+                                <li>Attending doctor assignment</li>
+                            </ul>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                            <h3 class="text-lg font-semibold text-orange-900 mb-3">Case Management</h3>
+                            <ul class="list-disc list-inside text-orange-700 text-sm space-y-1">
+                                <li>List and filter cases by status and priority</li>
+                                <li>View case details, update status and notes</li>
+                                <li>Track disposition and follow-up</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Telemedicine -->
+            <section id="telemedicine" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-video text-blue-600 mr-3"></i>
+                    Telemedicine
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Conduct virtual consultations via video, audio, or chat. Schedule sessions, use a waiting room, and issue prescriptions from within the session.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">Sessions</h3>
+                            <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                <li>Create new session: select patient, doctor, consultation type (video, audio, chat), and schedule</li>
+                                <li>View all sessions with status (scheduled, waiting, in-progress, completed, cancelled)</li>
+                                <li>Join consultation room with video, audio, or chat as per type</li>
+                                <li>In-session chat and clinical notes</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">Waiting Room & Prescriptions</h3>
+                            <ul class="list-disc list-inside text-green-700 text-sm space-y-1">
+                                <li>Waiting room: see patients waiting to join; start consultation when ready</li>
+                                <li>Create e-prescriptions during or after session (medications, diagnosis, follow-up)</li>
+                                <li>Session linked to appointment and billing where applicable</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ambulance -->
+            <section id="ambulance" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-ambulance text-rose-600 mr-3"></i>
+                    Ambulance Services
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Manage ambulance bookings and fleet. Book ambulances for patients, track assignments, and maintain vehicle and driver information.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-rose-50 rounded-lg p-6 border border-rose-200">
+                            <h3 class="text-lg font-semibold text-rose-900 mb-3">Bookings</h3>
+                            <ul class="list-disc list-inside text-rose-700 text-sm space-y-1">
+                                <li>Create new booking: patient, pickup/destination, date and time, priority</li>
+                                <li>List and filter bookings by status</li>
+                                <li>View booking details and update status</li>
+                                <li>Service charges and notes</li>
+                            </ul>
+                        </div>
+                        <div class="bg-pink-50 rounded-lg p-6 border border-pink-200">
+                            <h3 class="text-lg font-semibold text-pink-900 mb-3">Fleet Management</h3>
+                            <ul class="list-disc list-inside text-pink-700 text-sm space-y-1">
+                                <li>Register ambulances (vehicle number, type, status)</li>
+                                <li>Driver assignment and availability</li>
+                                <li>Track fleet for booking assignment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytical Reports -->
+            <section id="analytical-reports" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-indigo-600 mr-3"></i>
+                    Analytical Reports
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        Analytical Reports pull real data from your database (not static demo values). Charts are rendered using Recharts, with CSV export available on each report screen.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+                            <h3 class="text-lg font-semibold text-indigo-900 mb-3">Available Dashboards</h3>
+                            <ul class="list-disc list-inside text-indigo-700 text-sm space-y-1">
+                                <li>Financial</li>
+                                <li>Clinical</li>
+                                <li>Operational</li>
+                                <li>Performance</li>
+                                <li>Patient Analytics</li>
+                                <li>Appointment Analytics</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">Filters & Export</h3>
+                            <ul class="list-disc list-inside text-blue-700 text-sm space-y-1">
+                                <li>Date range selector (today/week/month/quarter/year)</li>
+                                <li>Filter toggles (status/type views depending on report)</li>
+                                <li>Export button downloads CSV for the current view</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Internationalization -->
+            <section id="internationalization" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-language text-teal-600 mr-3"></i>
+                    Language (i18n)
+                </h2>
+                <div class="space-y-6">
+                    <p class="text-gray-700 leading-relaxed">
+                        The UI supports multiple languages (English, Spanish, French). Translations are stored in JSON files under <code class="bg-gray-100 px-2 py-1 rounded">messages/</code>.
+                    </p>
+                    <div class="bg-teal-50 rounded-lg p-6 border border-teal-200">
+                        <ul class="list-disc list-inside text-teal-700 text-sm space-y-1">
+                            <li>Change language from Settings (authenticated app)</li>
+                            <li>Public landing and <code class="bg-teal-100 px-1 rounded">/request-appointment</code> include a language switcher for the same locales</li>
+                            <li>If any text looks stale after switching, reload the page</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Features Overview -->
+            <section id="ai-features" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-brain text-indigo-600 mr-3"></i>
+                    AI-Powered Features
+                </h2>
+                <p class="text-gray-700 leading-relaxed mb-6">
+                    AI Hospital includes a comprehensive suite of AI-powered tools designed to enhance clinical workflows. These tools support diagnosis, treatment planning, risk assessment, and more.
+                </p>
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6 border border-indigo-200 mb-6">
+                    <p class="text-indigo-900 font-semibold mb-2">All AI features are powered by GPT-4.1:</p>
+                    <ul class="list-disc list-inside text-indigo-800 text-sm space-y-1">
+                        <li>GPT-4.1 for text-based AI features</li>
+                        <li>GPT-4.1 Vision for image analysis</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- AI Assistant -->
+            <section id="ai-assistant" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-robot text-blue-600 mr-3"></i>
+                    AI Assistant
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Your intelligent medical assistant that can help with various medical queries, patient information, and clinical decision support.
+                    </p>
+                    <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                        <h3 class="text-lg font-semibold text-blue-900 mb-3">Key Features:</h3>
+                        <ul class="list-disc list-inside text-blue-700 text-sm space-y-2">
+                            <li><strong>Medical Queries:</strong> Ask questions about symptoms, treatments, or medical conditions</li>
+                            <li><strong>Patient Information:</strong> Query patient data, medical history, and prescriptions</li>
+                            <li><strong>Treatment Suggestions:</strong> Get AI-powered treatment recommendations</li>
+                            <li><strong>Drug Information:</strong> Access medication details and interactions</li>
+                            <li><strong>Clinical Guidelines:</strong> Reference latest medical research and guidelines</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <p class="text-sm text-gray-700"><strong>Example Queries:</strong></p>
+                        <ul class="list-disc list-inside text-gray-600 text-sm mt-2 space-y-1">
+                            <li>"What are the symptoms of diabetes?"</li>
+                            <li>"Show me patient John Smith's medical history"</li>
+                            <li>"What medications is patient Jane Doe currently taking?"</li>
+                            <li>"Recommend treatment for hypertension"</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Treatment Recommendations -->
+            <section id="ai-treatment" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-stethoscope text-green-600 mr-3"></i>
+                    AI Treatment Plans
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Generate comprehensive, evidence-based treatment plans tailored to your patients' specific conditions.
+                    </p>
+                    <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                        <h3 class="text-lg font-semibold text-green-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-green-700 text-sm space-y-2">
+                            <li>Personalized treatment recommendations based on patient data</li>
+                            <li>Evidence-based medicine integration</li>
+                            <li>Medication suggestions with dosages</li>
+                            <li>Follow-up care plans</li>
+                            <li>Lifestyle recommendations</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Drug Interaction -->
+            <section id="ai-drug-interaction" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-pills text-red-600 mr-3"></i>
+                    AI Drug Interaction Checker
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Safely check for potential drug interactions before prescribing medications.
+                    </p>
+                    <div class="bg-red-50 rounded-lg p-6 border border-red-200">
+                        <h3 class="text-lg font-semibold text-red-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-red-700 text-sm space-y-2">
+                            <li>Check interactions between multiple medications</li>
+                            <li>Patient-specific interaction analysis</li>
+                            <li>Severity ratings (mild, moderate, severe)</li>
+                            <li>Alternative medication suggestions</li>
+                            <li>Food and supplement interaction warnings</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Medical Image -->
+            <section id="ai-image" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-x-ray text-purple-600 mr-3"></i>
+                    AI Medical Image Analysis
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Analyze medical images using GPT-4.1 Vision to assist in diagnosis.
+                    </p>
+                    <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                        <h3 class="text-lg font-semibold text-purple-900 mb-3">Supported Image Types:</h3>
+                        <ul class="list-disc list-inside text-purple-700 text-sm space-y-2">
+                            <li>X-rays and radiographs</li>
+                            <li>CT scans and MRIs</li>
+                            <li>Ultrasound images</li>
+                            <li>Dermatology photos</li>
+                            <li>Pathology slides</li>
+                        </ul>
+                        <p class="text-purple-800 text-sm mt-4"><strong>Note:</strong> AI analysis is for assistance only and should not replace professional medical judgment.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Voice Input -->
+            <section id="ai-voice" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-microphone text-orange-600 mr-3"></i>
+                    AI Voice Input
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Use voice commands to interact with the system and create medical notes hands-free.
+                    </p>
+                    <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                        <h3 class="text-lg font-semibold text-orange-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-orange-700 text-sm space-y-2">
+                            <li>Voice-to-text transcription for notes</li>
+                            <li>Hands-free patient data entry</li>
+                            <li>Voice commands for navigation</li>
+                            <li>Real-time transcription</li>
+                            <li>Multi-language support</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Appointment Optimizer -->
+            <section id="ai-optimizer" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-calendar-check text-teal-600 mr-3"></i>
+                    AI Appointment Optimizer
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Optimize your appointment schedule using AI to maximize efficiency and patient satisfaction.
+                    </p>
+                    <div class="bg-teal-50 rounded-lg p-6 border border-teal-200">
+                        <h3 class="text-lg font-semibold text-teal-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-teal-700 text-sm space-y-2">
+                            <li>Optimal time slot suggestions</li>
+                            <li>Patient preference learning</li>
+                            <li>Resource allocation optimization</li>
+                            <li>Reduced wait times</li>
+                            <li>Schedule conflict prevention</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Risk Assessment -->
+            <section id="ai-risk" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt text-yellow-600 mr-3"></i>
+                    AI Risk Assessment
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Assess patient risk factors and potential complications using AI-powered analysis.
+                    </p>
+                    <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+                        <h3 class="text-lg font-semibold text-yellow-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-yellow-700 text-sm space-y-2">
+                            <li>Comprehensive risk factor analysis</li>
+                            <li>Disease progression prediction</li>
+                            <li>Complication risk scoring</li>
+                            <li>Preventive care recommendations</li>
+                            <li>Risk stratification</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Health Trends -->
+            <section id="ai-trends" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-pink-600 mr-3"></i>
+                    AI Health Trends
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Track and analyze health trends across your patient population.
+                    </p>
+                    <div class="bg-pink-50 rounded-lg p-6 border border-pink-200">
+                        <h3 class="text-lg font-semibold text-pink-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-pink-700 text-sm space-y-2">
+                            <li>Population health analytics</li>
+                            <li>Disease trend identification</li>
+                            <li>Seasonal pattern recognition</li>
+                            <li>Comparative analysis</li>
+                            <li>Predictive insights</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Health Analytics -->
+            <section id="ai-analytics" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-bar text-indigo-600 mr-3"></i>
+                    AI Health Analytics
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Advanced analytics and insights powered by AI to improve practice outcomes.
+                    </p>
+                    <div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+                        <h3 class="text-lg font-semibold text-indigo-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-indigo-700 text-sm space-y-2">
+                            <li>Practice performance metrics</li>
+                            <li>Patient outcome analysis</li>
+                            <li>Treatment effectiveness tracking</li>
+                            <li>Resource utilization insights</li>
+                            <li>Customizable reports and dashboards</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Symptom Analyzer -->
+            <section id="ai-symptom" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-search text-cyan-600 mr-3"></i>
+                    AI Symptom Analyzer
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Analyze patient symptoms to assist in diagnosis and treatment planning.
+                    </p>
+                    <div class="bg-cyan-50 rounded-lg p-6 border border-cyan-200">
+                        <h3 class="text-lg font-semibold text-cyan-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-cyan-700 text-sm space-y-2">
+                            <li>Symptom pattern recognition</li>
+                            <li>Differential diagnosis suggestions</li>
+                            <li>Severity assessment</li>
+                            <li>Recommended tests and examinations</li>
+                            <li>Treatment pathway suggestions</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Report Generator -->
+            <section id="ai-report" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-file-alt text-violet-600 mr-3"></i>
+                    AI Report Generator
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        Automatically generate comprehensive medical reports using AI assistance.
+                    </p>
+                    <div class="bg-violet-50 rounded-lg p-6 border border-violet-200">
+                        <h3 class="text-lg font-semibold text-violet-900 mb-3">Features:</h3>
+                        <ul class="list-disc list-inside text-violet-700 text-sm space-y-2">
+                            <li>Automated report generation from patient data</li>
+                            <li>Structured medical documentation</li>
+                            <li>Customizable report templates</li>
+                            <li>Multi-format export (PDF, DOCX)</li>
+                            <li>Quality assurance checks</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings & Profile -->
+            <section id="settings" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-cog text-gray-600 mr-3"></i>
+                    Settings & Profile
+                </h2>
+                <div class="space-y-6">
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-user-circle mr-2"></i>
+                            Profile Management
+                        </h3>
+                        <ul class="list-disc list-inside text-gray-700 text-sm space-y-2">
+                            <li>Update personal information</li>
+                            <li>Change password</li>
+                            <li>Manage contact details</li>
+                            <li>Profile picture upload</li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                        <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                            <i class="fas fa-sliders-h mr-2"></i>
+                            System Settings
+                        </h3>
+                        <ul class="list-disc list-inside text-blue-700 text-sm space-y-2">
+                            <li>GPT-4.1 configuration</li>
+                            <li><strong>Notification settings:</strong> Twilio SMS (Account SID, Auth Token), optional <strong>Messaging Service SID</strong> (<code class="bg-blue-100 px-1 rounded">MG…</code>) or <strong>From</strong> number, and <strong>default SMS country code</strong> for parsing local numbers on the public booking form</li>
+                            <li>Language preferences</li>
+                            <li>Display preferences</li>
+                            <li>Data export options</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                        <h3 class="text-lg font-semibold text-green-900 mb-3">
+                            <i class="fas fa-brain mr-2"></i>
+                            AI Settings
+                        </h3>
+                        <ul class="list-disc list-inside text-green-700 text-sm space-y-2">
+                            <li>Configure GPT-4.1 API key</li>
+                            <li>Test API connection</li>
+                            <li>Adjust AI response parameters</li>
+                            <li>Manage AI feature preferences</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tips & Best Practices -->
+            <section id="tips" class="section-anchor bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-3"></i>
+                    Tips & Best Practices
+                </h2>
+                <div class="space-y-6">
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded">
+                        <h3 class="text-lg font-semibold text-yellow-900 mb-3">General Tips</h3>
+                        <ul class="list-disc list-inside text-yellow-800 space-y-2">
+                            <li>Keep patient information up-to-date for accurate AI recommendations</li>
+                            <li>Use the search functionality to quickly find patients, appointments, or reports</li>
+                            <li>Regularly review and update appointment statuses</li>
+                            <li>Export important reports for backup purposes</li>
+                            <li>Use AI features as decision support tools, not replacements for clinical judgment</li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded">
+                        <h3 class="text-lg font-semibold text-blue-900 mb-3">AI Features Best Practices</h3>
+                        <ul class="list-disc list-inside text-blue-800 space-y-2">
+                            <li>Always verify AI-generated recommendations with your medical expertise</li>
+                            <li>Use drug interaction checker before prescribing new medications</li>
+                            <li>Review AI-generated reports before finalizing them</li>
+                            <li>Ensure your GPT-4.1 API key is valid and has sufficient credits</li>
+                            <li>Use voice input in quiet environments for better accuracy</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded">
+                        <h3 class="text-lg font-semibold text-green-900 mb-3">Security & Privacy</h3>
+                        <ul class="list-disc list-inside text-green-800 space-y-2">
+                            <li>Always log out when finished, especially on shared computers</li>
+                            <li>Keep your password secure and change it regularly</li>
+                            <li>Be mindful of patient privacy and applicable regulations when using AI features</li>
+                            <li>Review patient data access logs regularly</li>
+                            <li>Ensure secure network connections when accessing the system</li>
+                        </ul>
+                    </div>
+                    <div class="bg-purple-50 border-l-4 border-purple-500 p-6 rounded">
+                        <h3 class="text-lg font-semibold text-purple-900 mb-3">Efficiency Tips</h3>
+                        <ul class="list-disc list-inside text-purple-800 space-y-2">
+                            <li>Use keyboard shortcuts for faster navigation</li>
+                            <li>Set up quick actions for frequently performed tasks</li>
+                            <li>Use filters and search to quickly locate information</li>
+                            <li>Take advantage of bulk actions where available</li>
+                            <li>Customize your dashboard to show most relevant information</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white rounded-lg p-8 mt-12">
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold mb-4">AI Hospital</h3>
+                    <p class="text-gray-300 mb-4">AI Hospital - Complete AI Powered Healthcare / Hospital Management System (HMS)</p>
+                    <p class="text-gray-400 text-sm">
+                        For technical support or questions, please contact your system administrator.
+                    </p>
+                    <p class="text-gray-500 text-xs mt-4">
+                        © 2026 AI Hospital. All rights reserved.
+                    </p>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="lg:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-3 rounded-lg shadow-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="lg:hidden fixed inset-0 bg-blue-900 text-white z-40 transform -translate-x-full transition-transform duration-300">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-stethoscope mr-3 text-blue-300"></i>
+                    AI Hospital
+                </h1>
+                <button id="closeMobileMenu" class="text-white">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <ul class="space-y-2">
+                <li><a href="#introduction" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-book-open mr-3 w-5"></i>Introduction</a></li>
+                <li><a href="#technology-stack" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-code mr-3 w-5"></i>Technology Stack</a></li>
+                <li><a href="#installation" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-download mr-3 w-5"></i>Installation</a></li>
+                <li><a href="#getting-started" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-rocket mr-3 w-5"></i>Getting Started</a></li>
+                <li><a href="#dashboard" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-tachometer-alt mr-3 w-5"></i>Dashboard</a></li>
+                <li><a href="#patients" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-users mr-3 w-5"></i>Patient Management</a></li>
+                <li><a href="#appointments" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-calendar-alt mr-3 w-5"></i>Appointments</a></li>
+                <li><a href="#public-website" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-globe mr-3 w-5"></i>Public Website & Booking</a></li>
+                <li><a href="#reports" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-file-medical mr-3 w-5"></i>Medical Reports</a></li>
+                <li><a href="#doctors-staff" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-user-md mr-3 w-5"></i>Doctors & Staff</a></li>
+                <li><a href="#laboratory" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-vial mr-3 w-5"></i>Laboratory + LIS</a></li>
+                <li><a href="#device-integration" class="block px-4 py-2 ml-4 text-sm rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-plug mr-3 w-4"></i>LIS Integration Guide</a></li>
+                <li><a href="#inpatient" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-procedures mr-3 w-5"></i>Inpatient</a></li>
+                <li><a href="#radiology" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-x-ray mr-3 w-5"></i>Radiology + DICOM</a></li>
+                <li><a href="#pharmacy" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-prescription-bottle-medical mr-3 w-5"></i>Pharmacy</a></li>
+                <li><a href="#inventory" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-boxes-stacked mr-3 w-5"></i>Inventory</a></li>
+                <li><a href="#billing" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-file-invoice-dollar mr-3 w-5"></i>Billing</a></li>
+                <li><a href="#documents" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-folder-open mr-3 w-5"></i>Document Management</a></li>
+                <li><a href="#emergency" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-ambulance mr-3 w-5"></i>Emergency</a></li>
+                <li><a href="#telemedicine" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-video mr-3 w-5"></i>Telemedicine</a></li>
+                <li><a href="#ambulance" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-ambulance mr-3 w-5"></i>Ambulance</a></li>
+                <li><a href="#analytical-reports" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-chart-line mr-3 w-5"></i>Analytical Reports</a></li>
+                <li><a href="#internationalization" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-language mr-3 w-5"></i>Language (i18n)</a></li>
+                <li><a href="#ai-features" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-brain mr-3 w-5"></i>AI Features</a></li>
+                <li><a href="#settings" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-cog mr-3 w-5"></i>Settings & Profile</a></li>
+                <li><a href="#tips" class="block px-4 py-2 rounded hover:bg-blue-800 transition flex items-center"><i class="fas fa-lightbulb mr-3 w-5"></i>Tips & Best Practices</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('-translate-x-full');
+        });
+
+        closeMobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.add('-translate-x-full');
+        });
+
+        // Close mobile menu when clicking on a link
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('-translate-x-full');
+            });
+        });
+
+        // Jump to anchor links (instant scroll)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
