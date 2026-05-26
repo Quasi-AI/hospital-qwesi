@@ -51,6 +51,15 @@ interface Settings {
     passwordMinLength: number;
     requireTwoFactor: boolean;
   };
+  paymentProviders?: {
+    paystack?: {
+      enabled: boolean;
+      mode: 'test' | 'live';
+      publicKey: string;
+      secretKey?: string;
+      callbackUrl: string;
+    };
+  };
 }
 
 interface SettingsContextType {
@@ -107,6 +116,15 @@ const defaultSettings: Settings = {
     maxLoginAttempts: 5,
     passwordMinLength: 8,
     requireTwoFactor: false,
+  },
+  paymentProviders: {
+    paystack: {
+      enabled: false,
+      mode: 'live',
+      publicKey: '',
+      secretKey: '',
+      callbackUrl: '',
+    },
   },
 };
 

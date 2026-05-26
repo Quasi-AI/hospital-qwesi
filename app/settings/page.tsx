@@ -19,7 +19,8 @@ import {
   MapPin,
   Shield,
   Palette,
-  ImageIcon
+  ImageIcon,
+  CreditCard
 } from 'lucide-react';
 import { getCurrencySelectOptions } from '@/lib/currencies';
 
@@ -154,13 +155,18 @@ export default function SettingsPage() {
         [name]: checked
       }));
     } else if (name.includes('.')) {
-      const [parent, child] = name.split('.');
+      const path = name.split('.');
       setFormData((prev: any) => ({
         ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
+        [path[0]]: {
+          ...(prev[path[0]] || {}),
+          [path[1]]: path.length === 2
+            ? value
+            : {
+                ...(prev[path[0]]?.[path[1]] || {}),
+                [path[2]]: value,
+              },
+        },
       }));
     } else {
       // Handle language change immediately
@@ -402,6 +408,19 @@ export default function SettingsPage() {
                   >
                     <ImageIcon className="h-4 w-4 shrink-0" />
                     <span>{t('settings.invoiceLogo')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('payments')}
+                    className={`flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-xs font-medium transition-colors ${
+                      activeTab === 'payments'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <CreditCard className="h-4 w-4 shrink-0" />
+                    <span>Payments</span>
                   </button>
                 </nav>
               </div>
@@ -759,6 +778,104 @@ export default function SettingsPage() {
                             {t('settings.invoiceLogoRemove')}
                           </button>
                         )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'payments' && (
+                  <div>
+                    <div className="mb-4">
+                      <h3 className="text-base font-semibold text-gray-900">Paystack payments</h3>
+                      <p className="text-xs text-gray-600">Configure live Paystack checkout for patient subscriptions and paid services.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3">
+                        <span>
+                          <span className="block text-xs font-medium text-gray-900">Enable Paystack checkout</span>
+                          <span className="mt-0.5 block text-xs text-gray-500">When enabled, patient payments are initialized through Paystack.</span>
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={formData.paymentProviders?.paystack?.enabled || false}
+                          onChange={(e) =>
+                            setFormData((prev: any) => ({
+                              ...prev,
+                              paymentProviders: {
+                                ...(prev.paymentProviders || {}),
+                                paystack: {
+                                  ...(prev.paymentProviders?.paystack || {}),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </label>
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <label htmlFor="paymentProviders.paystack.mode" className="mb-1 block text-xs font-medium text-gray-700">
+                            Paystack mode
+                          </label>
+                          <select
+                            id="paymentProviders.paystack.mode"
+                            name="paymentProviders.paystack.mode"
+                            value={formData.paymentProviders?.paystack?.mode || 'live'}
+                            onChange={handleInputChange}
+                            className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          >
+                            <option value="live">Live</option>
+                            <option value="test">Test</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="paymentProviders.paystack.callbackUrl" className="mb-1 block text-xs font-medium text-gray-700">
+                            Callback URL override
+                          </label>
+                          <input
+                            type="url"
+                            id="paymentProviders.paystack.callbackUrl"
+                            name="paymentProviders.paystack.callbackUrl"
+                            value={formData.paymentProviders?.paystack?.callbackUrl || ''}
+                            onChange={handleInputChange}
+                            placeholder="https://your-domain.com/patient-portal/subscriptions"
+                            className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="paymentProviders.paystack.publicKey" className="mb-1 block text-xs font-medium text-gray-700">
+                            Public key
+                          </label>
+                          <input
+                            type="text"
+                            id="paymentProviders.paystack.publicKey"
+                            name="paymentProviders.paystack.publicKey"
+                            value={formData.paymentProviders?.paystack?.publicKey || ''}
+                            onChange={handleInputChange}
+                            placeholder="pk_live_..."
+                            className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="paymentProviders.paystack.secretKey" className="mb-1 block text-xs font-medium text-gray-700">
+                            Secret key
+                          </label>
+                          <input
+                            type="password"
+                            id="paymentProviders.paystack.secretKey"
+                            name="paymentProviders.paystack.secretKey"
+                            value={formData.paymentProviders?.paystack?.secretKey || ''}
+                            onChange={handleInputChange}
+                            placeholder="sk_live_..."
+                            className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

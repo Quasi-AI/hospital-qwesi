@@ -84,6 +84,15 @@ export interface ISettings {
       };
     };
   };
+  paymentProviders: {
+    paystack: {
+      enabled: boolean;
+      mode: 'test' | 'live';
+      publicKey: string;
+      secretKey: string;
+      callbackUrl: string;
+    };
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -232,6 +241,15 @@ const settingsSchema = new mongoose.Schema<ISettings>(
           phoneNumber: { type: String, default: '' },
           messagingServiceSid: { type: String, default: '' },
         },
+      },
+    },
+    paymentProviders: {
+      paystack: {
+        enabled: { type: Boolean, default: false },
+        mode: { type: String, enum: ['test', 'live'], default: 'live' },
+        publicKey: { type: String, default: '' },
+        secretKey: { type: String, default: '' },
+        callbackUrl: { type: String, default: '' },
       },
     },
   },

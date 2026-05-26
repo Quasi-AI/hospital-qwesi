@@ -70,7 +70,8 @@ import {
   Heart,
   Globe,
   LayoutGrid,
-  Languages
+  Languages,
+  Wallet
 } from 'lucide-react';
 
 interface SidebarLayoutProps {
@@ -286,6 +287,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
       ]
     },
     { id: 'notifications', label: t('navigation.notifications') || 'Notifications', icon: Bell, href: '/notifications', roles: ['admin', 'doctor', 'staff'] },
+    { id: 'wallet', label: 'Wallet', icon: Wallet, href: '/wallet', roles: ['doctor', 'staff'] },
     { id: 'ai-treatment-recommendations', label: t('navigation.aiTreatmentRecommendations'), icon: Stethoscope, href: '/ai-treatment-recommendations', roles: ['admin', 'doctor', 'staff'] },
     { id: 'ai-drug-interaction', label: t('navigation.aiDrugInteraction'), icon: Pill, href: '/ai-drug-interaction', roles: ['admin', 'doctor', 'staff'] },
     { id: 'ai-medical-image', label: t('navigation.aiMedicalImage'), icon: Camera, href: '/ai-medical-image', roles: ['admin', 'doctor', 'staff'] },
