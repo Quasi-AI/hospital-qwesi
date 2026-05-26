@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
     const patient = await Patient.findOneAndUpdate(
       { email: patientEmail },
       { $set: allowedUpdates },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('-password');
 
     if (!patient) {

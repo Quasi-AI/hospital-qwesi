@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     const activeModel = await AIModel.findOneAndUpdate(
       { id: body.id },
       { isActive: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!activeModel) {

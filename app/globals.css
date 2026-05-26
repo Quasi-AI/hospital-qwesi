@@ -48,6 +48,43 @@ a, [role="link"] {
   cursor: pointer !important;
 }
 
+/* Public homepage / landing accent color */
+.hospital-landing {
+  --color-teal-50: #eff6ff;
+  --color-teal-100: #dbeafe;
+  --color-teal-200: #bfdbfe;
+  --color-teal-300: #93c5fd;
+  --color-teal-400: #60a5fa;
+  --color-teal-500: #2563eb;
+  --color-teal-600: #1447e6;
+  --color-teal-700: #1447e6;
+  --color-teal-800: #1e40af;
+  --color-teal-900: #1e3a8a;
+  --color-teal-950: #172554;
+  --color-emerald-50: #eff6ff;
+  --color-emerald-100: #dbeafe;
+  --color-emerald-200: #bfdbfe;
+  --color-emerald-300: #93c5fd;
+  --color-emerald-400: #60a5fa;
+  --color-emerald-500: #2563eb;
+  --color-emerald-600: #1447e6;
+  --color-emerald-700: #1447e6;
+  --color-emerald-800: #1e40af;
+  --color-emerald-900: #1e3a8a;
+  --color-emerald-950: #172554;
+  --color-cyan-50: #eff6ff;
+  --color-cyan-100: #dbeafe;
+  --color-cyan-200: #bfdbfe;
+  --color-cyan-300: #93c5fd;
+  --color-cyan-400: #60a5fa;
+  --color-cyan-500: #2563eb;
+  --color-cyan-600: #1447e6;
+  --color-cyan-700: #1447e6;
+  --color-cyan-800: #1e40af;
+  --color-cyan-900: #1e3a8a;
+  --color-cyan-950: #172554;
+}
+
 /* Ensure clickable elements in navigation and interactive components */
 .nav-link, .btn, .button, .link, .clickable {
   cursor: pointer !important;

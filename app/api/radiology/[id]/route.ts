@@ -31,7 +31,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     await dbConnect();
 
     const data = await request.json();
-    const study = await RadiologyStudy.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+    const study = await RadiologyStudy.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
     if (!study) return NextResponse.json({ error: 'Study not found' }, { status: 404 });
 
     return NextResponse.json(study);

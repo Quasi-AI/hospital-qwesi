@@ -113,7 +113,7 @@ export async function PUT(request: NextRequest) {
     const updatedModel = await AIModel.findOneAndUpdate(
       { id: body.id },
       { $set: body },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!updatedModel) {

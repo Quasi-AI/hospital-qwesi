@@ -127,7 +127,7 @@ export async function PUT(
           workingHours,
         },
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     const effective = await getEffectiveDoctorSchedule(doctorId);

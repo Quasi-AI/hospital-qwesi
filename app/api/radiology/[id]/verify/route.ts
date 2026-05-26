@@ -25,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         verifiedBy: session.user?.name || session.user?.email || 'Unknown',
         verifiedAt: new Date(),
       },
-    }, { new: true });
+    }, { returnDocument: 'after' });
 
     return NextResponse.json(updatedStudy);
   } catch (error: unknown) {

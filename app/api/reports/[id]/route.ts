@@ -40,7 +40,7 @@ export async function PUT(
     const updatedReport = await Report.findByIdAndUpdate(
       id,
       body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     
     if (!updatedReport) {

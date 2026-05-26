@@ -63,7 +63,7 @@ export async function PUT(
     const updatedDonor = await BloodDonor.findByIdAndUpdate(
       id,
       { $set: body },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     return NextResponse.json(updatedDonor);

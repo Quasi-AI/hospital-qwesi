@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data.dispensedBy = session.user?.name || session.user?.email || 'Unknown';
     }
 
-    const dispensing = await Dispensing.findByIdAndUpdate(id, { $set: data }, { new: true });
+    const dispensing = await Dispensing.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after' });
     if (!dispensing) return NextResponse.json({ error: 'Dispensing record not found' }, { status: 404 });
 
     return NextResponse.json(dispensing);

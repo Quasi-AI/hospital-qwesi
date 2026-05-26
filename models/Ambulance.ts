@@ -129,7 +129,6 @@ const AmbulanceSchema: Schema = new Schema(
 );
 
 // Indexes
-AmbulanceSchema.index({ vehicleNumber: 1 });
 AmbulanceSchema.index({ status: 1 });
 AmbulanceSchema.index({ vehicleType: 1 });
 AmbulanceSchema.index({ isActive: 1 });

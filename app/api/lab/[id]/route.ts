@@ -88,7 +88,7 @@ export async function PUT(
     const labTest = await LabTest.findByIdAndUpdate(
       id,
       { $set: body },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!labTest) {

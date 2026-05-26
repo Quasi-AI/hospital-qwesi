@@ -215,7 +215,7 @@ export async function PUT(request: NextRequest) {
     const updatedUser = await User.findByIdAndUpdate(
       doctorId,
       { $set: updateData },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('-password');
 
     if (!updatedUser) {

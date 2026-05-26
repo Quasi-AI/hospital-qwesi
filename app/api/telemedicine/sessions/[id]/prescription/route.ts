@@ -152,7 +152,7 @@ export async function PUT(
           followUpDate: data.followUpDate,
         }
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     return NextResponse.json({ prescription });

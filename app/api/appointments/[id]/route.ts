@@ -145,7 +145,7 @@ export async function PUT(
     const fallbackAppointment = await Appointment.findByIdAndUpdate(
       id,
       update,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!fallbackAppointment) {

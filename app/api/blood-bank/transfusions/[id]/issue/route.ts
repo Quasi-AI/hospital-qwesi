@@ -107,7 +107,7 @@ export async function POST(
           status: 'ready'
         }
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     return NextResponse.json({

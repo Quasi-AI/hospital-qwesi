@@ -18,7 +18,7 @@ export async function DELETE(
     const study = await RadiologyStudy.findByIdAndUpdate(
       id,
       { $pull: { images: { filename: decodeURIComponent(filename) } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!study) {

@@ -55,7 +55,7 @@ export async function POST(
           adverseReaction
         }
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     return NextResponse.json({

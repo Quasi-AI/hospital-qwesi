@@ -173,7 +173,6 @@ const BloodDonorSchema: Schema = new Schema(
 );
 
 // Indexes
-BloodDonorSchema.index({ donorId: 1 });
 BloodDonorSchema.index({ bloodGroup: 1 });
 BloodDonorSchema.index({ status: 1 });
 BloodDonorSchema.index({ phone: 1 });

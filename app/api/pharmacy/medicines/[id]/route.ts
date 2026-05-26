@@ -31,7 +31,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     await dbConnect();
 
     const data = await request.json();
-    const medicine = await Medicine.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+    const medicine = await Medicine.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
     if (!medicine) return NextResponse.json({ error: 'Medicine not found' }, { status: 404 });
 
     return NextResponse.json(medicine);

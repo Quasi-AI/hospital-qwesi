@@ -79,7 +79,7 @@ export async function PUT(
       const updated = await Notification.findByIdAndUpdate(
         id,
         { status: 'sent', readAt: null },
-        { new: true }
+        { returnDocument: 'after' }
       );
       return NextResponse.json(updated);
     }
@@ -103,7 +103,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const updated = await Notification.findByIdAndUpdate(id, body, { new: true });
+    const updated = await Notification.findByIdAndUpdate(id, body, { returnDocument: 'after' });
     return NextResponse.json(updated);
   } catch (error: any) {
     console.error('PUT notification error:', error);

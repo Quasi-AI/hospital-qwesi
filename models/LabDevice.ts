@@ -282,7 +282,6 @@ labDeviceSchema.methods.resetDailyCounterIfNeeded = function() {
 };
 
 // Indexes
-labDeviceSchema.index({ deviceCode: 1 });
 labDeviceSchema.index({ apiKeyHash: 1 });
 labDeviceSchema.index({ isActive: 1 });
 labDeviceSchema.index({ manufacturer: 1 });

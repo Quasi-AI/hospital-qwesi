@@ -102,7 +102,7 @@ export async function PUT(
     const admission = await Admission.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     return NextResponse.json(admission);

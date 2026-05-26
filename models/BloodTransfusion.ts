@@ -235,7 +235,6 @@ const BloodTransfusionSchema: Schema = new Schema(
 );
 
 // Indexes
-BloodTransfusionSchema.index({ requestNumber: 1 });
 BloodTransfusionSchema.index({ patientId: 1 });
 BloodTransfusionSchema.index({ status: 1 });
 BloodTransfusionSchema.index({ urgency: 1 });

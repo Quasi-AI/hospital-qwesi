@@ -301,12 +301,10 @@ incomingImageSchema.pre('save', async function() {
 });
 
 // Indexes
-incomingImageSchema.index({ imageNumber: 1 });
 incomingImageSchema.index({ deviceId: 1 });
 incomingImageSchema.index({ deviceCode: 1 });
 incomingImageSchema.index({ studyInstanceUID: 1 });
 incomingImageSchema.index({ seriesInstanceUID: 1 });
-incomingImageSchema.index({ sopInstanceUID: 1 });
 incomingImageSchema.index({ accessionNumber: 1 });
 incomingImageSchema.index({ patientId: 1 });
 incomingImageSchema.index({ matchedStudyId: 1 });

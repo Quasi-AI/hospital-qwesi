@@ -153,7 +153,7 @@ export async function PUT(request: NextRequest) {
     const updatedUser = await User.findByIdAndUpdate(
       staffId,
       { $set: updateData },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('-password');
 
     if (!updatedUser) {

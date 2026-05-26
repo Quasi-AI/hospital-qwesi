@@ -31,7 +31,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     await dbConnect();
 
     const data = await request.json();
-    const item = await InventoryItem.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+    const item = await InventoryItem.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
     if (!item) return NextResponse.json({ error: 'Item not found' }, { status: 404 });
 
     return NextResponse.json(item);

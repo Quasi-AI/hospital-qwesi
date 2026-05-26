@@ -63,7 +63,7 @@ export async function PUT(
     const ward = await Ward.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!ward) {

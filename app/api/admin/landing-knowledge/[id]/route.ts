@@ -62,7 +62,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const doc = await LandingKnowledgeEntry.findByIdAndUpdate(
       id,
       { $set: { enabled: body.enabled } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 });

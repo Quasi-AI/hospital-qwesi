@@ -429,7 +429,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen overflow-hidden bg-gray-50 flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -440,7 +440,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
@@ -466,9 +466,9 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
           </button>
         </div>
 
-
-        {/* Navigation Menu */}
-        <nav className="px-3 py-4 space-y-1">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
+          {/* Navigation Menu */}
+          <nav className="px-3 py-4 space-y-1">
           {navigation.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
             const isExpanded = expandedMenus.has(item.id);
@@ -542,7 +542,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
               </div>
             );
           })}
-        </nav>
+          </nav>
 
         {/* General Settings - Admin Only */}
         {isAdmin && (
@@ -712,10 +712,11 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
             )}
           </div>
         </div>
+        </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:ml-0">
+      <div className="flex min-h-0 flex-1 min-w-0 flex-col lg:ml-64">
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 lg:hidden">
           <div className="flex items-center justify-between h-16 px-4">
@@ -776,7 +777,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 flex-1 overflow-y-auto">
           <div
             className={
               dense

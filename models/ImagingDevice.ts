@@ -246,7 +246,6 @@ imagingDeviceSchema.methods.resetDailyCounterIfNeeded = function() {
 };
 
 // Indexes
-imagingDeviceSchema.index({ deviceCode: 1 });
 imagingDeviceSchema.index({ aeTitle: 1 });
 imagingDeviceSchema.index({ apiKeyHash: 1 });
 imagingDeviceSchema.index({ isActive: 1 });

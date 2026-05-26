@@ -75,7 +75,7 @@ export async function PUT(
     const bed = await Bed.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     return NextResponse.json(bed);

@@ -39,7 +39,7 @@ export async function PUT(request: NextRequest) {
     delete clean.updatedAt;
 
     await dbConnect();
-    await WebsiteContent.findOneAndUpdate({}, { $set: clean }, { upsert: true, new: true });
+    await WebsiteContent.findOneAndUpdate({}, { $set: clean }, { upsert: true, returnDocument: 'after' });
 
     const content = await getMergedWebsiteContent();
     return NextResponse.json({ ok: true, content });

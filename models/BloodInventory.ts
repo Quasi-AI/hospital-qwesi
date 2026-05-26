@@ -151,7 +151,6 @@ const BloodInventorySchema: Schema = new Schema(
 );
 
 // Indexes
-BloodInventorySchema.index({ unitNumber: 1 });
 BloodInventorySchema.index({ bloodGroup: 1, status: 1 });
 BloodInventorySchema.index({ component: 1 });
 BloodInventorySchema.index({ expiryDate: 1 });

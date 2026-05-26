@@ -53,7 +53,7 @@ export async function POST(
     const updatedAdmission = await Admission.findByIdAndUpdate(
       id,
       { $set: dischargeData },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     // Free the bed

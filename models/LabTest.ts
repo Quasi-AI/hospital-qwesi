@@ -202,7 +202,6 @@ labTestSchema.pre('save', async function () {
 // Index for efficient queries
 labTestSchema.index({ patientId: 1, createdAt: -1 });
 labTestSchema.index({ status: 1 });
-labTestSchema.index({ testNumber: 1 });
 labTestSchema.index({ priority: 1 });
 
 const LabTest = mongoose.models.LabTest || mongoose.model<ILabTest>('LabTest', labTestSchema);

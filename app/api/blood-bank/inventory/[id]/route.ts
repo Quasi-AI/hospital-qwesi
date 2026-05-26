@@ -76,7 +76,7 @@ export async function PUT(
     const updatedItem = await BloodInventory.findByIdAndUpdate(
       id,
       { $set: body },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     return NextResponse.json(updatedItem);

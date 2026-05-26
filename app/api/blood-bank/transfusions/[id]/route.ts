@@ -94,7 +94,7 @@ export async function PUT(
     const updatedTransfusion = await BloodTransfusion.findByIdAndUpdate(
       id,
       { $set: body },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     return NextResponse.json(updatedTransfusion);

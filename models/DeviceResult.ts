@@ -266,7 +266,6 @@ deviceResultSchema.pre('save', async function() {
 });
 
 // Indexes
-deviceResultSchema.index({ resultNumber: 1 });
 deviceResultSchema.index({ deviceId: 1, receivedAt: -1 });
 deviceResultSchema.index({ sampleId: 1 });
 deviceResultSchema.index({ status: 1 });

@@ -44,7 +44,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const study = await RadiologyStudy.findByIdAndUpdate(
       id,
       { $push: { images: { $each: uploadedImages } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!study) {

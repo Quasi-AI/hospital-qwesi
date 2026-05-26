@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest) {
         name: name.trim(),
         email: email.toLowerCase().trim()
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updatedUser) {

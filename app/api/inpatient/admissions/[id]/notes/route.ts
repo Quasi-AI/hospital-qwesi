@@ -42,7 +42,7 @@ export async function POST(
     const updatedAdmission = await Admission.findByIdAndUpdate(
       id,
       { $push: { nursingNotes: nursingNote } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     return NextResponse.json(updatedAdmission);

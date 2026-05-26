@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }
     }
 
-    const order = await PurchaseOrder.findByIdAndUpdate(id, { $set: data }, { new: true });
+    const order = await PurchaseOrder.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after' });
     return NextResponse.json(order);
   } catch (error: unknown) {
     console.error('Error updating purchase order:', error);

@@ -252,7 +252,6 @@ AmbulanceBookingSchema.pre('save', async function() {
 });
 
 // Indexes
-AmbulanceBookingSchema.index({ bookingNumber: 1 });
 AmbulanceBookingSchema.index({ patientId: 1 });
 AmbulanceBookingSchema.index({ ambulanceId: 1 });
 AmbulanceBookingSchema.index({ status: 1 });

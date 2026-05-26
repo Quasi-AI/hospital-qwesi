@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       status: 'reported',
     };
 
-    const study = await RadiologyStudy.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+    const study = await RadiologyStudy.findByIdAndUpdate(id, { $set: updateData }, { returnDocument: 'after' });
     if (!study) return NextResponse.json({ error: 'Study not found' }, { status: 404 });
 
     return NextResponse.json(study);
