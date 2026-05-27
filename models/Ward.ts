@@ -18,6 +18,7 @@ export interface IWard extends Document {
   contactNumber?: string;
   createdAt: Date;
   updatedAt: Date;
+  
 }
 
 const WardSchema: Schema = new Schema(
