@@ -70,8 +70,8 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  systemTitle: 'Qwesi AI Virtual Hospital',
-  systemDescription: 'Practice Management System',
+  systemTitle: '',
+  systemDescription: 'Qwesi Virtual Hospital',
   invoiceLogoUrl: '',
   currency: 'USD',
   timezone: 'UTC',
