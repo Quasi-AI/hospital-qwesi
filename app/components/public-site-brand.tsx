@@ -24,6 +24,7 @@ export function PublicSiteBrand({
   showLogoGraphic?: boolean;
 }) {
   const clinical = variant === 'clinical';
+  const resolvedLogoUrl = logoUrl.trim() || '/logo.png';
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
     onNavigate?.();
@@ -43,10 +44,10 @@ export function PublicSiteBrand({
   }`;
 
   const textOnlyTitleClass = inverse
-    ? 'block max-w-[min(100%,12rem)] text-balance bg-gradient-to-br from-white via-teal-100 to-cyan-200 bg-clip-text text-sm font-extrabold leading-tight tracking-tight text-transparent motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:brightness-110 sm:max-w-md sm:text-base md:text-lg'
+    ? 'block max-w-[10.5rem] truncate whitespace-nowrap bg-gradient-to-br from-white via-teal-100 to-cyan-200 bg-clip-text text-sm font-extrabold leading-tight tracking-tight text-transparent motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:brightness-110 sm:max-w-[16rem] sm:text-base lg:max-w-[20rem] lg:text-lg'
     : clinical
-      ? 'block max-w-[min(100%,12rem)] text-balance bg-gradient-to-br from-slate-900 via-teal-800 to-teal-600 bg-clip-text text-sm font-extrabold leading-tight tracking-tight text-transparent motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:brightness-95 sm:max-w-md sm:text-base md:text-lg'
-      : 'block max-w-[min(100%,12rem)] text-balance bg-gradient-to-br from-gray-900 via-blue-900 to-blue-600 bg-clip-text text-sm font-extrabold leading-tight tracking-tight text-transparent sm:max-w-md sm:text-base md:text-lg';
+      ? 'block max-w-[10.5rem] truncate whitespace-nowrap bg-gradient-to-br from-slate-900 via-teal-800 to-teal-600 bg-clip-text text-sm font-extrabold leading-tight tracking-tight text-transparent motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:brightness-95 sm:max-w-[16rem] sm:text-base lg:max-w-[20rem] lg:text-lg'
+      : 'block max-w-[10.5rem] truncate whitespace-nowrap bg-gradient-to-br from-gray-900 via-blue-900 to-blue-600 bg-clip-text text-sm font-extrabold leading-tight tracking-tight text-transparent sm:max-w-[16rem] sm:text-base lg:max-w-[20rem] lg:text-lg';
 
   return (
     <Link
@@ -55,10 +56,10 @@ export function PublicSiteBrand({
       onClick={handleClick}
     >
       {showLogoGraphic ? (
-        logoUrl ? (
+        resolvedLogoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={logoUrl}
+            src={resolvedLogoUrl}
             alt=""
             className={`h-10 w-10 rounded-xl object-contain shadow-md ${
               inverse

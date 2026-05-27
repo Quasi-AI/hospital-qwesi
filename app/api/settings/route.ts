@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
+import { DEFAULT_HOSPITAL_NAME, normalizeHospitalName } from '@/lib/getLandingSettings';
 
 export async function GET() {
   try {
@@ -26,7 +27,7 @@ export async function GET() {
     // For non-admin users, return only public/display settings
     if (session.user.role !== 'admin') {
       const publicSettings = {
-        systemTitle: settings.systemTitle,
+        systemTitle: normalizeHospitalName(settings.systemTitle),
         systemDescription: settings.systemDescription,
         currency: settings.currency,
         timezone: settings.timezone,
@@ -42,6 +43,9 @@ export async function GET() {
     }
 
     // Admin gets full settings
+    if (!settings.systemTitle || settings.systemTitle === 'AI Doctor' || settings.systemTitle === 'AI Doc') {
+      settings.systemTitle = DEFAULT_HOSPITAL_NAME;
+    }
     return NextResponse.json(settings);
 
   } catch (error) {

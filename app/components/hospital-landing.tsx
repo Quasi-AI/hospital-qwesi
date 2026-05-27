@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import type { WebsiteContentData } from '@/lib/defaultWebsiteContent';
-import { PUBLIC_LANDING_NAV_ITEMS, publicLandingNavLinkClassDark, type PublicLandingNavId } from '@/lib/publicSiteLandingNav';
+import { PUBLIC_LANDING_NAV_ITEMS, type PublicLandingNavId } from '@/lib/publicSiteLandingNav';
 import type { LandingSettingsSnapshot } from '@/lib/getLandingSettings';
 import { countryCodeFromAddressField } from '@/lib/phoneCountryFields';
 import type { CountryCode } from 'libphonenumber-js';
@@ -120,6 +120,7 @@ const NAV_SCROLL_FUZZ_PX = 18;
 const NAV_SPY_PAUSE_MS = 380;
 /** Past this scroll offset, header uses elevated (glass) chrome separate from the hero slab. */
 const HEADER_ELEVATE_SCROLL_PX = 8;
+const DEFAULT_PUBLIC_BRAND = 'Qwesi AI Virtual Hospital';
 
 /** Gutters align with hero inner column; vertical padding sets section rhythm below the header. */
 const LANDING_SECTION_SHELL =
@@ -136,18 +137,20 @@ export function HospitalLanding({
 }) {
   const { data: session, status } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sectionsOpen, setSectionsOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeNavId, setActiveNavId] = useState<PublicLandingNavId | null>(null);
   const [headerElevated, setHeaderElevated] = useState(false);
   const navSpyPausedUntilRef = useRef(0);
   const signedIn = status === 'authenticated' && session;
-  const brand = settings?.systemTitle?.trim() || content.heroTitle;
+  const brand = settings?.systemTitle?.trim() || DEFAULT_PUBLIC_BRAND;
   const logoUrl = settings?.invoiceLogoUrl?.trim() || '';
   const heroPhone = settings?.address?.phone?.trim() || '';
   const phoneDefaultCountry = countryCodeFromAddressField(settings?.address?.country);
 
   const jumpToSection = (id: string) => {
     setMobileOpen(false);
+    setSectionsOpen(false);
     if (typeof performance !== 'undefined') {
       navSpyPausedUntilRef.current = performance.now() + NAV_SPY_PAUSE_MS;
     }
@@ -229,35 +232,51 @@ export function HospitalLanding({
             : 'border-b border-transparent bg-[#0a1614] shadow-none backdrop-blur-none supports-[backdrop-filter]:bg-[#0a1614]'
         }`}
       >
-        <div className="mx-auto flex h-11 max-w-6xl items-center justify-between gap-2 px-2.5 sm:px-4 lg:h-12">
+        <div className="mx-auto flex h-12 max-w-7xl items-center justify-between gap-2 px-2.5 sm:px-4 lg:h-14">
           <PublicSiteBrand
             brand={brand}
             logoUrl={logoUrl}
             variant="clinical"
             inverse
             href="/#hero"
-            showLogoGraphic={false}
             onNavigate={() => setMobileOpen(false)}
           />
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-x-0.5 px-1 xl:flex xl:gap-x-1 2xl:gap-x-1.5" aria-label="Primary">
-            {PUBLIC_LANDING_NAV_ITEMS.map(([id, label]) => {
-              const active = activeNavId === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => jumpToSection(id)}
-                  aria-current={active ? 'true' : undefined}
-                  className={`${publicLandingNavLinkClassDark} ${
-                    active ? 'bg-white/12 text-white after:scale-x-100' : ''
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </nav>
+          <div className="relative hidden shrink-0 lg:block">
+            <button
+              type="button"
+              onClick={() => setSectionsOpen((open) => !open)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-3 text-sm font-semibold text-teal-50 transition hover:border-white/25 hover:bg-white/10"
+              aria-expanded={sectionsOpen}
+            >
+              Sections
+              <ChevronDown className={`h-4 w-4 transition-transform ${sectionsOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {sectionsOpen ? (
+              <div className="absolute left-1/2 top-full z-50 mt-2 w-56 -translate-x-1/2 rounded-xl border border-white/10 bg-[#0c1816] p-2 shadow-2xl shadow-black/35">
+                <div className="grid grid-cols-2 gap-1">
+                  {PUBLIC_LANDING_NAV_ITEMS.map(([id, label]) => {
+                    const active = activeNavId === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => jumpToSection(id)}
+                        aria-current={active ? 'true' : undefined}
+                        className={`rounded-lg px-2.5 py-2 text-left text-xs font-semibold transition ${
+                          active
+                            ? 'bg-teal-500/20 text-white'
+                            : 'text-teal-50/90 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {content.appointmentRequestEnabled ? (
@@ -296,7 +315,7 @@ export function HospitalLanding({
             )}
             <button
               type="button"
-              className="rounded-lg p-2 text-teal-100/90 transition hover:bg-white/10 hover:text-white xl:hidden"
+              className="rounded-lg p-2 text-teal-100/90 transition hover:bg-white/10 hover:text-white lg:hidden"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-expanded={mobileOpen}
               aria-label="Menu"
@@ -307,7 +326,7 @@ export function HospitalLanding({
         </div>
 
         {mobileOpen ? (
-          <div className="border-t border-white/10 bg-[#0c1816]/98 px-2.5 py-2.5 shadow-xl shadow-black/40 backdrop-blur-xl sm:px-4 xl:hidden">
+          <div className="border-t border-white/10 bg-[#0c1816]/98 px-2.5 py-2.5 shadow-xl shadow-black/40 backdrop-blur-xl sm:px-4 lg:hidden">
             <div className="flex flex-col gap-0.5 text-sm">
               {content.appointmentRequestEnabled ? (
                 <Link

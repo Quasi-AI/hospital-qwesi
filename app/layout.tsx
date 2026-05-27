@@ -6,8 +6,13 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "AI Doctor - Practice Management System",
-  description: "Comprehensive AI-powered practice management software for healthcare professionals",
+  title: "Qwesi AI Virtual Hospital",
+  description: "AI-powered virtual hospital and healthcare management platform",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

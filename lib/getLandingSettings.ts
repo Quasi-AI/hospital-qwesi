@@ -1,6 +1,16 @@
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
 
+export const DEFAULT_HOSPITAL_NAME = 'Qwesi AI Virtual Hospital';
+
+export function normalizeHospitalName(value: unknown) {
+  const title = String(value || '').trim();
+  if (!title || title === 'AI Doctor' || title === 'AI Doc') {
+    return DEFAULT_HOSPITAL_NAME;
+  }
+  return title;
+}
+
 export type LandingSettingsSnapshot = {
   systemTitle: string;
   systemDescription: string;
@@ -25,7 +35,7 @@ export async function getLandingSettings(): Promise<LandingSettingsSnapshot> {
     if (!s) return null;
     const o = s as Record<string, unknown>;
     return {
-      systemTitle: String(o.systemTitle || ''),
+      systemTitle: normalizeHospitalName(o.systemTitle),
       systemDescription: String(o.systemDescription || ''),
       invoiceLogoUrl: String(o.invoiceLogoUrl || ''),
       address: (typeof o.address === 'object' && o.address !== null ? o.address : {}) as NonNullable<

@@ -70,7 +70,7 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  systemTitle: '',
+  systemTitle: 'Qwesi AI Virtual Hospital',
   systemDescription: 'Practice Management System',
   invoiceLogoUrl: '',
   currency: 'USD',
