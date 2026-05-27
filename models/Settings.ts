@@ -102,7 +102,7 @@ const settingsSchema = new mongoose.Schema<ISettings>(
     systemTitle: {
       type: String,
       required: true,
-      default: 'Qwesi AI Virtual Hospital',
+      default: '',
       trim: true,
     },
     systemDescription: {
