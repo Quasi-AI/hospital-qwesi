@@ -43,9 +43,16 @@ function dispatchRealtimeEvent(event: RealtimeEvent) {
 
 function showToast(event: RealtimeEvent) {
   if (event.type === 'notification.created') {
+    if (event.payload?.type === 'direct_message') return;
     const title = event.payload?.title || 'New notification';
     const message = event.payload?.message;
     toast(`${title}${message ? `\n${message}` : ''}`);
+  }
+
+  if (event.type === 'message.created') {
+    const senderName = event.payload?.senderName || 'New message';
+    const body = event.payload?.body;
+    toast(`${senderName}${body ? `\n${body}` : ''}`);
   }
 
   if (event.type === 'telemedicine.session.updated' && event.payload?.status === 'waiting') {

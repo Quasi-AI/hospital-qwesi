@@ -58,7 +58,7 @@ export async function GET() {
       .limit(100)
       .lean();
 
-    return NextResponse.json({ threads });
+    return NextResponse.json({ threads, current });
   } catch (error) {
     console.error('Messages fetch error:', error);
     return NextResponse.json({ error: 'Failed to load messages' }, { status: 500 });

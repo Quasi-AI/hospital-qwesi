@@ -155,6 +155,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     { id: 'appointment-slots', label: t('navigation.appointmentSlots'), icon: LayoutGrid, href: '/appointments/slots', roles: ['admin', 'doctor', 'staff'] },
     { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['admin', 'doctor', 'staff'] },
     { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'staff'] },
+    { id: 'clinical-notes', label: 'Notes', icon: ClipboardList, href: '/clinical-notes', roles: ['admin', 'doctor', 'staff'] },
     { 
       id: 'laboratory', 
       label: t('navigation.laboratory'), 
@@ -291,9 +292,9 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       href: '/analytical-reports', 
       roles: ['admin', 'doctor', 'staff'],
       children: [
-        { id: 'financial-reports', label: t('navigation.financialReports'), icon: DollarSign, href: '/analytical-reports/financial', roles: ['admin', 'staff'] },
+        { id: 'financial-reports', label: t('navigation.financialReports'), icon: DollarSign, href: '/analytical-reports/financial', roles: ['admin', 'doctor', 'staff'] },
         { id: 'clinical-analytics', label: t('navigation.clinicalAnalytics'), icon: Activity, href: '/analytical-reports/clinical', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'operational-analytics', label: t('navigation.operationalAnalytics'), icon: LineChart, href: '/analytical-reports/operational', roles: ['admin', 'staff'] },
+        { id: 'operational-analytics', label: t('navigation.operationalAnalytics'), icon: LineChart, href: '/analytical-reports/operational', roles: ['admin', 'doctor', 'staff'] },
         { id: 'performance-reports', label: t('navigation.performanceReports'), icon: Target, href: '/analytical-reports/performance', roles: ['admin', 'doctor'] },
         { id: 'patient-analytics', label: t('navigation.patientAnalytics'), icon: Users, href: '/analytical-reports/patient', roles: ['admin', 'doctor', 'staff'] },
         { id: 'appointment-analytics', label: t('navigation.appointmentAnalytics'), icon: Calendar, href: '/analytical-reports/appointment', roles: ['admin', 'doctor', 'staff'] }
@@ -308,7 +309,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       children: [
         { id: 'billing-home', label: t('billing.title'), icon: Receipt, href: '/billing', roles: ['admin', 'doctor', 'staff'] },
         { id: 'billing-new', label: t('billing.addNewInvoice'), icon: Plus, href: '/billing/invoices/new', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'service-items', label: t('navigation.serviceItems'), icon: List, href: '/billing/service-items', roles: ['admin', 'staff'] }
+        { id: 'service-items', label: t('navigation.serviceItems'), icon: List, href: '/billing/service-items', roles: ['admin', 'doctor', 'staff'] }
       ]
     },
     { id: 'notifications', label: t('navigation.notifications') || 'Notifications', icon: Bell, href: '/notifications', roles: ['admin', 'doctor', 'staff'] },
