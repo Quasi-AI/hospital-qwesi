@@ -42,9 +42,11 @@ export default function DashboardTopToolbar({ compact = false }: Props) {
       if (document.visibilityState === 'visible') fetchUnread();
     };
     document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('qwesi:notifications-changed', fetchUnread);
     return () => {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('qwesi:notifications-changed', fetchUnread);
     };
   }, [fetchUnread]);
 
@@ -155,4 +157,3 @@ export default function DashboardTopToolbar({ compact = false }: Props) {
     </div>
   );
 }
-

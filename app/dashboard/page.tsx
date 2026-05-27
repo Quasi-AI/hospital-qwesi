@@ -63,6 +63,7 @@ interface OperationalStats {
   billing: {
     pendingInvoices: number;
     todayRevenue: number;
+    monthlyRevenue: number;
   };
   laboratory: {
     pending: number;
@@ -204,6 +205,10 @@ export default function DashboardPage() {
             case 'todayRevenue':
               icon = DollarSign;
               color = 'emerald';
+              break;
+            case 'monthlyRevenue':
+              icon = TrendingUp;
+              color = 'cyan';
               break;
             default:
               icon = Activity;
@@ -347,9 +352,9 @@ export default function DashboardPage() {
           )}
 
           {/* Primary Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, index) => (
+              Array.from({ length: 5 }).map((_, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-sm p-3.5 animate-pulse border border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -375,6 +380,7 @@ export default function DashboardPage() {
                     href = '/reports';
                     break;
                   case 'todayRevenue':
+                  case 'monthlyRevenue':
                     href = '/billing';
                     break;
                 }

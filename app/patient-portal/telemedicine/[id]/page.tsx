@@ -140,8 +140,12 @@ export default function PatientTelemedicineSessionPage() {
   useEffect(() => {
     fetchSession();
     const messageInterval = setInterval(pollMessages, 3000);
+    window.addEventListener('qwesi:telemedicine-chat-changed', pollMessages);
+    window.addEventListener('qwesi:sessions-changed', fetchSession);
     return () => {
       clearInterval(messageInterval);
+      window.removeEventListener('qwesi:telemedicine-chat-changed', pollMessages);
+      window.removeEventListener('qwesi:sessions-changed', fetchSession);
       if (callTimerRef.current) {
         clearInterval(callTimerRef.current);
       }

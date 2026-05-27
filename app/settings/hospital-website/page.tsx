@@ -102,6 +102,7 @@ export default function HospitalWebsiteCMSPage() {
         { id: 'cms-about', label: t('settings.hospitalWebsiteSectionAbout') },
         { id: 'cms-stats', label: t('settings.hospitalWebsiteSectionStats') },
         { id: 'cms-services', label: t('settings.hospitalWebsiteSectionServices') },
+        { id: 'cms-subscriptions', label: 'Subscriptions' },
         { id: 'cms-departments', label: t('settings.hospitalWebsiteSectionDepartments') },
         { id: 'cms-providers', label: 'Providers' },
         { id: 'cms-care-journey', label: t('settings.hospitalWebsiteSectionCareJourney') },
@@ -197,6 +198,19 @@ export default function HospitalWebsiteCMSPage() {
       const arr = [...(prev.providers ?? [])];
       arr[index] = { ...arr[index], [field]: val };
       return { ...prev, providers: arr };
+    });
+  };
+
+  const updateSubscription = (
+    index: number,
+    field: 'name' | 'price' | 'cadence' | 'description' | 'benefits',
+    val: string | string[]
+  ) => {
+    setForm((prev) => {
+      if (!prev) return prev;
+      const arr = [...(prev.subscriptions ?? [])];
+      arr[index] = { ...arr[index], [field]: val };
+      return { ...prev, subscriptions: arr };
     });
   };
 
@@ -708,6 +722,58 @@ export default function HospitalWebsiteCMSPage() {
                         label={`Service ${i + 1} description`}
                         value={s.description}
                         onChange={(x) => updatePair('services', i, 'description', x)}
+                        multiline
+                      />
+                    </div>
+                  ))}
+                </SectionCard>
+                ) : null}
+
+                {activeSection === 'cms-subscriptions' ? (
+                <SectionCard
+                  id="cms-subscriptions"
+                  title="Subscriptions"
+                  description="Three public plan cards. Payment is intentionally a placeholder for now."
+                >
+                  <Field
+                    label="Eyebrow"
+                    value={form.subscriptionsEyebrow}
+                    onChange={(v) => update({ subscriptionsEyebrow: v })}
+                  />
+                  <Field
+                    label="Section title"
+                    value={form.subscriptionsTitle}
+                    onChange={(v) => update({ subscriptionsTitle: v })}
+                  />
+                  <Field
+                    label="Section subtitle"
+                    value={form.subscriptionsSubtitle}
+                    onChange={(v) => update({ subscriptionsSubtitle: v })}
+                    multiline
+                  />
+                  {(form.subscriptions ?? []).slice(0, 3).map((plan, i) => (
+                    <div key={i} className="space-y-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                      <div className="grid gap-3 md:grid-cols-3">
+                        <Field label={`Plan ${i + 1} name`} value={plan.name} onChange={(v) => updateSubscription(i, 'name', v)} />
+                        <Field label="Price" value={plan.price} onChange={(v) => updateSubscription(i, 'price', v)} />
+                        <Field label="Cadence" value={plan.cadence} onChange={(v) => updateSubscription(i, 'cadence', v)} />
+                      </div>
+                      <Field
+                        label="Description"
+                        value={plan.description}
+                        onChange={(v) => updateSubscription(i, 'description', v)}
+                        multiline
+                      />
+                      <Field
+                        label="Benefits (one per line)"
+                        value={(plan.benefits || []).join('\n')}
+                        onChange={(v) =>
+                          updateSubscription(
+                            i,
+                            'benefits',
+                            v.split('\n').map((line) => line.trim()).filter(Boolean)
+                          )
+                        }
                         multiline
                       />
                     </div>

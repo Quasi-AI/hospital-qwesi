@@ -39,11 +39,32 @@ async function getEmailConfig(): Promise<EmailConfig | null> {
   await dbConnect();
   const settings = await Settings.findOne({});
   
-  if (!settings?.notificationProviders?.email) {
-    return null;
+  if (settings?.notificationProviders?.email?.enabled) {
+    return settings.notificationProviders.email as EmailConfig;
+  }
+
+  const envHost = process.env.SMTP_HOST;
+  const envUser = process.env.SMTP_USERNAME;
+  const envPass = process.env.SMTP_PASSWORD;
+  const envFrom = process.env.SMTP_FROM_EMAIL || envUser;
+
+  if (envHost && envUser && envPass && envFrom) {
+    return {
+      provider: 'smtp',
+      enabled: true,
+      smtp: {
+        host: envHost,
+        port: Number(process.env.SMTP_PORT || 465),
+        secure: (process.env.SMTP_SECURE || 'true').toLowerCase() === 'true',
+        username: envUser,
+        password: envPass,
+        fromEmail: envFrom,
+        fromName: process.env.SMTP_FROM_NAME || settings?.systemTitle || 'Qwesi Virtual Hospital',
+      },
+    };
   }
   
-  return settings.notificationProviders.email as EmailConfig;
+  return settings?.notificationProviders?.email ? (settings.notificationProviders.email as EmailConfig) : null;
 }
 
 export async function sendEmail(options: EmailOptions): Promise<EmailResult> {

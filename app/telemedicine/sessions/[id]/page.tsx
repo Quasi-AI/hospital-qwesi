@@ -100,7 +100,7 @@ export default function SessionDetailPage() {
   const [newSymptom, setNewSymptom] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  const fetchSession = async () => {
+  const fetchSession = useCallback(async () => {
     try {
       const res = await fetch(`/api/telemedicine/sessions/${sessionId}`);
       if (!res.ok) throw new Error('Failed to fetch session');
@@ -111,7 +111,7 @@ export default function SessionDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
 
   const pollMessages = useCallback(async () => {
     try {
@@ -141,11 +141,15 @@ export default function SessionDetailPage() {
     fetchSession();
     
     const messageInterval = setInterval(pollMessages, 3000);
+    window.addEventListener('qwesi:telemedicine-chat-changed', pollMessages);
+    window.addEventListener('qwesi:sessions-changed', fetchSession);
     
     return () => {
       clearInterval(messageInterval);
+      window.removeEventListener('qwesi:telemedicine-chat-changed', pollMessages);
+      window.removeEventListener('qwesi:sessions-changed', fetchSession);
     };
-  }, [sessionId, pollMessages]);
+  }, [sessionId, fetchSession, pollMessages]);
 
   useEffect(() => {
     if (searchParams.get('start') === 'true' && session && !isCallActive) {

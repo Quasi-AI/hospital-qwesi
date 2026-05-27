@@ -59,6 +59,17 @@ const ProviderSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const SubscriptionPlanSchema = new mongoose.Schema(
+  {
+    name: { type: String, default: '' },
+    price: { type: String, default: '' },
+    cadence: { type: String, default: '' },
+    description: { type: String, default: '' },
+    benefits: { type: [String], default: [] },
+  },
+  { _id: false }
+);
+
 const TrustPillarSchema = new mongoose.Schema(
   {
     title: { type: String, default: '' },
@@ -133,6 +144,11 @@ const websiteContentSchema = new mongoose.Schema(
     providersTitle: { type: String, default: '' },
     providersSubtitle: { type: String, default: '' },
     providers: { type: [ProviderSchema], default: [] },
+
+    subscriptionsEyebrow: { type: String, default: '' },
+    subscriptionsTitle: { type: String, default: '' },
+    subscriptionsSubtitle: { type: String, default: '' },
+    subscriptions: { type: [SubscriptionPlanSchema], default: [] },
 
     faqEyebrow: { type: String, default: '' },
     faqTitle: { type: String, default: '' },

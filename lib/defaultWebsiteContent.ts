@@ -7,6 +7,7 @@ export type WebsiteVisitRow = { label: string; value: string };
 export type WebsiteFaqItem = { question: string; answer: string };
 export type WebsiteTestimonial = { quote: string; author: string; role: string };
 export type WebsiteProvider = { name: string; role: string; bio: string; imageUrl: string };
+export type WebsiteSubscriptionPlan = { name: string; price: string; cadence: string; description: string; benefits: string[] };
 /** Trust pillars band under announcement */
 export type WebsiteTrustPillar = { title: string; subtitle: string };
 /** Care journey steps (icons are assigned by order on the public site) */
@@ -75,6 +76,11 @@ export interface WebsiteContentData {
   providersTitle: string;
   providersSubtitle: string;
   providers: WebsiteProvider[];
+
+  subscriptionsEyebrow: string;
+  subscriptionsTitle: string;
+  subscriptionsSubtitle: string;
+  subscriptions: WebsiteSubscriptionPlan[];
 
   faqEyebrow: string;
   faqTitle: string;
@@ -276,6 +282,33 @@ export const defaultWebsiteContent: WebsiteContentData = {
       role: 'Senior Nursing Lead',
       bio: 'Coordinates nursing standards, patient education, and compassionate ward care across clinical teams.',
       imageUrl: '',
+    },
+  ],
+  subscriptionsEyebrow: 'Membership plans',
+  subscriptionsTitle: 'Care subscriptions',
+  subscriptionsSubtitle:
+    'Flexible monthly care options for routine follow-up, family coordination, and priority virtual support. Payment integration can be connected later.',
+  subscriptions: [
+    {
+      name: 'Basic Care',
+      price: 'GHS 99',
+      cadence: 'per month',
+      description: 'For patients who need simple access and reminders.',
+      benefits: ['Patient portal access', 'Appointment reminders', 'Basic record sharing', 'Monthly care summary'],
+    },
+    {
+      name: 'Family Plus',
+      price: 'GHS 249',
+      cadence: 'per month',
+      description: 'For ongoing care coordination and faster virtual support.',
+      benefits: ['Priority telemedicine requests', 'Family/caregiver updates with consent', 'Medication follow-up', 'Care coordinator support'],
+    },
+    {
+      name: 'Chronic Care',
+      price: 'GHS 399',
+      cadence: 'per month',
+      description: 'For patients managing long-term conditions.',
+      benefits: ['Monthly doctor review', 'Vitals monitoring review', 'Lab/imaging coordination', 'Escalation guidance for warning signs'],
     },
   ],
   faqEyebrow: 'FAQ',

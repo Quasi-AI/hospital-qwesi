@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from '../../hooks/useTranslations';
 import {
@@ -37,21 +37,23 @@ export default function PatientTelemedicinePage() {
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'completed'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const res = await fetch('/api/patient-portal/telemedicine');
-        const data = await res.json();
-        setSessions(data.sessions || []);
-      } catch (error) {
-        console.error('Error fetching telemedicine sessions:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSessions();
+  const fetchSessions = useCallback(async () => {
+    try {
+      const res = await fetch('/api/patient-portal/telemedicine');
+      const data = await res.json();
+      setSessions(data.sessions || []);
+    } catch (error) {
+      console.error('Error fetching telemedicine sessions:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchSessions();
+    window.addEventListener('qwesi:sessions-changed', fetchSessions);
+    return () => window.removeEventListener('qwesi:sessions-changed', fetchSessions);
+  }, [fetchSessions]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

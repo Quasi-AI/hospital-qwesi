@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Video,
@@ -39,13 +39,7 @@ export default function WaitingRoomPage() {
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
-  useEffect(() => {
-    fetchWaitingSessions();
-    const interval = setInterval(fetchWaitingSessions, 10000); // Refresh every 10 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchWaitingSessions = async () => {
+  const fetchWaitingSessions = useCallback(async () => {
     try {
       const res = await fetch('/api/telemedicine/sessions?status=waiting&limit=50');
       if (res.ok) {
@@ -58,7 +52,17 @@ export default function WaitingRoomPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchWaitingSessions();
+    const interval = setInterval(fetchWaitingSessions, 10000); // Refresh every 10 seconds
+    window.addEventListener('qwesi:sessions-changed', fetchWaitingSessions);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('qwesi:sessions-changed', fetchWaitingSessions);
+    };
+  }, [fetchWaitingSessions]);
 
   const getConsultationIcon = (type: string) => {
     switch (type) {

@@ -4,12 +4,14 @@ import { SessionProvider } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import RealtimeListener from './components/realtime-listener';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <LanguageProvider>
         <SettingsProvider>
+          <RealtimeListener />
           {children}
           <Toaster 
             position="top-right"

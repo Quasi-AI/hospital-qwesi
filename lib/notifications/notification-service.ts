@@ -8,6 +8,7 @@ import Patient from '@/models/Patient';
 import { sendEmail } from './email-provider';
 import { sendSMS } from './sms-provider';
 import { getTemplate, TemplateData } from './templates';
+import { emitRealtimeEvent, notificationTargets } from '@/lib/realtime';
 
 export interface CreateNotificationOptions {
   type: INotification['type'];
@@ -203,12 +204,31 @@ export async function sendNotification(notificationId: string): Promise<Notifica
       newStatus = 'failed';
     }
     
-    await Notification.findByIdAndUpdate(notificationId, {
+    const updatedNotification = await Notification.findByIdAndUpdate(notificationId, {
       status: newStatus,
       deliveryStatus,
       sentAt: hasSuccess ? new Date() : undefined,
       retryCount: hasFailure ? notification.retryCount + 1 : notification.retryCount,
-    });
+    }, { new: true }).lean();
+
+    if (updatedNotification?.channels?.includes('in_app')) {
+      await emitRealtimeEvent({
+        type: 'notification.created',
+        targets: notificationTargets(updatedNotification),
+        payload: {
+          _id: String(updatedNotification._id),
+          type: updatedNotification.type,
+          title: updatedNotification.title,
+          message: updatedNotification.message,
+          status: updatedNotification.status,
+          priority: updatedNotification.priority,
+          recipientId: updatedNotification.recipientId,
+          recipientType: updatedNotification.recipientType,
+          relatedEntity: updatedNotification.relatedEntity,
+          createdAt: updatedNotification.createdAt,
+        },
+      });
+    }
     
     return {
       success: hasSuccess,
@@ -231,8 +251,22 @@ export async function markAsRead(notificationId: string, userId: string): Promis
     
     const result = await Notification.findOneAndUpdate(
       { _id: notificationId, recipientId: userId },
-      { status: 'read', readAt: new Date() }
-    );
+      { status: 'read', readAt: new Date() },
+      { new: true }
+    ).lean();
+
+    if (result) {
+      await emitRealtimeEvent({
+        type: 'notification.updated',
+        targets: notificationTargets(result),
+        payload: {
+          _id: String(result._id),
+          status: result.status,
+          recipientId: result.recipientId,
+          recipientType: result.recipientType,
+        },
+      });
+    }
     
     return !!result;
   } catch (error) {

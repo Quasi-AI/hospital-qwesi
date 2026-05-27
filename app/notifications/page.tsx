@@ -7,6 +7,7 @@ import {
   RefreshCw,
   Mail,
   MessageSquare,
+  MessageCircle,
   CheckCircle,
   XCircle,
   Clock,
@@ -67,6 +68,8 @@ const TYPE_ICONS: Record<string, any> = {
   medication_reminder: Pill,
   follow_up: Stethoscope,
   system: Bell,
+  direct_message: MessageSquare,
+  telemedicine: MessageCircle,
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -76,6 +79,8 @@ const TYPE_COLORS: Record<string, string> = {
   medication_reminder: 'bg-green-100 text-green-800',
   follow_up: 'bg-cyan-100 text-cyan-800',
   system: 'bg-gray-100 text-gray-800',
+  direct_message: 'bg-indigo-100 text-indigo-800',
+  telemedicine: 'bg-teal-100 text-teal-800',
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -125,6 +130,8 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     fetchNotifications();
+    window.addEventListener('qwesi:notifications-changed', fetchNotifications);
+    return () => window.removeEventListener('qwesi:notifications-changed', fetchNotifications);
   }, [fetchNotifications]);
 
   const handleMarkAsRead = async (id: string) => {
@@ -293,6 +300,8 @@ export default function NotificationsPage() {
                 <option value="payment_due">Payment Due</option>
                 <option value="medication_reminder">Medication Reminder</option>
                 <option value="follow_up">Follow-up</option>
+                <option value="direct_message">Direct Message</option>
+                <option value="telemedicine">Telemedicine</option>
                 <option value="system">System</option>
               </select>
               <select

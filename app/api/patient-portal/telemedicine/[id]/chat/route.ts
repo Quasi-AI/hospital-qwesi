@@ -4,6 +4,9 @@ import { authOptions } from '../../../../auth/[...nextauth]/route';
 import dbConnect from '../../../../../../lib/mongodb';
 import TelemedicineSession from '../../../../../../models/TelemedicineSession';
 import Patient from '../../../../../../models/Patient';
+import User from '../../../../../../models/User';
+import { createNotification } from '@/lib/notifications/notification-service';
+import { emitRealtimeEvent } from '@/lib/realtime';
 
 export async function GET(
   request: NextRequest,
@@ -152,6 +155,37 @@ export async function POST(
     const savedMessage = telemedicineSession.chatMessages[
       telemedicineSession.chatMessages.length - 1
     ];
+
+    const doctor = await User.findById(telemedicineSession.doctorId).select('name email phone').lean();
+
+    await emitRealtimeEvent({
+      type: 'telemedicine.chat.created',
+      targets: [
+        `patient:${String(patient._id)}`,
+        patient.patientId ? `patient:${patient.patientId}` : '',
+        `user:${String(telemedicineSession.doctorId)}`,
+      ].filter(Boolean),
+      payload: {
+        sessionId: id,
+        sessionNumber: telemedicineSession.sessionNumber,
+        message: savedMessage,
+      },
+    });
+
+    if (doctor) {
+      await createNotification({
+        type: 'telemedicine',
+        recipientId: String(doctor._id),
+        recipientType: 'user',
+        recipientEmail: doctor.email,
+        recipientPhone: doctor.phone,
+        title: `New telemedicine message from ${patient.name}`,
+        message: newMessage.message,
+        priority: 'normal',
+        relatedEntity: { type: 'telemedicineSession', id },
+        metadata: { sessionId: id, sessionNumber: telemedicineSession.sessionNumber },
+      });
+    }
 
     return NextResponse.json({ message: savedMessage });
   } catch (error) {

@@ -5,8 +5,9 @@ import { authOptions } from '../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Appointment from '@/models/Appointment';
 import TelemedicineSession from '@/models/TelemedicineSession';
-import { scheduleAppointmentReminder } from '@/lib/notifications/notification-service';
+import { createNotification, scheduleAppointmentReminder } from '@/lib/notifications/notification-service';
 import { getSystemCurrency } from '@/lib/getSystemCurrency';
+import { emitRealtimeEvent } from '@/lib/realtime';
 import {
   normalizeAppointmentDateForStorage,
   normalizeTimeLabel,
@@ -326,6 +327,50 @@ export async function POST(request: NextRequest) {
           });
 
           await telemedicineSession.save();
+
+          await emitRealtimeEvent({
+            type: 'telemedicine.session.created',
+            targets: [
+              'role:admin',
+              'role:staff',
+              `user:${String(doctor._id)}`,
+              `patient:${String(patient._id)}`,
+              patient.patientId ? `patient:${patient.patientId}` : '',
+            ].filter(Boolean),
+            payload: {
+              sessionId: String(telemedicineSession._id),
+              sessionNumber: telemedicineSession.sessionNumber,
+              status: telemedicineSession.status,
+              patientName: patient.name,
+              doctorName: doctor.name,
+              scheduledStartTime: appointmentDateTime,
+            },
+          });
+
+          await Promise.all([
+            createNotification({
+              type: 'telemedicine',
+              recipientId: String(doctor._id),
+              recipientType: 'user',
+              recipientEmail: doctor.email,
+              recipientPhone: doctor.phone,
+              title: 'New telemedicine session scheduled',
+              message: `${patient.name} is scheduled for ${appointmentDateTime.toLocaleString()}.`,
+              relatedEntity: { type: 'telemedicineSession', id: String(telemedicineSession._id) },
+              metadata: { sessionId: String(telemedicineSession._id), sessionNumber: telemedicineSession.sessionNumber },
+            }),
+            createNotification({
+              type: 'telemedicine',
+              recipientId: String(patient._id),
+              recipientType: 'patient',
+              recipientEmail: patient.email,
+              recipientPhone: patient.phone,
+              title: 'Telemedicine session scheduled',
+              message: `Your session with Dr. ${doctor.name} is scheduled for ${appointmentDateTime.toLocaleString()}.`,
+              relatedEntity: { type: 'telemedicineSession', id: String(telemedicineSession._id) },
+              metadata: { sessionId: String(telemedicineSession._id), sessionNumber: telemedicineSession.sessionNumber },
+            }),
+          ]);
 
           if (collection) {
             await collection.updateOne(

@@ -33,6 +33,7 @@ import {
   Wind,
   HeartHandshake,
   HelpCircle,
+  CheckCircle,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import type { WebsiteContentData } from '@/lib/defaultWebsiteContent';
@@ -842,6 +843,55 @@ export function HospitalLanding({
             </div>
           </div>
         </section>
+
+        {/* Subscriptions */}
+        {content.subscriptions?.length ? (
+          <section id="subscriptions" className="scroll-mt-16 border-t border-slate-200/80 bg-white">
+            <div className={LANDING_SECTION_SHELL}>
+              <SectionHeader
+                title={content.subscriptionsTitle}
+                subtitle={content.subscriptionsSubtitle}
+                eyebrow={content.subscriptionsEyebrow?.trim() || undefined}
+                centered
+                phoneDefaultCountry={phoneDefaultCountry}
+              />
+              <div className="grid gap-3 md:grid-cols-3">
+                {content.subscriptions.slice(0, 3).map((plan, i) => (
+                  <div
+                    key={i}
+                    className="flex h-full flex-col rounded-xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm ring-1 ring-slate-900/[0.02]"
+                  >
+                    <div className="min-h-[8rem]">
+                      <p className="text-sm font-semibold text-teal-700">{plan.name}</p>
+                      <div className="mt-2 flex items-end gap-1">
+                        <span className="text-2xl font-bold tracking-tight text-slate-950">{plan.price}</span>
+                        {plan.cadence ? <span className="pb-1 text-xs font-medium text-slate-500">{plan.cadence}</span> : null}
+                      </div>
+                      <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                        <AutoLinkText text={plan.description} phoneDefaultCountry={phoneDefaultCountry} linkClassName={linkOnSlateBody} />
+                      </p>
+                    </div>
+                    <ul className="mt-4 space-y-2 border-t border-slate-200 pt-4">
+                      {(plan.benefits || []).filter(Boolean).slice(0, 6).map((benefit, benefitIndex) => (
+                        <li key={benefitIndex} className="flex gap-2 text-sm leading-relaxed text-slate-700">
+                          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-teal-600" aria-hidden />
+                          <span>{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      type="button"
+                      className="mt-5 inline-flex h-10 items-center justify-center rounded-md border border-teal-200 bg-white px-3 text-sm font-semibold text-teal-800 shadow-sm"
+                      disabled
+                    >
+                      Payment coming soon
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {/* Departments */}
         <section id="departments" className={`scroll-mt-16`}>

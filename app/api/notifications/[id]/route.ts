@@ -4,6 +4,7 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/Notification';
 import { sendNotification, markAsRead } from '@/lib/notifications/notification-service';
+import { emitRealtimeEvent, notificationTargets } from '@/lib/realtime';
 
 export async function GET(
   request: NextRequest,
@@ -81,6 +82,13 @@ export async function PUT(
         { status: 'sent', readAt: null },
         { returnDocument: 'after' }
       );
+      if (updated) {
+        await emitRealtimeEvent({
+          type: 'notification.updated',
+          targets: notificationTargets(updated),
+          payload: { _id: String(updated._id), status: updated.status },
+        });
+      }
       return NextResponse.json(updated);
     }
 
@@ -104,6 +112,13 @@ export async function PUT(
     }
 
     const updated = await Notification.findByIdAndUpdate(id, body, { returnDocument: 'after' });
+    if (updated) {
+      await emitRealtimeEvent({
+        type: 'notification.updated',
+        targets: notificationTargets(updated),
+        payload: { _id: String(updated._id), status: updated.status },
+      });
+    }
     return NextResponse.json(updated);
   } catch (error: any) {
     console.error('PUT notification error:', error);
@@ -137,6 +152,12 @@ export async function DELETE(
     if (!notification) {
       return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
     }
+
+    await emitRealtimeEvent({
+      type: 'notification.deleted',
+      targets: notificationTargets(notification),
+      payload: { _id: String(notification._id) },
+    });
 
     return NextResponse.json({ message: 'Notification deleted successfully' });
   } catch (error: any) {

@@ -7,6 +7,8 @@ import Patient from '@/models/Patient';
 import User from '@/models/User';
 import Appointment from '@/models/Appointment';
 import { getSystemCurrency } from '@/lib/getSystemCurrency';
+import { createNotification } from '@/lib/notifications/notification-service';
+import { emitRealtimeEvent } from '@/lib/realtime';
 
 // GET - List all telemedicine sessions with filters
 export async function GET(request: NextRequest) {
@@ -264,6 +266,54 @@ export async function POST(request: NextRequest) {
       .populate('patientId', 'name email phone patientId')
       .populate({ path: 'doctorId', model: User, select: 'name email specialization' })
       .lean();
+
+    const sessionTargets = [
+      'role:admin',
+      'role:staff',
+      `user:${String(doctor._id)}`,
+      `patient:${String(patient._id)}`,
+      patient.patientId ? `patient:${patient.patientId}` : '',
+    ].filter(Boolean);
+
+    await emitRealtimeEvent({
+      type: 'telemedicine.session.created',
+      targets: sessionTargets,
+      payload: {
+        sessionId: String(telemedicineSession._id),
+        sessionNumber,
+        status: telemedicineSession.status,
+        patientName: patient.name,
+        doctorName: doctor.name,
+        scheduledStartTime,
+      },
+    });
+
+    await Promise.all([
+      createNotification({
+        type: 'telemedicine',
+        recipientId: String(doctor._id),
+        recipientType: 'user',
+        recipientEmail: doctor.email,
+        recipientPhone: doctor.phone,
+        title: 'New telemedicine session scheduled',
+        message: `${patient.name} is scheduled for ${scheduledStartTime.toLocaleString()}.`,
+        priority: 'normal',
+        relatedEntity: { type: 'telemedicineSession', id: String(telemedicineSession._id) },
+        metadata: { sessionId: String(telemedicineSession._id), sessionNumber },
+      }),
+      createNotification({
+        type: 'telemedicine',
+        recipientId: String(patient._id),
+        recipientType: 'patient',
+        recipientEmail: patient.email,
+        recipientPhone: patient.phone,
+        title: 'Telemedicine session scheduled',
+        message: `Your session with Dr. ${doctor.name} is scheduled for ${scheduledStartTime.toLocaleString()}.`,
+        priority: 'normal',
+        relatedEntity: { type: 'telemedicineSession', id: String(telemedicineSession._id) },
+        metadata: { sessionId: String(telemedicineSession._id), sessionNumber },
+      }),
+    ]);
 
     return NextResponse.json(populatedSession, { status: 201 });
   } catch (error) {

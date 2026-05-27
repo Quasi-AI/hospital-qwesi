@@ -407,11 +407,11 @@ export default function NewPatientPage() {
                       className="w-full rounded-md border border-gray-300 py-1.5 pl-9 pr-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <p className="mt-1 text-xs text-gray-500">This email will be used for patient login if a password is set</p>
+                  <p className="mt-1 text-xs text-gray-500">This email will receive the patient portal login details.</p>
                 </div>
                 <div>
                   <label htmlFor="password" className="mb-1 block text-xs font-medium text-gray-700 sm:text-sm">
-                    Password {formData.password && <span className="text-red-500">*</span>}
+                    Temporary password
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -421,15 +421,15 @@ export default function NewPatientPage() {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      placeholder="Leave blank if patient won't have login access"
+                      placeholder="Leave blank to generate and email one"
                       minLength={6}
                       className="w-full rounded-md border border-gray-300 py-1.5 pl-9 pr-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
-                    {formData.password 
-                      ? 'Password must be at least 6 characters. A user account will be created for this patient.'
-                      : 'Optional: Set a password to create a user account for patient portal access'
+                    {formData.password
+                      ? 'Password must be at least 6 characters. The patient will receive it by email.'
+                      : 'A temporary password will be generated and emailed to the patient.'
                     }
                   </p>
                 </div>

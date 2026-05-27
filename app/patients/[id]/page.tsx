@@ -35,7 +35,8 @@ import {
   Siren,
   Bed,
   Video,
-  Truck
+  Truck,
+  ClipboardList
 } from 'lucide-react';
 import ProtectedRoute from '../../protected-route';
 import SidebarLayout from '../../components/sidebar-layout';
@@ -441,6 +442,14 @@ export default function PatientViewPage() {
                   <Plus className="h-4 w-4 text-amber-600 shrink-0" />
                   <FilePlus className="h-4 w-4 text-amber-500 shrink-0" />
                   Document
+                </Link>
+                <Link
+                  href={`/patients/${patient._id}/notes`}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition-colors hover:bg-blue-50/80 hover:border-blue-300 sm:text-sm"
+                >
+                  <Plus className="h-4 w-4 text-blue-600 shrink-0" />
+                  <ClipboardList className="h-4 w-4 text-blue-500 shrink-0" />
+                  SOAP note
                 </Link>
                 <Link
                   href={`/emergency/new?patientId=${patient._id}`}

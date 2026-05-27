@@ -3,6 +3,8 @@ import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
+import { generateTemporaryPassword } from '@/lib/temporaryPassword';
+import { sendCredentialEmail } from '@/lib/notifications/credential-email';
 
 export async function GET() {
   try {
@@ -43,12 +45,14 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // Handle password if provided (for patient login)
-    if (body.password && body.password.trim()) {
-      // Hash the password before storing
-      const hashedPassword = await bcrypt.hash(body.password, 12);
-      cleanedData.password = hashedPassword;
+    const temporaryPassword = body.password?.trim() || generateTemporaryPassword();
+    if (temporaryPassword.length < 6) {
+      return NextResponse.json({
+        error: 'Patient validation failed',
+        details: 'Password must be at least 6 characters long',
+      }, { status: 400 });
     }
+    cleanedData.password = await bcrypt.hash(temporaryPassword, 12);
     if (body.address && body.address.trim()) {
       cleanedData.address = body.address.trim();
     }
@@ -115,46 +119,43 @@ export async function POST(request: NextRequest) {
     
     await patient.save();
     
-    // If password was provided, create a User account for patient login
-    if (body.password && body.password.trim()) {
-      try {
-        // Check if user already exists with this email
-        const existingUser = await User.findOne({ email: body.email.toLowerCase() });
-        if (existingUser) {
-          // Update existing user to patient role if needed
-          if (existingUser.role !== 'patient') {
-            existingUser.role = 'patient';
-            if (body.password && body.password.trim()) {
-              existingUser.password = await bcrypt.hash(body.password, 12);
-            }
-            await existingUser.save();
-          }
-        } else {
-          // Create new user account for patient
-          const hashedPassword = await bcrypt.hash(body.password, 12);
-          const user = new User({
-            email: body.email.toLowerCase(),
-            name: body.name,
-            password: hashedPassword,
-            role: 'patient'
-          });
-          await user.save();
+    let credentialEmail: any = null;
+    try {
+      const existingUser = await User.findOne({ email: body.email.toLowerCase() });
+      if (existingUser) {
+        if (existingUser.role !== 'patient') {
+          existingUser.role = 'patient';
         }
-      } catch (userError: any) {
-        console.error('Error creating user account for patient:', userError);
-        // If user creation fails due to duplicate email, return error
-        if (userError.code === 11000) {
-          return NextResponse.json({ 
-            error: 'User account creation failed',
-            details: 'A user account with this email already exists'
-          }, { status: 400 });
-        }
-        // For other errors, log but don't fail patient creation
-        console.warn('User account creation failed, but patient was created:', userError.message);
+        existingUser.password = await bcrypt.hash(temporaryPassword, 12);
+        existingUser.name = body.name;
+        await existingUser.save();
+      } else {
+        const user = new User({
+          email: body.email.toLowerCase(),
+          name: body.name,
+          password: await bcrypt.hash(temporaryPassword, 12),
+          role: 'patient'
+        });
+        await user.save();
       }
+      credentialEmail = await sendCredentialEmail({
+        to: body.email.toLowerCase(),
+        name: body.name,
+        role: 'patient',
+        password: temporaryPassword,
+      });
+    } catch (userError: any) {
+      console.error('Error creating user account for patient:', userError);
+      if (userError.code === 11000) {
+        return NextResponse.json({
+          error: 'User account creation failed',
+          details: 'A user account with this email already exists'
+        }, { status: 400 });
+      }
+      console.warn('User account creation failed, but patient was created:', userError.message);
     }
     
-    return NextResponse.json(patient, { status: 201 });
+    return NextResponse.json({ ...patient.toObject(), credentialEmail }, { status: 201 });
   } catch (error: any) {
     console.error('Error creating patient:', error);
     

@@ -4,6 +4,9 @@ import { authOptions } from '../../../auth/[...nextauth]/route';
 import dbConnect from '../../../../../lib/mongodb';
 import TelemedicineSession from '../../../../../models/TelemedicineSession';
 import Patient from '../../../../../models/Patient';
+import User from '../../../../../models/User';
+import { createNotification } from '@/lib/notifications/notification-service';
+import { emitRealtimeEvent } from '@/lib/realtime';
 
 export async function GET(
   request: NextRequest,
@@ -164,6 +167,40 @@ export async function PUT(
     const populatedSession = await TelemedicineSession.findById(id)
       .populate('patientId', 'name email phone patientId')
       .populate('doctorId', 'name email specialization profilePhoto');
+
+    const doctor = await User.findById(telemedicineSession.doctorId).select('name email phone').lean();
+    await emitRealtimeEvent({
+      type: 'telemedicine.session.updated',
+      targets: [
+        'role:admin',
+        'role:staff',
+        `patient:${String(patient._id)}`,
+        patient.patientId ? `patient:${patient.patientId}` : '',
+        `user:${String(telemedicineSession.doctorId)}`,
+      ].filter(Boolean),
+      payload: {
+        sessionId: id,
+        sessionNumber: telemedicineSession.sessionNumber,
+        status: telemedicineSession.status,
+        action: data.action,
+        patientName: patient.name,
+      },
+    });
+
+    if (data.action === 'join' && doctor) {
+      await createNotification({
+        type: 'telemedicine',
+        recipientId: String(doctor._id),
+        recipientType: 'user',
+        recipientEmail: doctor.email,
+        recipientPhone: doctor.phone,
+        title: 'Patient is waiting',
+        message: `${patient.name} has joined ${telemedicineSession.sessionNumber} and is waiting.`,
+        priority: 'high',
+        relatedEntity: { type: 'telemedicineSession', id },
+        metadata: { sessionId: id, sessionNumber: telemedicineSession.sessionNumber },
+      });
+    }
 
     return NextResponse.json(populatedSession);
   } catch (error) {

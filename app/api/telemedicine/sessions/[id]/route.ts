@@ -4,8 +4,9 @@ import { authOptions } from '../../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import TelemedicineSession from '@/models/TelemedicineSession';
 import User from '@/models/User';
-import MedicalReport from '@/models/MedicalReport';
 import Appointment from '@/models/Appointment';
+import { createNotification } from '@/lib/notifications/notification-service';
+import { emitRealtimeEvent } from '@/lib/realtime';
 
 // GET - Get single telemedicine session
 export async function GET(
@@ -82,9 +83,11 @@ export async function PUT(
     }
 
     // Handle status changes
+    let oldStatus = telemedicineSession.status;
+    let statusChanged = false;
     if (data.status) {
-      const oldStatus = telemedicineSession.status;
       const newStatus = data.status;
+      statusChanged = oldStatus !== newStatus;
 
       // Start session
       if (newStatus === 'in-progress' && oldStatus !== 'in-progress') {
@@ -156,6 +159,67 @@ export async function PUT(
       .populate('appointmentId', 'appointmentNumber')
       .lean();
 
+    if (populatedSession) {
+      const patient = (populatedSession as any).patientId;
+      const doctor = (populatedSession as any).doctorId;
+      const sessionTargets = [
+        'role:admin',
+        'role:staff',
+        doctor?._id ? `user:${String(doctor._id)}` : '',
+        patient?._id ? `patient:${String(patient._id)}` : '',
+        patient?.patientId ? `patient:${patient.patientId}` : '',
+      ].filter(Boolean);
+
+      await emitRealtimeEvent({
+        type: 'telemedicine.session.updated',
+        targets: sessionTargets,
+        payload: {
+          sessionId: String((populatedSession as any)._id),
+          sessionNumber: (populatedSession as any).sessionNumber,
+          status: (populatedSession as any).status,
+          oldStatus,
+        },
+      });
+
+      if (statusChanged) {
+        const title = `Telemedicine session ${String((populatedSession as any).status).replace('-', ' ')}`;
+        const message = `Session ${(populatedSession as any).sessionNumber} changed from ${oldStatus} to ${(populatedSession as any).status}.`;
+        const actorId = session.user.id;
+        const notifications = [];
+
+        if (doctor?._id && String(doctor._id) !== actorId) {
+          notifications.push(createNotification({
+            type: 'telemedicine',
+            recipientId: String(doctor._id),
+            recipientType: 'user',
+            recipientEmail: doctor.email,
+            title,
+            message,
+            priority: (populatedSession as any).status === 'waiting' ? 'high' : 'normal',
+            relatedEntity: { type: 'telemedicineSession', id: String((populatedSession as any)._id) },
+            metadata: { sessionId: String((populatedSession as any)._id) },
+          }));
+        }
+
+        if (patient?._id && String(patient._id) !== actorId) {
+          notifications.push(createNotification({
+            type: 'telemedicine',
+            recipientId: String(patient._id),
+            recipientType: 'patient',
+            recipientEmail: patient.email,
+            recipientPhone: patient.phone,
+            title,
+            message,
+            priority: 'normal',
+            relatedEntity: { type: 'telemedicineSession', id: String((populatedSession as any)._id) },
+            metadata: { sessionId: String((populatedSession as any)._id) },
+          }));
+        }
+
+        await Promise.all(notifications);
+      }
+    }
+
     return NextResponse.json(populatedSession);
   } catch (error) {
     console.error('Error updating telemedicine session:', error);
@@ -206,6 +270,17 @@ export async function DELETE(
     if (appointmentId) {
       await Appointment.findByIdAndUpdate(appointmentId, { $unset: { telemedicineSessionId: 1 } });
     }
+
+    await emitRealtimeEvent({
+      type: 'telemedicine.session.deleted',
+      targets: [
+        'role:admin',
+        'role:staff',
+        `user:${String((telemedicineSession.doctorId as any)?._id || telemedicineSession.doctorId)}`,
+        `patient:${String((telemedicineSession as any).patientId)}`,
+      ],
+      payload: { sessionId: id, sessionNumber: telemedicineSession.sessionNumber },
+    });
 
     return NextResponse.json({ message: 'Session deleted successfully' });
   } catch (error) {

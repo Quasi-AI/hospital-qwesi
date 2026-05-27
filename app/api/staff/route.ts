@@ -4,6 +4,8 @@ import { authOptions } from '../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
+import { generateTemporaryPassword } from '@/lib/temporaryPassword';
+import { sendCredentialEmail } from '@/lib/notifications/credential-email';
 
 export async function GET(request: NextRequest) {
   try {
@@ -50,11 +52,13 @@ export async function POST(request: NextRequest) {
 
     const { name, email, password, role } = await request.json();
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: 'Name, email, and password are required' }, { status: 400 });
+    if (!name || !email) {
+      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
     }
 
-    if (password.length < 6) {
+    const temporaryPassword = password?.trim() || generateTemporaryPassword();
+
+    if (temporaryPassword.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 });
     }
 
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(temporaryPassword, 12);
 
     // Create new user with staff role
     const newUser = new User({
@@ -79,13 +83,21 @@ export async function POST(request: NextRequest) {
 
     await newUser.save();
 
+    const credentialEmail = await sendCredentialEmail({
+      to: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
+      password: temporaryPassword,
+    });
+
     // Return user without password
     const userResponse = newUser.toObject();
     delete userResponse.password;
 
     return NextResponse.json({ 
       message: 'Staff member created successfully',
-      user: userResponse
+      user: userResponse,
+      credentialEmail,
     });
 
   } catch (error) {

@@ -11,16 +11,18 @@
     "seed": "tsx scripts/seed-db.ts",
     "fix-admin": "tsx scripts/fix-admin-account.ts",
     "test:ai-results": "tsx scripts/test-ai-results.ts",
+    "realtime": "tsx servers/realtime-server.ts",
     "servers": "tsx servers/index.ts",
     "servers:hl7": "tsx servers/hl7-server.ts",
     "servers:astm": "tsx servers/astm-server.ts",
-    "dev:all": "concurrently \"npm run dev\" \"npm run servers\""
+    "dev:all": "concurrently \"npm run dev\" \"npm run realtime\" \"npm run servers\""
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.10.0",
     "@sendgrid/mail": "^8.1.6",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^7.0.10",
+    "@types/ws": "^8.18.1",
     "bcryptjs": "^3.0.2",
     "cookies-next": "^6.1.0",
     "dicom-parser": "^1.8.21",
@@ -39,7 +41,8 @@
     "react-dom": "19.2.1",
     "react-hot-toast": "^2.6.0",
     "recharts": "^3.7.0",
-    "twilio": "^5.12.1"
+    "twilio": "^5.12.1",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^0.1.0",

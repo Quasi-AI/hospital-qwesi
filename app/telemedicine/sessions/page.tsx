@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -60,11 +60,7 @@ function SessionsListContent() {
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchSessions();
-  }, [page, statusFilter, typeFilter, dateFilter]);
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -94,7 +90,13 @@ function SessionsListContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter, typeFilter, dateFilter]);
+
+  useEffect(() => {
+    fetchSessions();
+    window.addEventListener('qwesi:sessions-changed', fetchSessions);
+    return () => window.removeEventListener('qwesi:sessions-changed', fetchSessions);
+  }, [fetchSessions]);
 
   const getConsultationIcon = (type: string) => {
     switch (type) {

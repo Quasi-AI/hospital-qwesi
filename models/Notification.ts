@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export interface INotification {
   _id: string;
-  type: 'appointment_reminder' | 'lab_result' | 'payment_due' | 'medication_reminder' | 'follow_up' | 'system';
+  type: 'appointment_reminder' | 'lab_result' | 'payment_due' | 'medication_reminder' | 'follow_up' | 'system' | 'direct_message' | 'telemedicine';
   recipientId: string;
   recipientType: 'user' | 'patient';
   recipientEmail?: string;
@@ -47,7 +47,7 @@ const notificationSchema = new mongoose.Schema<INotification>(
     type: {
       type: String,
       required: true,
-      enum: ['appointment_reminder', 'lab_result', 'payment_due', 'medication_reminder', 'follow_up', 'system'],
+      enum: ['appointment_reminder', 'lab_result', 'payment_due', 'medication_reminder', 'follow_up', 'system', 'direct_message', 'telemedicine'],
     },
     recipientId: {
       type: String,

@@ -3,6 +3,7 @@ export const PUBLIC_LANDING_NAV_ITEMS = [
   ['highlights', 'Highlights'],
   ['about', 'About'],
   ['services', 'Services'],
+  ['subscriptions', 'Plans'],
   ['departments', 'Departments'],
   ['providers', 'Providers'],
   ['visit', 'Visit'],

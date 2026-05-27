@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useCallback, useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -101,6 +101,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileProfileMenuOpen, setMobileProfileMenuOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState<number | null>(null);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -111,6 +112,27 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   const mobileProfileMenuRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = session?.user?.role === 'admin';
+
+  const fetchUnreadNotifications = useCallback(async () => {
+    try {
+      const res = await fetch('/api/notifications/unread-count');
+      if (!res.ok) {
+        setUnreadNotifications(0);
+        return;
+      }
+      const data = await res.json();
+      setUnreadNotifications(typeof data.count === 'number' ? data.count : 0);
+    } catch {
+      setUnreadNotifications(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    fetchUnreadNotifications();
+    window.addEventListener('qwesi:notifications-changed', fetchUnreadNotifications);
+    return () => window.removeEventListener('qwesi:notifications-changed', fetchUnreadNotifications);
+  }, [fetchUnreadNotifications, session?.user?.id]);
 
   const toggleSubmenu = (menuId: string) => {
     setExpandedMenus(prev => {
@@ -132,6 +154,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor', 'staff'] },
     { id: 'appointment-slots', label: t('navigation.appointmentSlots'), icon: LayoutGrid, href: '/appointments/slots', roles: ['admin', 'doctor', 'staff'] },
     { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['admin', 'doctor', 'staff'] },
+    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'staff'] },
     { 
       id: 'laboratory', 
       label: t('navigation.laboratory'), 
@@ -731,9 +754,19 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
               <Menu className="h-6 w-6" />
             </button>
             <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600">
+              <Link
+                href="/notifications"
+                className="relative p-2 text-gray-400 hover:text-gray-600"
+                aria-label="Notifications"
+                title="Notifications"
+              >
                 <Bell className="h-5 w-5" />
-              </button>
+                {unreadNotifications !== null && unreadNotifications > 0 && (
+                  <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold leading-none text-white">
+                    {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                  </span>
+                )}
+              </Link>
               <LanguageSwitcher />
               <div className="relative" ref={mobileProfileMenuRef}>
                 <button

@@ -29,9 +29,10 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-    const startOfLastMonth = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), lastMonth.getDate());
-    const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startOfLastMonth = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
+    const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     
     // Date for expiring items (next 30 days)
     const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -61,6 +62,8 @@ export async function GET(request: NextRequest) {
       
       // Billing stats
       todayRevenue,
+      monthlyRevenue,
+      previousMonthlyRevenue,
       pendingInvoices,
       
       // Lab stats
@@ -117,6 +120,14 @@ export async function GET(request: NextRequest) {
       // Billing - Today's revenue
       Invoice.aggregate([
         { $match: { status: 'paid', updatedAt: { $gte: startOfToday, $lt: endOfToday } } },
+        { $group: { _id: null, total: { $sum: '$total' } } }
+      ]),
+      Invoice.aggregate([
+        { $match: { status: 'paid', updatedAt: { $gte: startOfMonth, $lt: endOfToday } } },
+        { $group: { _id: null, total: { $sum: '$total' } } }
+      ]),
+      Invoice.aggregate([
+        { $match: { status: 'paid', updatedAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } } },
         { $group: { _id: null, total: { $sum: '$total' } } }
       ]),
       Invoice.countDocuments({ status: { $in: ['pending', 'partial'] } }),
@@ -188,6 +199,12 @@ export async function GET(request: NextRequest) {
         value: formatCurrencyAmount(todayRevenue[0]?.total || 0, systemCurrency),
         change: '+0%',
         changeType: 'neutral'
+      },
+      {
+        name: 'monthlyRevenue',
+        value: formatCurrencyAmount(monthlyRevenue[0]?.total || 0, systemCurrency),
+        change: calculateChange(monthlyRevenue[0]?.total || 0, previousMonthlyRevenue[0]?.total || 0),
+        changeType: (monthlyRevenue[0]?.total || 0) >= (previousMonthlyRevenue[0]?.total || 0) ? 'positive' : 'negative'
       }
     ];
 
@@ -205,7 +222,8 @@ export async function GET(request: NextRequest) {
       },
       billing: {
         pendingInvoices,
-        todayRevenue: todayRevenue[0]?.total || 0
+        todayRevenue: todayRevenue[0]?.total || 0,
+        monthlyRevenue: monthlyRevenue[0]?.total || 0
       },
       laboratory: {
         pending: pendingLabTests,

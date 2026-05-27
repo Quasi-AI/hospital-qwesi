@@ -21,7 +21,8 @@ import {
   Heart,
   Stethoscope,
   Video,
-  Activity
+  Activity,
+  MessageCircle
 } from 'lucide-react';
 
 interface PatientPortalLayoutProps {
@@ -53,7 +54,9 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     { id: 'dashboard', label: t('patientPortal.navigation.dashboard'), icon: Home, href: '/patient-portal' },
     { id: 'appointments', label: t('patientPortal.navigation.appointments'), icon: Calendar, href: '/patient-portal/appointments' },
     { id: 'telemedicine', label: t('patientPortal.navigation.telemedicine') || 'Video Consultations', icon: Video, href: '/patient-portal/telemedicine' },
+    { id: 'doctors', label: 'My Doctors', icon: Stethoscope, href: '/patient-portal/doctors' },
     { id: 'vitals', label: 'Vitals', icon: Activity, href: '/patient-portal/vitals' },
+    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/patient-portal/messages' },
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard, href: '/patient-portal/subscriptions' },
     { id: 'reports', label: t('patientPortal.navigation.reports'), icon: FileText, href: '/patient-portal/reports' },
     { id: 'ai-insights', label: t('patientPortal.navigation.aiInsights'), icon: Stethoscope, href: '/patient-portal/ai-insights' },
