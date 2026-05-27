@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
+import FormattedAIResult from '../components/FormattedAIResult';
 import { useTranslations } from '../hooks/useTranslations';
 import { aiService } from '../../lib/ai-service';
 import { aiConfigManager } from '../../lib/ai-config';
@@ -511,9 +512,7 @@ export default function AIHealthAnalyticsPage() {
                 ) : aiInsights ? (
                   <div className="rounded-md border border-purple-200 bg-purple-50 p-3">
                     <h4 className="mb-2 text-xs font-semibold text-purple-900 sm:text-sm">{t('ai.healthAnalytics.aiAnalysisResults')}</h4>
-                    <div className="whitespace-pre-wrap text-xs leading-relaxed text-purple-800 sm:text-sm">
-                      {aiInsights}
-                    </div>
+                    <FormattedAIResult content={aiInsights} type="health-analytics" />
                   </div>
                 ) : (
                   <div className="py-8 text-center text-xs text-gray-500 sm:text-sm">
@@ -566,9 +565,7 @@ export default function AIHealthAnalyticsPage() {
               ) : aiPredictions ? (
                 <div className="rounded-md border border-purple-200 bg-purple-50 p-3">
                   <h4 className="mb-2 text-xs font-semibold text-purple-900 sm:text-sm">{t('ai.healthAnalytics.aiPredictions')}</h4>
-                  <div className="whitespace-pre-wrap text-xs leading-relaxed text-purple-800 sm:text-sm">
-                    {aiPredictions}
-                  </div>
+                  <FormattedAIResult content={aiPredictions} type="health-predictions" />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -694,9 +691,7 @@ export default function AIHealthAnalyticsPage() {
               ) : aiOptimizations ? (
                 <div className="rounded-md border border-purple-200 bg-purple-50 p-3">
                   <h4 className="mb-2 text-xs font-semibold text-purple-900 sm:text-sm">{t('ai.healthAnalytics.aiOptimizationRecommendations')}</h4>
-                  <div className="whitespace-pre-wrap text-xs leading-relaxed text-purple-800 sm:text-sm">
-                    {aiOptimizations}
-                  </div>
+                  <FormattedAIResult content={aiOptimizations} type="health-optimization" />
                 </div>
               ) : (
                 <div className="rounded-lg border border-gray-100 bg-white p-3 shadow-sm">

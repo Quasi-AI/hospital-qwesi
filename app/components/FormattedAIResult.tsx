@@ -8,6 +8,25 @@ interface FormattedAIResultProps {
 }
 
 export default function FormattedAIResult({ content, type }: FormattedAIResultProps) {
+  const renderInline = (text: string) =>
+    text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <span key={index} className="font-semibold text-gray-900">
+            {part.slice(2, -2)}
+          </span>
+        );
+      }
+
+      return <span key={index}>{part}</span>;
+    });
+
+  const stripMarkdown = (text: string) =>
+    text
+      .replace(/^#{1,6}\s*/, '')
+      .replace(/\*\*/g, '')
+      .trim();
+
   // Parse the content into sections
   const parseContent = (text: string) => {
     const sections: any[] = [];
@@ -18,16 +37,16 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
       const trimmed = line.trim();
       
       // Patient Summary
-      if (trimmed.includes('**Patient Summary:**') || trimmed.includes('Patient Summary:')) {
+      if (/^\*{0,2}Patient Summary:\*{0,2}$/i.test(trimmed) || /^#{1,6}\s*Patient Summary:?/i.test(trimmed)) {
         if (currentSection) sections.push(currentSection);
         currentSection = { type: 'summary', title: 'Patient Summary', items: [] };
         return;
       }
 
-      // Section headers (### or **)
-      if (trimmed.startsWith('###') || (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length > 5)) {
+      // Markdown section headers (#, ##, ###...) or bold-only headings
+      if (/^#{1,6}\s+\S/.test(trimmed) || (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length > 5)) {
         if (currentSection) sections.push(currentSection);
-        const title = trimmed.replace(/^###\s*/, '').replace(/\*\*/g, '').trim();
+        const title = stripMarkdown(trimmed).replace(/:$/, '');
         currentSection = { type: 'section', title, content: [] };
         return;
       }
@@ -53,13 +72,13 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
         return;
       }
 
-      // Lists (starting with - or *)
-      if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+      // Lists (starting with -, *, or numbered items)
+      if (/^[-*]\s+/.test(trimmed) || /^\d+[.)]\s+/.test(trimmed)) {
         if (!currentSection) {
           currentSection = { type: 'list', items: [] };
         }
         if (currentSection.type === 'list' || currentSection.type === 'section') {
-          const item = trimmed.replace(/^[-*]\s*/, '').replace(/\*\*/g, '').trim();
+          const item = trimmed.replace(/^[-*]\s*/, '').replace(/^\d+[.)]\s*/, '').trim();
           if (item) {
             if (!currentSection.items) currentSection.items = [];
             currentSection.items.push(item);
@@ -75,17 +94,17 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
         }
         if (currentSection.type === 'section' || currentSection.type === 'paragraph') {
           if (!currentSection.content) currentSection.content = [];
-          const cleanLine = trimmed.replace(/\*\*/g, '').trim();
+          const cleanLine = trimmed.trim();
           if (cleanLine) {
             currentSection.content.push(cleanLine);
           }
         } else if (currentSection.type === 'summary') {
-          const cleanLine = trimmed.replace(/\*\*/g, '').trim();
+          const cleanLine = trimmed.trim();
           if (cleanLine && !cleanLine.startsWith('-')) {
             currentSection.items.push(cleanLine);
           }
         } else if (currentSection.type === 'risk') {
-          const cleanLine = trimmed.replace(/\*\*/g, '').trim();
+          const cleanLine = trimmed.trim();
           if (cleanLine) {
             currentSection.items.push(cleanLine);
           }
@@ -127,11 +146,11 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
                   <div key={i} className="text-sm text-blue-800">
                     {item.includes(':') ? (
                       <>
-                        <span className="font-semibold">{item.split(':')[0]}:</span>
-                        <span className="ml-2">{item.split(':').slice(1).join(':')}</span>
+                        <span className="font-semibold">{stripMarkdown(item.split(':')[0])}:</span>
+                        <span className="ml-2">{renderInline(item.split(':').slice(1).join(':').trim())}</span>
                       </>
                     ) : (
-                      item
+                      renderInline(stripMarkdown(item))
                     )}
                   </div>
                 ))}
@@ -197,11 +216,7 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
                       }`}
                     >
                       <div className="text-sm whitespace-pre-line">
-                        {item.split('**').map((part: string, j: number) => (
-                          <span key={j} className={j % 2 === 1 ? 'font-semibold' : ''}>
-                            {part}
-                          </span>
-                        ))}
+                        {renderInline(item)}
                       </div>
                     </div>
                   );
@@ -230,22 +245,14 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
               <div className="space-y-2">
                 {section.content.map((line: string, i: number) => (
                   <div key={i} className="text-sm text-gray-700">
-                    {line.split('**').map((part: string, j: number) => (
-                      <span key={j} className={j % 2 === 1 ? 'font-semibold text-gray-900' : ''}>
-                        {part}
-                      </span>
-                    ))}
+                    {renderInline(line)}
                   </div>
                 ))}
                 {section.items && section.items.length > 0 && (
-                  <ul className="list-disc list-inside space-y-1 mt-2">
+                  <ul className="list-disc space-y-1 pl-5 mt-2">
                     {section.items.map((item: string, i: number) => (
                       <li key={i} className="text-sm text-gray-700">
-                        {item.split('**').map((part: string, j: number) => (
-                          <span key={j} className={j % 2 === 1 ? 'font-semibold' : ''}>
-                            {part}
-                          </span>
-                        ))}
+                        {renderInline(item)}
                       </li>
                     ))}
                   </ul>
@@ -258,14 +265,10 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
         if (section.type === 'list') {
           return (
             <div key={index} className="border rounded-lg p-4">
-              <ul className="list-disc list-inside space-y-2">
+              <ul className="list-disc space-y-2 pl-5">
                 {section.items.map((item: string, i: number) => (
                   <li key={i} className="text-sm text-gray-700">
-                    {item.split('**').map((part: string, j: number) => (
-                      <span key={j} className={j % 2 === 1 ? 'font-semibold text-gray-900' : ''}>
-                        {part}
-                      </span>
-                    ))}
+                    {renderInline(item)}
                   </li>
                 ))}
               </ul>
@@ -278,11 +281,7 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
           <div key={index} className="text-sm text-gray-700 leading-relaxed">
             {section.content?.map((line: string, i: number) => (
               <div key={i} className="mb-2">
-                {line.split('**').map((part: string, j: number) => (
-                  <span key={j} className={j % 2 === 1 ? 'font-semibold text-gray-900' : ''}>
-                    {part}
-                  </span>
-                ))}
+                {renderInline(line)}
               </div>
             ))}
           </div>
@@ -291,4 +290,3 @@ export default function FormattedAIResult({ content, type }: FormattedAIResultPr
     </div>
   );
 }
-
