@@ -637,6 +637,59 @@ export default function PatientViewPage() {
                       <p className="text-sm text-gray-900">{patient.medicalHistory}</p>
                     </div>
                   )}
+
+          {/* Patient-entered vitals */}
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-gray-900">Patient-entered Vitals</h2>
+              {patient.vitalSigns?.length ? (
+                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                  {patient.vitalSigns.length} entries
+                </span>
+              ) : null}
+            </div>
+            {patient.vitalSigns?.length ? (
+              <div className="overflow-x-auto rounded-lg border border-gray-100">
+                <table className="min-w-full divide-y divide-gray-100 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Date</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">BP</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Pulse</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Temp</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Resp.</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">SpO2</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 bg-white">
+                    {patient.vitalSigns
+                      .slice()
+                      .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                      .slice(0, 10)
+                      .map((vital: any, index: number) => (
+                        <tr key={`${vital.timestamp}-${index}`} className="hover:bg-gray-50">
+                          <td className="whitespace-nowrap px-3 py-2 text-gray-900">
+                            {vital.timestamp ? new Date(vital.timestamp).toLocaleString() : 'N/A'}
+                          </td>
+                          <td className="px-3 py-2 text-gray-700">{vital.bloodPressure || '-'}</td>
+                          <td className="px-3 py-2 text-gray-700">{vital.pulse ? `${vital.pulse} bpm` : '-'}</td>
+                          <td className="px-3 py-2 text-gray-700">{vital.temperature ? `${vital.temperature} F` : '-'}</td>
+                          <td className="px-3 py-2 text-gray-700">{vital.respiratoryRate ? `${vital.respiratoryRate}/min` : '-'}</td>
+                          <td className="px-3 py-2 text-gray-700">{vital.oxygenSaturation ? `${vital.oxygenSaturation}%` : '-'}</td>
+                          <td className="max-w-xs px-3 py-2 text-gray-600">{vital.notes || '-'}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center">
+                <Heart className="mx-auto h-8 w-8 text-gray-300" />
+                <p className="mt-2 text-sm text-gray-500">No patient-entered vitals yet.</p>
+              </div>
+            )}
+          </div>
                 </div>
               </div>
             )}

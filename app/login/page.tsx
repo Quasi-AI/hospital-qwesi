@@ -171,6 +171,7 @@ export default function LoginPage() {
                     className="block w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                     placeholder={t('login.email')}
                     disabled={isLoading}
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
@@ -195,12 +196,14 @@ export default function LoginPage() {
                     className="block w-full rounded-md border border-gray-300 py-2 pl-9 pr-10 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                     placeholder={t('login.password')}
                     disabled={isLoading}
+                    suppressHydrationWarning
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-2.5"
                     disabled={isLoading}
+                    suppressHydrationWarning
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -244,6 +247,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={isLoading}
                 className="relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                suppressHydrationWarning
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">

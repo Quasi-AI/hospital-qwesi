@@ -20,7 +20,8 @@ import {
   Shield,
   Palette,
   ImageIcon,
-  CreditCard
+  CreditCard,
+  Users
 } from 'lucide-react';
 import { getCurrencySelectOptions } from '@/lib/currencies';
 
@@ -422,6 +423,14 @@ export default function SettingsPage() {
                     <CreditCard className="h-4 w-4 shrink-0" />
                     <span>Payments</span>
                   </button>
+
+                  <Link
+                    href="/settings/hospital-website?section=providers"
+                    className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    <Users className="h-4 w-4 shrink-0" />
+                    <span>Care team</span>
+                  </Link>
                 </nav>
               </div>
             </div>
@@ -842,6 +851,7 @@ export default function SettingsPage() {
                             name="paymentProviders.paystack.callbackUrl"
                             value={formData.paymentProviders?.paystack?.callbackUrl || ''}
                             onChange={handleInputChange}
+                            autoComplete="off"
                             placeholder="https://your-domain.com/patient-portal/subscriptions"
                             className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
@@ -857,6 +867,8 @@ export default function SettingsPage() {
                             name="paymentProviders.paystack.publicKey"
                             value={formData.paymentProviders?.paystack?.publicKey || ''}
                             onChange={handleInputChange}
+                            autoComplete="off"
+                            spellCheck={false}
                             placeholder="pk_live_..."
                             className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
@@ -872,6 +884,8 @@ export default function SettingsPage() {
                             name="paymentProviders.paystack.secretKey"
                             value={formData.paymentProviders?.paystack?.secretKey || ''}
                             onChange={handleInputChange}
+                            autoComplete="new-password"
+                            spellCheck={false}
                             placeholder="sk_live_..."
                             className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />

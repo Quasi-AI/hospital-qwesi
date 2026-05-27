@@ -6,6 +6,7 @@ export type WebsiteStat = { label: string; value: string };
 export type WebsiteVisitRow = { label: string; value: string };
 export type WebsiteFaqItem = { question: string; answer: string };
 export type WebsiteTestimonial = { quote: string; author: string; role: string };
+export type WebsiteProvider = { name: string; role: string; bio: string; imageUrl: string };
 /** Trust pillars band under announcement */
 export type WebsiteTrustPillar = { title: string; subtitle: string };
 /** Care journey steps (icons are assigned by order on the public site) */
@@ -69,6 +70,11 @@ export interface WebsiteContentData {
   testimonialsEyebrow: string;
   testimonialsTitle: string;
   testimonials: WebsiteTestimonial[];
+
+  providersEyebrow: string;
+  providersTitle: string;
+  providersSubtitle: string;
+  providers: WebsiteProvider[];
 
   faqEyebrow: string;
   faqTitle: string;
@@ -246,6 +252,30 @@ export const defaultWebsiteContent: WebsiteContentData = {
       quote: 'Clean facilities and kind nurses throughout my stay.',
       author: 'S. L.',
       role: 'Inpatient care',
+    },
+  ],
+  providersEyebrow: 'Care team',
+  providersTitle: 'Meet our providers',
+  providersSubtitle:
+    'Highlight the clinicians and care leaders patients may meet across your services. Edit names, photos, and bios from Admin settings.',
+  providers: [
+    {
+      name: 'Dr. Ama Mensah',
+      role: 'Consultant Physician',
+      bio: 'Leads coordinated care for adult medicine patients with a focus on clear communication and continuity after discharge.',
+      imageUrl: '',
+    },
+    {
+      name: 'Dr. Kojo Owusu',
+      role: 'Family Medicine',
+      bio: 'Supports preventive care, chronic disease follow-up, and timely referrals for patients and families.',
+      imageUrl: '',
+    },
+    {
+      name: 'Nurse Lead Efua Boateng',
+      role: 'Senior Nursing Lead',
+      bio: 'Coordinates nursing standards, patient education, and compassionate ward care across clinical teams.',
+      imageUrl: '',
     },
   ],
   faqEyebrow: 'FAQ',

@@ -49,6 +49,16 @@ const TestimonialSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const ProviderSchema = new mongoose.Schema(
+  {
+    name: { type: String, default: '' },
+    role: { type: String, default: '' },
+    bio: { type: String, default: '' },
+    imageUrl: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
 const TrustPillarSchema = new mongoose.Schema(
   {
     title: { type: String, default: '' },
@@ -118,6 +128,11 @@ const websiteContentSchema = new mongoose.Schema(
     testimonialsEyebrow: { type: String, default: '' },
     testimonialsTitle: { type: String, default: '' },
     testimonials: { type: [TestimonialSchema], default: [] },
+
+    providersEyebrow: { type: String, default: '' },
+    providersTitle: { type: String, default: '' },
+    providersSubtitle: { type: String, default: '' },
+    providers: { type: [ProviderSchema], default: [] },
 
     faqEyebrow: { type: String, default: '' },
     faqTitle: { type: String, default: '' },

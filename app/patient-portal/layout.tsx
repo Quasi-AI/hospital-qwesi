@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { useTranslations } from '../hooks/useTranslations';
-import { useSettings } from '../contexts/SettingsContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { 
   Home,
@@ -21,7 +20,8 @@ import {
   ChevronDown,
   Heart,
   Stethoscope,
-  Video
+  Video,
+  Activity
 } from 'lucide-react';
 
 interface PatientPortalLayoutProps {
@@ -36,7 +36,6 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   const router = useRouter();
   const { data: session, status } = useSession();
   const { t, translationsLoaded } = useTranslations();
-  const { settings } = useSettings();
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const mobileProfileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -54,12 +53,12 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     { id: 'dashboard', label: t('patientPortal.navigation.dashboard'), icon: Home, href: '/patient-portal' },
     { id: 'appointments', label: t('patientPortal.navigation.appointments'), icon: Calendar, href: '/patient-portal/appointments' },
     { id: 'telemedicine', label: t('patientPortal.navigation.telemedicine') || 'Video Consultations', icon: Video, href: '/patient-portal/telemedicine' },
+    { id: 'vitals', label: 'Vitals', icon: Activity, href: '/patient-portal/vitals' },
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard, href: '/patient-portal/subscriptions' },
     { id: 'reports', label: t('patientPortal.navigation.reports'), icon: FileText, href: '/patient-portal/reports' },
     { id: 'ai-insights', label: t('patientPortal.navigation.aiInsights'), icon: Stethoscope, href: '/patient-portal/ai-insights' },
     { id: 'prescriptions', label: t('patientPortal.navigation.prescriptions'), icon: Pill, href: '/patient-portal/prescriptions' },
     { id: 'medical-records', label: t('patientPortal.navigation.medicalRecords'), icon: ClipboardList, href: '/patient-portal/medical-records' },
-    { id: 'profile', label: t('patientPortal.navigation.profile'), icon: User, href: '/patient-portal/profile' },
   ];
 
   // Close profile menus when clicking outside
@@ -106,7 +105,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -117,7 +116,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 flex w-64 max-h-screen flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0
+        fixed inset-y-0 left-0 z-50 flex w-64 max-h-screen flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
@@ -140,27 +139,14 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
           </button>
         </div>
 
-        {/* Patient Info Card */}
-        <div className="shrink-0 border-b border-gray-200 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-2.5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-500 text-sm font-bold text-white">
-              {session?.user?.name?.charAt(0) || 'P'}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-gray-900">{session?.user?.name || 'Patient'}</p>
-              <p className="truncate text-xs text-teal-600">{session?.user?.patientId || 'Patient ID'}</p>
-            </div>
-          </div>
-        </div>
-
         {/* Navigation Menu */}
-        <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2.5 py-3">
           {navigation.map((item) => (
             <Link
               key={item.id}
               href={item.href}
               className={`
-                flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-all
+                flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all
                 ${isActiveRoute(item.href)
                   ? 'bg-teal-100 text-teal-700 shadow-sm'
                   : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700'
@@ -175,40 +161,72 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         </nav>
 
         {/* Language Switcher */}
-        <div className="shrink-0 border-t border-gray-200 px-2 py-2">
+        <div className="shrink-0 border-t border-gray-200 px-2.5 py-3">
           <div className="px-2">
             <LanguageSwitcher />
           </div>
         </div>
 
-        {/* Logout */}
-        <div className="shrink-0 border-t border-gray-200 px-2 py-2">
-          <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            <span>{t('profile.logout')}</span>
-          </button>
+        {/* User Profile */}
+        <div className="shrink-0 border-t border-gray-200 px-2.5 py-3">
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              className="flex w-full items-center gap-2.5 rounded-lg p-2 text-left transition-colors hover:bg-teal-50"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500 text-sm font-semibold text-white">
+                {session?.user?.name?.charAt(0) || 'P'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-gray-900">{session?.user?.name || 'Patient'}</p>
+                <p className="truncate text-xs text-teal-700">{session?.user?.patientId || session?.user?.role || 'Patient'}</p>
+              </div>
+              <ChevronDown className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {profileMenuOpen && (
+              <div className="absolute bottom-full left-0 right-0 z-50 mb-2 rounded-lg border border-gray-200 bg-white shadow-lg">
+                <div className="py-1">
+                  <div className="border-b border-gray-100 px-4 py-2">
+                    <p className="truncate text-sm font-medium text-gray-900">{session?.user?.name || 'Patient'}</p>
+                    <p className="truncate text-xs text-gray-500">{session?.user?.email}</p>
+                  </div>
+                  <Link
+                    href="/patient-portal/profile"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4" />
+                    <span>{t('patientPortal.navigation.profile')}</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      signOut({ callbackUrl: '/login' });
+                    }}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>{t('profile.logout')}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:ml-0">
-        {/* Top Header */}
-        <header className="border-b border-gray-200 bg-white shadow-sm">
+      <div className="flex min-h-screen flex-col lg:pl-64">
+        {/* Mobile Header */}
+        <header className="border-b border-gray-200 bg-white shadow-sm lg:hidden">
           <div className="flex h-12 items-center justify-between px-3 sm:px-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-1.5 text-gray-400 hover:text-gray-600 lg:hidden"
+              className="p-1.5 text-gray-400 hover:text-gray-600"
             >
               <Menu className="h-5 w-5" />
             </button>
-            
-            <div className="hidden items-center gap-2 lg:flex">
-              <Stethoscope className="h-4 w-4 text-teal-600" />
-              <span className="text-base font-semibold text-gray-800">{settings?.systemTitle || 'AI Doc'}</span>
-            </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
               <LanguageSwitcher />

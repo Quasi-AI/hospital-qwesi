@@ -21,20 +21,20 @@ export async function getMergedWebsiteContent(): Promise<WebsiteContentData> {
       if (v === undefined || v === null) return;
       if (Array.isArray(v)) {
         if (key === 'heroBullets') {
-          (merged as Record<string, unknown>)[key] = (v as unknown[])
+          (merged as unknown as Record<string, unknown>)[key] = (v as unknown[])
             .map((x) => String(x).trim())
             .filter(Boolean);
           return;
         }
-        if (v.length > 0) (merged as Record<string, unknown>)[key] = v;
+        if (v.length > 0) (merged as unknown as Record<string, unknown>)[key] = v;
         return;
       }
       if (typeof v === 'boolean') {
-        (merged as Record<string, unknown>)[key] = v;
+        (merged as unknown as Record<string, unknown>)[key] = v;
         return;
       }
       if (typeof v === 'string' && v.trim() !== '') {
-        (merged as Record<string, unknown>)[key] = v;
+        (merged as unknown as Record<string, unknown>)[key] = v;
       }
     });
     return merged;

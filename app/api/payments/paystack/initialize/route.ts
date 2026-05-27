@@ -7,6 +7,7 @@ import Settings from '@/models/Settings';
 import Patient from '@/models/Patient';
 import Invoice from '@/models/Invoice';
 import PaystackTransaction from '@/models/PaystackTransaction';
+import { getPaystackConfigError, getPaystackSettings } from '@/lib/paystackSettings';
 import {
   getQwesiPaygItem,
   getQwesiSubscriptionPlan,
@@ -33,10 +34,11 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
     const settings = await Settings.findOne().lean() as any;
-    const paystack = settings?.paymentProviders?.paystack;
+    const paystack = getPaystackSettings(settings);
 
-    if (!paystack?.enabled || !paystack?.secretKey) {
-      return NextResponse.json({ error: 'Paystack is not configured' }, { status: 400 });
+    const configError = getPaystackConfigError(paystack);
+    if (configError) {
+      return NextResponse.json({ error: configError }, { status: 400 });
     }
 
     let itemName = '';

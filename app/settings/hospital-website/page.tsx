@@ -11,6 +11,12 @@ import {
   Shield,
   LayoutList,
   ChevronRight,
+  Plus,
+  Trash2,
+  Upload,
+  ImageIcon,
+  ExternalLink,
+  Users,
 } from 'lucide-react';
 import ProtectedRoute from '@/app/protected-route';
 import SidebarLayout from '@/app/components/sidebar-layout';
@@ -30,17 +36,17 @@ function Field({
   multiline?: boolean;
   hint?: string;
 }) {
-  const cls =
-    'w-full px-2.5 py-1.5 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm';
+const cls =
+    'w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500';
   return (
     <div>
-      <label className="block text-[11px] font-medium text-gray-600 uppercase tracking-wide mb-1">{label}</label>
+      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-600">{label}</label>
       {multiline ? (
         <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={3} className={cls} />
       ) : (
         <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} />
       )}
-      {hint ? <p className="mt-0.5 text-[11px] text-gray-500 leading-snug">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-[11px] leading-snug text-slate-500">{hint}</p> : null}
     </div>
   );
 }
@@ -61,16 +67,19 @@ function SectionCard({
       id={id}
       role="tabpanel"
       aria-label={title}
-      className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden"
+      className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
     >
-      <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-3 py-2 sm:px-4">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        {description ? <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">{description}</p> : null}
+      <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+        <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+        {description ? <p className="mt-1 text-xs leading-relaxed text-slate-500">{description}</p> : null}
       </div>
-      <div className="p-3 sm:p-4 space-y-3">{children}</div>
+      <div className="space-y-4 p-4">{children}</div>
     </section>
   );
 }
+
+const PROVIDER_IMAGE_MAX_BYTES = 900 * 1024;
+const PROVIDER_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 
 export default function HospitalWebsiteCMSPage() {
   const { t, translationsLoaded } = useTranslations();
@@ -94,6 +103,7 @@ export default function HospitalWebsiteCMSPage() {
         { id: 'cms-stats', label: t('settings.hospitalWebsiteSectionStats') },
         { id: 'cms-services', label: t('settings.hospitalWebsiteSectionServices') },
         { id: 'cms-departments', label: t('settings.hospitalWebsiteSectionDepartments') },
+        { id: 'cms-providers', label: 'Providers' },
         { id: 'cms-care-journey', label: t('settings.hospitalWebsiteSectionCareJourney') },
         { id: 'cms-visit', label: t('settings.hospitalWebsiteSectionVisit') },
         { id: 'cms-testimonials', label: t('settings.hospitalWebsiteSectionTestimonials') },
@@ -119,6 +129,12 @@ export default function HospitalWebsiteCMSPage() {
         setJsonText(JSON.stringify(data, null, 2));
       })
       .catch(() => setMessage({ type: 'err', text: 'Failed to load' }));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'providers') {
+      setActiveSection('cms-providers');
+    }
   }, []);
 
   const update = (patch: Partial<WebsiteContentData>) => {
@@ -173,6 +189,57 @@ export default function HospitalWebsiteCMSPage() {
       arr[index] = { ...arr[index], [field]: val };
       return { ...prev, testimonials: arr };
     });
+  };
+
+  const updateProvider = (index: number, field: 'name' | 'role' | 'bio' | 'imageUrl', val: string) => {
+    setForm((prev) => {
+      if (!prev) return prev;
+      const arr = [...(prev.providers ?? [])];
+      arr[index] = { ...arr[index], [field]: val };
+      return { ...prev, providers: arr };
+    });
+  };
+
+  const addProvider = () => {
+    setForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            providers: [...(prev.providers ?? []), { name: '', role: '', bio: '', imageUrl: '' }],
+          }
+        : prev
+    );
+  };
+
+  const removeProvider = (index: number) => {
+    setForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            providers: (prev.providers ?? []).filter((_, i) => i !== index),
+          }
+        : prev
+    );
+  };
+
+  const handleProviderImageFile = (index: number, file: File | undefined) => {
+    if (!file) return;
+    if (!PROVIDER_IMAGE_TYPES.includes(file.type)) {
+      setMessage({ type: 'err', text: 'Provider photo must be PNG, JPG, GIF, or WebP.' });
+      return;
+    }
+    if (file.size > PROVIDER_IMAGE_MAX_BYTES) {
+      setMessage({ type: 'err', text: 'Provider photo must be smaller than 900 KB.' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateProvider(index, 'imageUrl', reader.result);
+        setMessage(null);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const updateTrustPillar = (index: number, field: 'title' | 'subtitle', val: string) => {
@@ -255,30 +322,57 @@ export default function HospitalWebsiteCMSPage() {
 
   return (
     <ProtectedRoute>
-      <SidebarLayout title={t('settings.hospitalWebsite')} description={t('settings.hospitalWebsiteDescription')} dense>
-        <div className="max-w-6xl mx-auto space-y-4">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <Link
-              href="/settings"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              {t('settings.title')}
-            </Link>
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >
-              <Globe className="h-4 w-4" />
-              {t('settings.hospitalWebsiteViewLive')}
-            </a>
-          </div>
+      <SidebarLayout title={t('settings.hospitalWebsite')} description={t('settings.hospitalWebsiteDescription')} dense wide>
+        <div className="space-y-4">
+          <section className="overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm">
+            <div className="grid gap-4 bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 p-5 text-white lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <div>
+                <Link
+                  href="/settings"
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-blue-100 transition hover:text-white"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  {t('settings.title')}
+                </Link>
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
+                    <Globe className="h-5 w-5 text-blue-100" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-blue-200">Website CMS</p>
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('settings.hospitalWebsite')}</h1>
+                  </div>
+                </div>
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-blue-50">
+                  Update homepage copy, appointment messaging, care team profiles, contact details, and footer content from one editor.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <a
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-10 items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  {t('settings.hospitalWebsiteViewLive')}
+                </a>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="inline-flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50 disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                  {saving ? t('settings.saving') : t('settings.save')}
+                </button>
+              </div>
+            </div>
+          </section>
 
           {message && (
             <div
-              className={`p-3 rounded-md text-sm ${
+              className={`rounded-lg border p-3 text-sm ${
                 message.type === 'ok'
                   ? 'bg-green-50 text-green-800 border border-green-200'
                   : 'bg-red-50 text-red-800 border border-red-200'
@@ -288,30 +382,38 @@ export default function HospitalWebsiteCMSPage() {
             </div>
           )}
 
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2.5 text-xs text-amber-900 leading-snug">
-            <Shield className="h-4 w-4 flex-shrink-0 mt-0.5" />
-            <p>{t('settings.hospitalWebsiteHint')}</p>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-gray-50/80 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <label className="flex items-center gap-2 text-xs text-gray-800 font-medium">
-              <input
-                type="checkbox"
-                checked={form.useSettingsContact}
-                onChange={(e) => update({ useSettingsContact: e.target.checked })}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              {t('settings.hospitalWebsiteUseContact')}
-            </label>
-            <div className="flex items-center gap-2 text-xs border-t sm:border-t-0 pt-2 sm:pt-0">
-              <span className="text-gray-500">{t('settings.hospitalWebsiteEditor')}</span>
-              <button
-                type="button"
-                onClick={() => setShowJson(!showJson)}
-                className="font-medium text-blue-600 hover:text-blue-800"
-              >
-                {showJson ? t('settings.hospitalWebsiteFormMode') : t('settings.hospitalWebsiteJsonMode')}
-              </button>
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
+              <div className="flex gap-2.5">
+                <Shield className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <p>{t('settings.hospitalWebsiteHint')}</p>
+              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="flex flex-col gap-3">
+                <label className="flex items-start justify-between gap-3 text-xs font-medium text-slate-800">
+                  <span>
+                    <span className="block font-semibold">Use settings contact</span>
+                    <span className="mt-0.5 block font-normal text-slate-500">{t('settings.hospitalWebsiteUseContact')}</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={form.useSettingsContact}
+                    onChange={(e) => update({ useSettingsContact: e.target.checked })}
+                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
+                <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs">
+                  <span className="font-semibold text-slate-700">{t('settings.hospitalWebsiteEditor')}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowJson(!showJson)}
+                    className="rounded-md bg-blue-50 px-2.5 py-1 font-semibold text-blue-700 hover:bg-blue-100"
+                  >
+                    {showJson ? t('settings.hospitalWebsiteFormMode') : t('settings.hospitalWebsiteJsonMode')}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -323,13 +425,13 @@ export default function HospitalWebsiteCMSPage() {
               spellCheck={false}
             />
           ) : (
-            <div className="lg:grid lg:grid-cols-[minmax(0,188px)_1fr] lg:gap-6 items-start">
-              <aside className="hidden lg:block sticky top-3 space-y-1.5 mb-0">
-                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1.5 mb-2">
+            <div className="space-y-4">
+              <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <p className="mb-3 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   <LayoutList className="h-3.5 w-3.5" />
                   {t('settings.hospitalWebsiteSectionNavHint')}
                 </p>
-                <nav className="space-y-0 border border-gray-200 rounded-lg bg-white p-1.5 shadow-sm" role="tablist" aria-label={t('settings.hospitalWebsiteSectionNavHint')}>
+                <div className="flex flex-wrap gap-1.5" role="tablist">
                   {navItems.map((item) => {
                     const selected = activeSection === item.id;
                     return (
@@ -340,36 +442,10 @@ export default function HospitalWebsiteCMSPage() {
                         aria-selected={selected}
                         aria-controls={item.id}
                         onClick={() => setActiveSection(item.id)}
-                        className={`w-full text-left flex items-center justify-between gap-1.5 rounded-md px-2 py-1.5 text-xs transition-colors ${
+                        className={`rounded-md border px-3 py-2 text-xs font-semibold leading-tight transition-colors ${
                           selected
-                            ? 'bg-blue-100 text-blue-900 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                      >
-                        <span className="truncate">{item.label}</span>
-                        <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 ${selected ? 'text-blue-600 opacity-80' : 'opacity-40'}`} aria-hidden />
-                      </button>
-                    );
-                  })}
-                </nav>
-              </aside>
-
-              <div className="min-w-0 space-y-4">
-                <div className="lg:hidden flex flex-wrap gap-1.5" role="tablist">
-                  {navItems.map((item) => {
-                    const selected = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={selected}
-                        aria-controls={item.id}
-                        onClick={() => setActiveSection(item.id)}
-                        className={`text-[11px] font-medium px-2 py-1 rounded-md border transition-colors leading-tight ${
-                          selected
-                            ? 'border-blue-500 bg-blue-50 text-blue-900'
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-blue-200 hover:bg-blue-50/50'
+                            ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/50'
                         }`}
                       >
                         {item.label}
@@ -377,6 +453,9 @@ export default function HospitalWebsiteCMSPage() {
                     );
                   })}
                 </div>
+              </div>
+
+              <div className="min-w-0 space-y-4">
 
                 {activeSection === 'cms-hero' ? (
                 <SectionCard id="cms-hero" title={t('settings.hospitalWebsiteSectionHero')}>
@@ -672,6 +751,166 @@ export default function HospitalWebsiteCMSPage() {
                       />
                     </div>
                   ))}
+                </SectionCard>
+                ) : null}
+
+                {activeSection === 'cms-providers' ? (
+                <SectionCard
+                  id="cms-providers"
+                  title="Featured providers"
+                  description="Shown on the public homepage with photo, role, and short bio."
+                >
+                  <Field
+                    label="Eyebrow"
+                    value={form.providersEyebrow}
+                    onChange={(v) => update({ providersEyebrow: v })}
+                  />
+                  <Field
+                    label="Section title"
+                    value={form.providersTitle}
+                    onChange={(v) => update({ providersTitle: v })}
+                  />
+                  <Field
+                    label="Section subtitle"
+                    value={form.providersSubtitle}
+                    onChange={(v) => update({ providersSubtitle: v })}
+                    multiline
+                  />
+                  {(form.providers ?? []).length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-blue-200 bg-blue-50/70 p-6 text-center">
+                      <Users className="mx-auto h-10 w-10 text-blue-400" />
+                      <h4 className="mt-3 text-base font-semibold text-blue-950">No providers added yet</h4>
+                      <p className="mx-auto mt-1 max-w-xl text-sm text-blue-800">
+                        Add a provider row to enter the person&apos;s name, role, bio, and photo for the homepage Care team section.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={addProvider}
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add provider
+                      </button>
+                    </div>
+                  ) : null}
+                  {(form.providers ?? []).map((provider, i) => (
+                    <div key={i} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Provider {i + 1}</p>
+                        <button
+                          type="button"
+                          onClick={() => removeProvider(i)}
+                          className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Remove
+                        </button>
+                      </div>
+                      <div className="grid gap-5 xl:grid-cols-[18rem_minmax(0,1fr)]">
+                        <div className="space-y-3">
+                          <div className="aspect-[4/3] overflow-hidden rounded-lg border border-slate-200 bg-white">
+                            {provider.imageUrl?.trim() ? (
+                              <img
+                                src={provider.imageUrl.trim()}
+                                alt={provider.name || `Provider ${i + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-slate-400">
+                                <ImageIcon className="h-8 w-8" />
+                                <span className="text-xs font-medium">No photo</span>
+                              </div>
+                            )}
+                          </div>
+                          <label className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-blue-200 bg-white px-3 text-xs font-semibold text-blue-700 hover:bg-blue-50">
+                            <Upload className="h-4 w-4" />
+                            Upload image
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/gif,image/webp"
+                              className="sr-only"
+                              onChange={(e) => {
+                                handleProviderImageFile(i, e.target.files?.[0]);
+                                e.target.value = '';
+                              }}
+                            />
+                          </label>
+                          {provider.imageUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => updateProvider(i, 'imageUrl', '')}
+                              className="w-full text-center text-xs font-medium text-red-600 hover:text-red-800"
+                            >
+                              Remove photo
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="space-y-4">
+                          <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
+                            <h4 className="text-sm font-semibold text-blue-950">Provider details</h4>
+                            <p className="mt-0.5 text-xs text-blue-800">
+                              Add the provider name, role, and bio shown in the Care team section.
+                            </p>
+                          </div>
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <Field
+                              label="Provider name"
+                              value={provider.name}
+                              onChange={(x) => updateProvider(i, 'name', x)}
+                            />
+                            <Field
+                              label="Role or specialty"
+                              value={provider.role}
+                              onChange={(x) => updateProvider(i, 'role', x)}
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                              Photo URL or uploaded image
+                            </label>
+                            <input
+                              type="text"
+                              value={
+                                provider.imageUrl?.startsWith('data:image/')
+                                  ? 'Uploaded image stored with this provider'
+                                  : provider.imageUrl
+                              }
+                              onChange={(e) => updateProvider(i, 'imageUrl', e.target.value)}
+                              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                              placeholder="https://example.com/provider.jpg"
+                              readOnly={provider.imageUrl?.startsWith('data:image/')}
+                            />
+                            <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                              Paste an HTTPS image URL, or upload PNG/JPG/GIF/WebP under 900 KB.
+                            </p>
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                              Provider bio
+                            </label>
+                            <textarea
+                              value={provider.bio}
+                              onChange={(e) => updateProvider(i, 'bio', e.target.value)}
+                              rows={5}
+                              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                              placeholder="Short bio, qualifications, specialty focus, or patient care approach."
+                            />
+                            <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                              This appears under the provider name on the homepage.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addProvider}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add provider
+                  </button>
                 </SectionCard>
                 ) : null}
 
@@ -974,12 +1213,12 @@ export default function HospitalWebsiteCMSPage() {
             </div>
           )}
 
-          <div className="flex justify-end pt-3 border-t border-gray-200">
+          <div className="sticky bottom-0 z-10 flex justify-end border-t border-slate-200 bg-white/90 px-3 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur">
             <button
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm font-medium shadow-sm"
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               {saving ? t('settings.saving') : t('settings.save')}

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CheckCircle2, Stethoscope } from 'lucide-react';
+import { ArrowRight, CheckCircle2, CreditCard, ShieldCheck, Stethoscope } from 'lucide-react';
 import { qwesiPaygItems, qwesiSubscriptionPlans } from '@/lib/qwesi-pricing';
 
 export const metadata = {
@@ -11,33 +11,45 @@ export default function PublicSubscriptionsPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <section className="border-b border-blue-100 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
           <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
             <Stethoscope className="h-4 w-4" />
             Qwesi Care
           </Link>
-          <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Qwesi patient pricing</h1>
-            <p className="mt-3 text-base leading-relaxed text-slate-600">
-              Flexible pay-as-you-go services and monthly care subscriptions for patients and families.
-            </p>
-          </div>
-          <div>
-            <Link
-              href="/login"
-              className="inline-flex rounded-lg bg-[#1447e6] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"
-            >
-              Sign in to subscribe
-            </Link>
+          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+            <div className="max-w-3xl">
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Transparent patient pricing
+              </p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Qwesi patient pricing</h1>
+              <p className="mt-3 text-base leading-relaxed text-slate-600">
+                Flexible pay-as-you-go services and monthly care subscriptions for patients and families.
+              </p>
+            </div>
+            <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+              <p className="text-sm font-semibold text-slate-950">Ready to subscribe?</p>
+              <p className="mt-1 text-sm text-slate-600">Sign in as a patient to pay securely through Paystack.</p>
+              <Link
+                href="/login"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1447e6] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"
+              >
+                Sign in to subscribe
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <h2 className="text-xl font-semibold text-slate-950">PAYG services</h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-5 w-5 text-blue-700" />
+          <h2 className="text-xl font-semibold text-slate-950">PAYG services</h2>
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {qwesiPaygItems.map((item) => (
-            <article key={item.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <article key={item.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <h3 className="text-base font-semibold text-slate-950">{item.name}</h3>
                 <p className="shrink-0 text-sm font-bold text-blue-700">{item.priceLabel}</p>
@@ -58,9 +70,9 @@ export default function PublicSubscriptionsPage() {
 
       <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-6 lg:px-8">
         <h2 className="text-xl font-semibold text-slate-950">Monthly patient subscriptions</h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
           {qwesiSubscriptionPlans.map((plan) => (
-            <article key={plan.id} className="flex flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <article key={plan.id} className="flex min-h-[18rem] flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <h3 className="text-base font-semibold text-slate-950">{plan.name}</h3>
               <p className="mt-1 text-2xl font-bold text-blue-700">{plan.priceLabel}</p>
               <p className="mt-2 text-sm text-slate-500">{plan.audience}</p>

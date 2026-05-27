@@ -1,5 +1,5 @@
 import { MongoClient } from 'mongodb';
-import { configureMongoSrvDns } from './mongodb-dns';
+import { resolveMongoSrvUri } from './mongodb-dns';
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
@@ -8,8 +8,6 @@ declare global {
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-doc';
 const options = {};
 
-configureMongoSrvDns(uri);
-
 let clientPromise: Promise<MongoClient> | undefined;
 
 function getMongoClient() {
@@ -17,13 +15,17 @@ function getMongoClient() {
     // Preserve the connection across HMR, but create it lazily to avoid
     // unhandled startup rejections when DNS or the network is not ready.
     if (!global._mongoClientPromise) {
-      global._mongoClientPromise = new MongoClient(uri, options).connect();
+      global._mongoClientPromise = resolveMongoSrvUri(uri).then((resolvedUri) =>
+        new MongoClient(resolvedUri, options).connect()
+      );
     }
     return global._mongoClientPromise;
   }
 
   if (!clientPromise) {
-    clientPromise = new MongoClient(uri, options).connect();
+    clientPromise = resolveMongoSrvUri(uri).then((resolvedUri) =>
+      new MongoClient(resolvedUri, options).connect()
+    );
   }
   return clientPromise;
 }

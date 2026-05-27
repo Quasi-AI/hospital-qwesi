@@ -21,10 +21,42 @@ export interface IPatient {
   insuranceProvider?: string;
   insuranceNumber?: string;
   assignedDoctor?: string;
+  vitalSigns?: {
+    timestamp: Date;
+    bloodPressure?: string;
+    pulse?: number;
+    temperature?: number;
+    respiratoryRate?: number;
+    oxygenSaturation?: number;
+    weight?: number;
+    notes?: string;
+    recordedBy?: string;
+    source?: 'patient' | 'staff';
+  }[];
   password?: string; // For patient login
   createdAt: Date;
   updatedAt: Date;
 }
+
+const vitalSignSchema = new mongoose.Schema(
+  {
+    timestamp: { type: Date, default: Date.now },
+    bloodPressure: { type: String, trim: true },
+    pulse: { type: Number },
+    temperature: { type: Number },
+    respiratoryRate: { type: Number },
+    oxygenSaturation: { type: Number },
+    weight: { type: Number },
+    notes: { type: String, trim: true },
+    recordedBy: { type: String, trim: true },
+    source: {
+      type: String,
+      enum: ['patient', 'staff'],
+      default: 'patient',
+    },
+  },
+  { _id: false }
+);
 
 const patientSchema = new mongoose.Schema<IPatient>(
   {
@@ -109,6 +141,10 @@ const patientSchema = new mongoose.Schema<IPatient>(
     assignedDoctor: {
       type: String,
       trim: true,
+    },
+    vitalSigns: {
+      type: [vitalSignSchema],
+      default: [],
     },
     password: {
       type: String,

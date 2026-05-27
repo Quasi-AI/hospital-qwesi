@@ -857,6 +857,67 @@ export function HospitalLanding({
           </div>
         </section>
 
+        {/* Featured providers */}
+        {content.providers?.length ? (
+          <section
+            id="providers"
+            className="scroll-mt-16 border-t border-slate-200/80 bg-white"
+          >
+            <div className={LANDING_SECTION_SHELL}>
+              <SectionHeader
+                title={content.providersTitle}
+                subtitle={content.providersSubtitle}
+                eyebrow={content.providersEyebrow?.trim() || undefined}
+                centered
+                phoneDefaultCountry={phoneDefaultCountry}
+              />
+              <div className="grid gap-4 md:grid-cols-3">
+                {content.providers.map((provider, i) => {
+                  const initials = provider.name
+                    .split(' ')
+                    .map((part) => part[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase();
+
+                  return (
+                    <article
+                      key={`${provider.name}-${i}`}
+                      className="overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 shadow-sm ring-1 ring-slate-900/[0.02] transition duration-300 hover:-translate-y-0.5 hover:border-teal-200/80 hover:bg-white hover:shadow-lg hover:shadow-teal-900/8 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                    >
+                      <div className="aspect-[4/3] bg-gradient-to-br from-teal-100 via-cyan-50 to-slate-100">
+                        {provider.imageUrl?.trim() ? (
+                          <img
+                            src={provider.imageUrl.trim()}
+                            alt={provider.name}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-xl font-semibold text-teal-800 shadow-sm ring-1 ring-teal-100">
+                              {initials || 'DR'}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-base font-semibold text-slate-950">{provider.name}</h3>
+                        {provider.role?.trim() ? (
+                          <p className="mt-1 text-xs font-bold uppercase tracking-wider text-teal-700">{provider.role}</p>
+                        ) : null}
+                        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                          <AutoLinkText text={provider.bio} phoneDefaultCountry={phoneDefaultCountry} linkClassName={linkOnSlateBody} />
+                        </p>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         {/* Care journey */}
         <section
           id="care-journey"

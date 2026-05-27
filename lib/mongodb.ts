@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { configureMongoSrvDns } from './mongodb-dns';
+import { resolveMongoSrvUri } from './mongodb-dns';
 
 function getMongoUri() {
   const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-doc';
@@ -30,8 +30,7 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-    const uri = getMongoUri();
-    configureMongoSrvDns(uri);
+    const uri = await resolveMongoSrvUri(getMongoUri());
 
     cached.promise = mongoose.connect(uri, opts).then((mongoose) => {
       return mongoose;

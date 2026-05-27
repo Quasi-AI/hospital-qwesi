@@ -82,6 +82,8 @@ interface SidebarLayoutProps {
   topRight?: React.ReactNode;
   /** Tighter page padding and title block (e.g. dashboard) */
   dense?: boolean;
+  /** Let content-heavy admin tools use the full available canvas */
+  wide?: boolean;
 }
 
 interface NavigationItem {
@@ -95,7 +97,7 @@ interface NavigationItem {
   children?: NavigationItem[];
 }
 
-function SidebarLayoutInner({ children, title, description, topRight, dense }: SidebarLayoutProps) {
+function SidebarLayoutInner({ children, title, description, topRight, dense, wide }: SidebarLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileProfileMenuOpen, setMobileProfileMenuOpen] = useState(false);
@@ -783,8 +785,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense }: S
           <div
             className={
               dense
-                ? 'max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3'
-                : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'
+                ? `${wide ? 'max-w-none' : 'max-w-7xl'} mx-auto px-3 sm:px-4 lg:px-6 py-3`
+                : `${wide ? 'max-w-none' : 'max-w-7xl'} mx-auto px-4 sm:px-6 lg:px-8 py-6`
             }
           >
             {/* Page title row (optional topRight: language, notifications, logout — no extra header bar) */}

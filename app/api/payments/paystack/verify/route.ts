@@ -8,6 +8,7 @@ import Invoice from '@/models/Invoice';
 import Payment from '@/models/Payment';
 import PatientSubscription from '@/models/PatientSubscription';
 import PaystackTransaction from '@/models/PaystackTransaction';
+import { getPaystackConfigError, getPaystackSettings } from '@/lib/paystackSettings';
 import { getQwesiSubscriptionPlan, toPaystackSubunit } from '@/lib/qwesi-pricing';
 
 export async function GET(request: NextRequest) {
@@ -24,9 +25,10 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
     const settings = await Settings.findOne().lean() as any;
-    const paystack = settings?.paymentProviders?.paystack;
-    if (!paystack?.enabled || !paystack?.secretKey) {
-      return NextResponse.json({ error: 'Paystack is not configured' }, { status: 400 });
+    const paystack = getPaystackSettings(settings);
+    const configError = getPaystackConfigError(paystack);
+    if (configError) {
+      return NextResponse.json({ error: configError }, { status: 400 });
     }
 
     const transaction = await PaystackTransaction.findOne({ reference });
