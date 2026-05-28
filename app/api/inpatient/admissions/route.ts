@@ -4,7 +4,61 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Admission from '@/models/Admission';
 import Bed from '@/models/Bed';
+import Hospital from '@/models/Hospital';
 import Ward from '@/models/Ward';
+
+const DEFAULT_HOSPITAL_NAME = 'Qwesi AI Virtual Hospital';
+
+function makeHospitalCode(name: string) {
+  const base = name
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 18) || 'HOSPITAL';
+  return `${base}-${Date.now().toString(36).toUpperCase()}`;
+}
+
+async function resolveHospital(data: Record<string, unknown>, createdBy?: string) {
+  const newHospitalName = String(data.newHospitalName || '').trim();
+  if (newHospitalName) {
+    return Hospital.findOneAndUpdate(
+      { name: newHospitalName },
+      {
+        $setOnInsert: {
+          name: newHospitalName,
+          code: makeHospitalCode(newHospitalName),
+          type: 'local',
+          region: data.newHospitalRegion || '',
+          city: data.newHospitalCity || '',
+          isActive: true,
+          createdBy,
+        },
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
+  }
+
+  if (data.hospitalId) {
+    const hospital = await Hospital.findById(data.hospitalId);
+    if (hospital) return hospital;
+  }
+
+  return Hospital.findOneAndUpdate(
+    { name: DEFAULT_HOSPITAL_NAME },
+    {
+      $setOnInsert: {
+        name: DEFAULT_HOSPITAL_NAME,
+        code: 'QWESI-VIRTUAL',
+        type: 'virtual',
+        notes: 'Default connected virtual hospital workspace',
+        isActive: true,
+        createdBy,
+      },
+    },
+    { upsert: true, new: true }
+  );
+}
 
 // GET - List all admissions
 export async function GET(request: NextRequest) {
@@ -19,6 +73,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const wardId = searchParams.get('wardId');
+    const hospitalId = searchParams.get('hospitalId');
     const patientId = searchParams.get('patientId');
     const doctorId = searchParams.get('doctorId');
     const priority = searchParams.get('priority');
@@ -38,6 +93,10 @@ export async function GET(request: NextRequest) {
     
     if (wardId) {
       query.wardId = wardId;
+    }
+
+    if (hospitalId) {
+      query.hospitalId = hospitalId;
     }
     
     if (patientId) {
@@ -88,9 +147,64 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     const data = await request.json();
+    const createdBy = session.user?.id;
+    const hospital = await resolveHospital(data, createdBy);
+    data.hospitalId = hospital._id;
+    data.hospitalName = hospital.name;
+
+    const newWardName = String(data.newWardName || '').trim();
+    if (newWardName) {
+      const count = (await Ward.countDocuments()) || 0;
+      const sequence = String(count + 1).padStart(3, '0');
+      const ward = new Ward({
+        hospitalId: hospital._id,
+        hospitalName: hospital.name,
+        wardNumber: `W-${sequence}`,
+        name: newWardName,
+        type: data.newWardType || 'general',
+        floor: Number(data.newWardFloor || 1),
+        building: data.newWardBuilding || '',
+        totalBeds: 0,
+        occupiedBeds: 0,
+        availableBeds: 0,
+        dailyRate: Number(data.newWardDailyRate || data.newBedDailyRate || 0),
+        amenities: [],
+        isActive: true,
+      });
+      await ward.save();
+      data.wardId = ward._id;
+    }
 
     // Check if bed is available
-    const bed = await Bed.findById(data.bedId);
+    let bed = await Bed.findById(data.bedId);
+    const newBedNumber = String(data.newBedNumber || '').trim();
+    if (!bed && newBedNumber && data.wardId) {
+      const wardForBed = await Ward.findById(data.wardId);
+      if (!wardForBed) {
+        return NextResponse.json({ error: 'Ward not found' }, { status: 404 });
+      }
+
+      bed = new Bed({
+        bedNumber: newBedNumber,
+        hospitalId: hospital._id,
+        hospitalName: hospital.name,
+        wardId: wardForBed._id,
+        wardName: wardForBed.name,
+        wardType: wardForBed.type,
+        type: data.newBedType || 'standard',
+        status: 'available',
+        features: [],
+        dailyRate: Number(data.newBedDailyRate || wardForBed.dailyRate || 0),
+        isActive: true,
+      });
+      await bed.save();
+
+      await Ward.findByIdAndUpdate(wardForBed._id, {
+        $inc: { totalBeds: 1, availableBeds: 1 },
+      });
+      data.bedId = bed._id;
+    }
+
     if (!bed) {
       return NextResponse.json({ error: 'Bed not found' }, { status: 404 });
     }
@@ -117,9 +231,24 @@ export async function POST(request: NextRequest) {
     data.admissionNumber = `ADM-${year}${month}${day}-${sequence}`;
 
     // Set ward and bed info
+    data.hospitalId = ward.hospitalId || hospital._id;
+    data.hospitalName = ward.hospitalName || hospital.name;
     data.wardName = ward.name;
     data.bedNumber = bed.bedNumber;
-    data.createdBy = session.user?.id;
+    data.createdBy = createdBy;
+    [
+      'newHospitalName',
+      'newHospitalRegion',
+      'newHospitalCity',
+      'newWardName',
+      'newWardType',
+      'newWardFloor',
+      'newWardBuilding',
+      'newWardDailyRate',
+      'newBedNumber',
+      'newBedType',
+      'newBedDailyRate',
+    ].forEach((key) => delete data[key]);
 
     const admission = new Admission(data);
     await admission.save();

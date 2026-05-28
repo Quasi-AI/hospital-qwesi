@@ -2,6 +2,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IWard extends Document {
   wardNumber: string;
+  hospitalId?: mongoose.Schema.Types.ObjectId;
+  hospitalName: string;
   name: string;
   type: 'general' | 'private' | 'semi-private' | 'icu' | 'nicu' | 'picu' | 'ccu' | 'emergency' | 'maternity' | 'pediatric' | 'surgical' | 'orthopedic';
   floor: number;
@@ -26,6 +28,16 @@ const WardSchema: Schema = new Schema(
       type: String,
       unique: true,
       required: true,
+      trim: true,
+    },
+    hospitalId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hospital',
+    },
+    hospitalName: {
+      type: String,
+      required: true,
+      default: 'Qwesi AI Virtual Hospital',
       trim: true,
     },
     name: {
@@ -89,6 +101,7 @@ const WardSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+WardSchema.index({ hospitalId: 1, type: 1, isActive: 1 });
 
 const Ward = mongoose.models.Ward || mongoose.model<IWard>('Ward', WardSchema);
 

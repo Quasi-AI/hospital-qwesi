@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ProtectedRoute from '@/app/protected-route';
@@ -8,13 +8,23 @@ import SidebarLayout from '@/app/components/sidebar-layout';
 import { useTranslations } from '@/app/hooks/useTranslations';
 import { ArrowLeft, Save } from 'lucide-react';
 
+interface Hospital {
+  _id: string;
+  name: string;
+  city?: string;
+}
+
 export default function NewWardPage() {
   const router = useRouter();
   const { t, translationsLoaded } = useTranslations();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [useNewHospital, setUseNewHospital] = useState(false);
 
   const [formData, setFormData] = useState({
+    hospitalId: '',
+    newHospitalName: '',
     name: '',
     type: 'general',
     floor: 1,
@@ -29,6 +39,17 @@ export default function NewWardPage() {
   });
 
   const [newAmenity, setNewAmenity] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      const response = await fetch('/api/inpatient/hospitals?isActive=true');
+      if (response.ok) {
+        const data = await response.json();
+        setHospitals(data);
+        setFormData(prev => prev.hospitalId || data.length === 0 ? prev : { ...prev, hospitalId: data[0]._id });
+      }
+    })();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +127,50 @@ export default function NewWardPage() {
 
           <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2 rounded-md border border-gray-200 bg-gray-50 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{t('inpatient.hospital')}</p>
+                    <p className="text-xs text-gray-500">{t('inpatient.localHospitalAdmissionHint')}</p>
+                  </div>
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700 shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={useNewHospital}
+                      onChange={(e) => setUseNewHospital(e.target.checked)}
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    />
+                    {t('inpatient.addLocalHospital')}
+                  </label>
+                </div>
+                <div className="mt-3">
+                  {useNewHospital ? (
+                    <input
+                      type="text"
+                      required
+                      value={formData.newHospitalName}
+                      onChange={(e) => setFormData({ ...formData, newHospitalName: e.target.value, hospitalId: '' })}
+                      className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder={t('inpatient.hospitalNamePlaceholder')}
+                    />
+                  ) : (
+                    <select
+                      required
+                      value={formData.hospitalId}
+                      onChange={(e) => setFormData({ ...formData, hospitalId: e.target.value, newHospitalName: '' })}
+                      className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">{t('inpatient.selectHospital')}</option>
+                      {hospitals.map(hospital => (
+                        <option key={hospital._id} value={hospital._id}>
+                          {hospital.name}{hospital.city ? ` - ${hospital.city}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+
               {/* Ward Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

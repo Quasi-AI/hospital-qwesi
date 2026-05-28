@@ -2,6 +2,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IBed extends Document {
   bedNumber: string;
+  hospitalId?: mongoose.Schema.Types.ObjectId;
+  hospitalName: string;
   wardId: mongoose.Schema.Types.ObjectId;
   wardName: string;
   wardType: string;
@@ -27,6 +29,15 @@ const BedSchema: Schema = new Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    hospitalId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hospital',
+    },
+    hospitalName: {
+      type: String,
+      required: true,
+      default: 'Qwesi AI Virtual Hospital',
     },
     wardId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -92,6 +103,7 @@ const BedSchema: Schema = new Schema(
 
 // Compound unique index for bed number within a ward
 BedSchema.index({ bedNumber: 1, wardId: 1 }, { unique: true });
+BedSchema.index({ hospitalId: 1, wardId: 1, status: 1, isActive: 1 });
 
 const Bed = mongoose.models.Bed || mongoose.model<IBed>('Bed', BedSchema);
 

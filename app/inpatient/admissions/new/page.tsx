@@ -10,10 +10,11 @@ import { useFormatCurrency } from '@/app/hooks/useFormatCurrency';
 import SearchablePatientSelect from '@/app/components/SearchablePatientSelect';
 import { ArrowLeft, Save, UserPlus } from 'lucide-react';
 
-interface Ward { _id: string; wardNumber: string; name: string; type: string; availableBeds: number; dailyRate: number; }
+interface Hospital { _id: string; name: string; type: string; region?: string; city?: string; }
+interface Ward { _id: string; wardNumber: string; hospitalName?: string; name: string; type: string; availableBeds: number; dailyRate: number; }
 interface Bed { _id: string; bedNumber: string; type: string; status: string; dailyRate: number; }
 interface Doctor { _id: string; name: string; specialization?: string; }
-interface Patient { _id: string; patientId: string; name: string; email?: string; phone?: string; age?: number; gender?: string; }
+interface Patient { _id: string; patientId: string; name: string; email: string; phone: string; age?: number; gender?: string; dateOfBirth?: string | Date; }
 
 export default function NewAdmissionPage() {
   return (
@@ -37,14 +38,21 @@ function NewAdmissionPageContent() {
   const { formatCurrency } = useFormatCurrency();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [wards, setWards] = useState<Ward[]>([]);
   const [beds, setBeds] = useState<Bed[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [useNewHospital, setUseNewHospital] = useState(false);
+  const [useNewWard, setUseNewWard] = useState(false);
+  const [useNewBed, setUseNewBed] = useState(false);
 
   const [formData, setFormData] = useState({
     patientId: '', patientName: '', patientEmail: '', patientPhone: '', patientAge: 0, patientGender: '',
-    wardId: '', bedId: '', admittingDoctorId: '', admittingDoctorName: '', admissionType: 'elective',
+    hospitalId: '', newHospitalName: '', newHospitalRegion: '', newHospitalCity: '',
+    wardId: '', newWardName: '', newWardType: 'general', newWardFloor: 1, newWardBuilding: '', newWardDailyRate: 0,
+    bedId: '', newBedNumber: '', newBedType: 'standard', newBedDailyRate: 0,
+    admittingDoctorId: '', admittingDoctorName: '', admissionType: 'elective',
     admissionDate: new Date().toISOString().split('T')[0], expectedDischargeDate: '',
     chiefComplaint: '', admissionDiagnosis: '', priority: 'normal', allergies: [] as string[],
     dietaryRestrictions: '', specialInstructions: '',
@@ -52,11 +60,26 @@ function NewAdmissionPageContent() {
   });
   const [newAllergy, setNewAllergy] = useState('');
 
-  useEffect(() => { fetchWards(); fetchDoctors(); }, []);
-  useEffect(() => { if (formData.wardId) fetchBeds(formData.wardId); else setBeds([]); }, [formData.wardId]);
+  useEffect(() => { fetchHospitals(); fetchDoctors(); }, []);
+  useEffect(() => {
+    if (formData.hospitalId && !useNewHospital) fetchWards(formData.hospitalId);
+    else setWards([]);
+  }, [formData.hospitalId, useNewHospital]);
+  useEffect(() => {
+    if (formData.wardId && !useNewWard) fetchBeds(formData.wardId);
+    else setBeds([]);
+  }, [formData.wardId, useNewWard]);
 
-  const fetchWards = async () => {
-    const res = await fetch('/api/inpatient/wards?isActive=true&hasAvailableBeds=true');
+  const fetchHospitals = async () => {
+    const res = await fetch('/api/inpatient/hospitals?isActive=true');
+    if (res.ok) {
+      const data = await res.json();
+      setHospitals(data);
+      setFormData(prev => prev.hospitalId || data.length === 0 ? prev : { ...prev, hospitalId: data[0]._id });
+    }
+  };
+  const fetchWards = async (hospitalId: string) => {
+    const res = await fetch(`/api/inpatient/wards?isActive=true&hasAvailableBeds=true&hospitalId=${hospitalId}`);
     if (res.ok) setWards(await res.json());
   };
   const fetchBeds = async (wardId: string) => {
@@ -92,8 +115,8 @@ function NewAdmissionPageContent() {
           _id: p._id,
           patientId: p.patientId || p._id,
           name: p.name,
-          email: p.email,
-          phone: p.phone,
+          email: p.email || '',
+          phone: p.phone || '',
           age: p.age,
           gender: p.gender,
         };
@@ -112,9 +135,36 @@ function NewAdmissionPageContent() {
     setFormData({ ...formData, admittingDoctorId: doctorId, admittingDoctorName: doctor?.name || '' });
   };
 
+  const handleHospitalModeChange = (checked: boolean) => {
+    setUseNewHospital(checked);
+    setUseNewWard(checked);
+    setUseNewBed(checked);
+    setFormData({ ...formData, hospitalId: checked ? '' : formData.hospitalId, wardId: '', bedId: '' });
+  };
+
+  const handleWardModeChange = (checked: boolean) => {
+    setUseNewWard(checked);
+    setUseNewBed(checked);
+    setFormData({ ...formData, wardId: checked ? '' : formData.wardId, bedId: '' });
+  };
+
+  const handleWardChange = (wardId: string) => {
+    const ward = wards.find(w => w._id === wardId);
+    setFormData({
+      ...formData,
+      wardId,
+      bedId: '',
+      newWardDailyRate: ward?.dailyRate || formData.newWardDailyRate,
+      newBedDailyRate: ward?.dailyRate || formData.newBedDailyRate,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.patientId) { setError(t('inpatient.selectPatientError')); return; }
+    if (!formData.hospitalId && !formData.newHospitalName.trim()) { setError(t('inpatient.selectHospitalError')); return; }
+    if (!formData.wardId && !formData.newWardName.trim()) { setError(t('inpatient.selectWardError')); return; }
+    if (!formData.bedId && !formData.newBedNumber.trim()) { setError(t('inpatient.selectBedError')); return; }
     setLoading(true); setError('');
     try {
       const res = await fetch('/api/inpatient/admissions', {
@@ -159,18 +209,107 @@ function NewAdmissionPageContent() {
             <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
               <h3 className="text-base font-semibold mb-3">{t('inpatient.wardBedAssignment')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.ward')} *</label>
-                  <select required value={formData.wardId} onChange={(e) => setFormData({ ...formData, wardId: e.target.value, bedId: '' })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">{t('inpatient.selectWard')}</option>
-                    {wards.map(w => <option key={w._id} value={w._id}>{w.name} ({w.wardNumber}) - {w.availableBeds} beds</option>)}
-                  </select>
+                <div className="md:col-span-2 flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{t('inpatient.localHospitalAdmission')}</p>
+                    <p className="text-xs text-gray-500">{t('inpatient.localHospitalAdmissionHint')}</p>
+                  </div>
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700 shrink-0">
+                    <input type="checkbox" checked={useNewHospital} onChange={(e) => handleHospitalModeChange(e.target.checked)} className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+                    {t('inpatient.addLocalHospital')}
+                  </label>
                 </div>
-                <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.bed')} *</label>
-                  <select required value={formData.bedId} onChange={(e) => setFormData({ ...formData, bedId: e.target.value })} disabled={!formData.wardId} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">{t('inpatient.selectBed')}</option>
-                    {beds.map(b => <option key={b._id} value={b._id}>{b.bedNumber} - {formatCurrency(b.dailyRate)}/day</option>)}
-                  </select>
+                {useNewHospital ? (
+                  <>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.hospitalName')} *</label>
+                      <input required value={formData.newHospitalName} onChange={(e) => setFormData({ ...formData, newHospitalName: e.target.value })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder={t('inpatient.hospitalNamePlaceholder')} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.regionCity')}</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input value={formData.newHospitalRegion} onChange={(e) => setFormData({ ...formData, newHospitalRegion: e.target.value })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md" placeholder={t('inpatient.region')} />
+                        <input value={formData.newHospitalCity} onChange={(e) => setFormData({ ...formData, newHospitalCity: e.target.value })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md" placeholder={t('inpatient.city')} />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.hospital')} *</label>
+                    <select required value={formData.hospitalId} onChange={(e) => setFormData({ ...formData, hospitalId: e.target.value, wardId: '', bedId: '' })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                      <option value="">{t('inpatient.selectHospital')}</option>
+                      {hospitals.map(h => <option key={h._id} value={h._id}>{h.name}{h.city ? ` - ${h.city}` : ''}</option>)}
+                    </select>
+                  </div>
+                )}
+                <div className="md:col-span-2 flex items-center justify-end">
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" checked={useNewWard} onChange={(e) => handleWardModeChange(e.target.checked)} className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+                    {t('inpatient.addWardNow')}
+                  </label>
                 </div>
+                {useNewWard ? (
+                  <>
+                    <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.wardName')} *</label>
+                      <input required value={formData.newWardName} onChange={(e) => setFormData({ ...formData, newWardName: e.target.value })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md" placeholder={t('inpatient.wardNamePlaceholder')} />
+                    </div>
+                    <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.wardType')} *</label>
+                      <select value={formData.newWardType} onChange={(e) => setFormData({ ...formData, newWardType: e.target.value })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md">
+                        <option value="general">{t('inpatient.wardTypes.general')}</option>
+                        <option value="private">{t('inpatient.wardTypes.private')}</option>
+                        <option value="icu">{t('inpatient.wardTypes.icu')}</option>
+                        <option value="emergency">{t('inpatient.wardTypes.emergency')}</option>
+                        <option value="maternity">{t('inpatient.wardTypes.maternity')}</option>
+                        <option value="pediatric">{t('inpatient.wardTypes.pediatric')}</option>
+                        <option value="surgical">{t('inpatient.wardTypes.surgical')}</option>
+                      </select>
+                    </div>
+                    <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.floor')}</label>
+                      <input type="number" min="0" value={formData.newWardFloor} onChange={(e) => setFormData({ ...formData, newWardFloor: parseInt(e.target.value) || 0 })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md" />
+                    </div>
+                    <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.dailyRate')}</label>
+                      <input type="number" min="0" step="0.01" value={formData.newWardDailyRate} onChange={(e) => setFormData({ ...formData, newWardDailyRate: parseFloat(e.target.value) || 0, newBedDailyRate: parseFloat(e.target.value) || formData.newBedDailyRate })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md" />
+                    </div>
+                  </>
+                ) : (
+                  <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.ward')} *</label>
+                    <select required={!useNewWard} value={formData.wardId} onChange={(e) => handleWardChange(e.target.value)} disabled={!formData.hospitalId} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                      <option value="">{t('inpatient.selectWard')}</option>
+                      {wards.map(w => <option key={w._id} value={w._id}>{w.name} ({w.wardNumber}) - {w.availableBeds} beds</option>)}
+                    </select>
+                  </div>
+                )}
+                <div className="md:col-span-2 flex items-center justify-end">
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" checked={useNewBed} onChange={(e) => { setUseNewBed(e.target.checked); setFormData({ ...formData, bedId: e.target.checked ? '' : formData.bedId }); }} className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+                    {t('inpatient.addBedNow')}
+                  </label>
+                </div>
+                {useNewBed ? (
+                  <>
+                    <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.bedNumber')} *</label>
+                      <input required value={formData.newBedNumber} onChange={(e) => setFormData({ ...formData, newBedNumber: e.target.value })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md" placeholder="e.g., B-001" />
+                    </div>
+                    <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.bedType')} *</label>
+                      <select value={formData.newBedType} onChange={(e) => setFormData({ ...formData, newBedType: e.target.value })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md">
+                        <option value="standard">{t('inpatient.bedTypes.standard')}</option>
+                        <option value="electric">{t('inpatient.bedTypes.electric')}</option>
+                        <option value="icu">{t('inpatient.bedTypes.icu')}</option>
+                        <option value="pediatric">{t('inpatient.bedTypes.pediatric')}</option>
+                      </select>
+                    </div>
+                    <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.dailyRate')}</label>
+                      <input type="number" min="0" step="0.01" value={formData.newBedDailyRate} onChange={(e) => setFormData({ ...formData, newBedDailyRate: parseFloat(e.target.value) || 0 })} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md" />
+                    </div>
+                  </>
+                ) : (
+                  <div><label className="block text-xs font-medium text-gray-700 mb-0.5">{t('inpatient.bed')} *</label>
+                    <select required={!useNewBed} value={formData.bedId} onChange={(e) => setFormData({ ...formData, bedId: e.target.value })} disabled={!formData.wardId} className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                      <option value="">{t('inpatient.selectBed')}</option>
+                      {beds.map(b => <option key={b._id} value={b._id}>{b.bedNumber} - {formatCurrency(b.dailyRate)}/day</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
             {/* Doctor & Details */}

@@ -11,6 +11,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 interface Ward {
   _id: string;
   wardNumber: string;
+  hospitalName?: string;
   name: string;
   type: string;
   dailyRate: number;
@@ -177,7 +178,7 @@ function NewBedForm() {
               <option value="">{t('inpatient.selectWard')}</option>
               {wards.map((ward) => (
                 <option key={ward._id} value={ward._id}>
-                  {ward.name} ({ward.wardNumber})
+                  {ward.name} ({ward.wardNumber}){ward.hospitalName ? ` - ${ward.hospitalName}` : ''}
                 </option>
               ))}
             </select>

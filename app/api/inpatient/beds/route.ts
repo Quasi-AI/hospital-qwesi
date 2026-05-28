@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const wardId = searchParams.get('wardId');
+    const hospitalId = searchParams.get('hospitalId');
     const status = searchParams.get('status');
     const isActive = searchParams.get('isActive');
 
@@ -25,6 +26,10 @@ export async function GET(request: NextRequest) {
     
     if (wardId) {
       query.wardId = wardId;
+    }
+
+    if (hospitalId) {
+      query.hospitalId = hospitalId;
     }
     
     if (status) {
@@ -66,6 +71,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Set ward info
+    data.hospitalId = ward.hospitalId;
+    data.hospitalName = ward.hospitalName;
     data.wardName = ward.name;
     data.wardType = ward.type;
 

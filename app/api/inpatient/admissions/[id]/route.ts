@@ -81,6 +81,8 @@ export async function PUT(
         
         const newWard = await Ward.findById(data.wardId);
         if (newWard) {
+          data.hospitalId = newWard.hospitalId;
+          data.hospitalName = newWard.hospitalName;
           data.wardName = newWard.name;
           await Ward.findByIdAndUpdate(data.wardId, {
             $inc: { occupiedBeds: 1, availableBeds: -1 }
@@ -90,6 +92,8 @@ export async function PUT(
 
       // Occupy new bed
       await Bed.findByIdAndUpdate(data.bedId, {
+        hospitalId: newBed.hospitalId,
+        hospitalName: newBed.hospitalName,
         status: 'occupied',
         currentPatientId: currentAdmission.patientId,
         currentPatientName: currentAdmission.patientName,

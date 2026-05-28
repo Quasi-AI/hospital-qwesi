@@ -22,6 +22,7 @@ interface Admission {
   admissionNumber: string;
   patientName: string;
   patientPhone?: string;
+  hospitalName?: string;
   wardName: string;
   bedNumber: string;
   admittingDoctorName: string;
@@ -66,7 +67,8 @@ export default function AdmissionsPage() {
   const filteredAdmissions = admissions.filter(admission => 
     admission.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     admission.admissionNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    admission.wardName.toLowerCase().includes(searchQuery.toLowerCase())
+    admission.wardName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (admission.hospitalName || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
@@ -250,6 +252,7 @@ export default function AdmissionsPage() {
                         <td className="px-3 py-2">
                           <div>
                             <p className="text-sm font-medium">{admission.wardName}</p>
+                            <p className="text-xs text-gray-500">{admission.hospitalName || 'Qwesi AI Virtual Hospital'}</p>
                             <p className="text-xs text-gray-500">{t('inpatient.bed')}: {admission.bedNumber}</p>
                           </div>
                         </td>

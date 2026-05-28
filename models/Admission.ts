@@ -39,6 +39,8 @@ export interface IAdmission extends Document {
   patientPhone?: string;
   patientAge?: number;
   patientGender?: string;
+  hospitalId?: mongoose.Schema.Types.ObjectId;
+  hospitalName: string;
   wardId: mongoose.Schema.Types.ObjectId;
   wardName: string;
   bedId: mongoose.Schema.Types.ObjectId;
@@ -146,6 +148,15 @@ const AdmissionSchema: Schema = new Schema(
     patientPhone: { type: String },
     patientAge: { type: Number },
     patientGender: { type: String },
+    hospitalId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hospital',
+    },
+    hospitalName: {
+      type: String,
+      required: true,
+      default: 'Qwesi AI Virtual Hospital',
+    },
     wardId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Ward',
@@ -247,6 +258,9 @@ const AdmissionSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+AdmissionSchema.index({ hospitalId: 1, status: 1, admissionDate: -1 });
+AdmissionSchema.index({ wardId: 1, status: 1 });
 
 // Pre-save hook to generate admission number
 AdmissionSchema.pre('save', async function () {

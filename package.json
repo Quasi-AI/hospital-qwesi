@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx scripts/seed-db.ts",
+    "seed:ghana-medicines": "tsx scripts/seed-ghana-medicines.ts",
     "fix-admin": "tsx scripts/fix-admin-account.ts",
     "test:ai-results": "tsx scripts/test-ai-results.ts",
     "realtime": "tsx servers/realtime-server.ts",

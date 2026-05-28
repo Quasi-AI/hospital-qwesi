@@ -20,6 +20,7 @@ import {
 interface Ward {
   _id: string;
   wardNumber: string;
+  hospitalName?: string;
   name: string;
   type: string;
   floor: number;
@@ -84,7 +85,8 @@ export default function WardsPage() {
 
   const filteredWards = wards.filter(ward => 
     ward.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    ward.wardNumber.toLowerCase().includes(searchQuery.toLowerCase())
+    ward.wardNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (ward.hospitalName || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getTypeColor = (type: string) => {
@@ -271,6 +273,7 @@ export default function WardsPage() {
                       <div className="min-w-0 pr-2">
                         <h3 className="text-base font-semibold text-gray-900 truncate">{ward.name}</h3>
                         <p className="text-xs text-gray-500">{ward.wardNumber}</p>
+                        {ward.hospitalName && <p className="text-xs text-gray-500 truncate">{ward.hospitalName}</p>}
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(ward.type)}`}>
                         {t(`inpatient.wardTypes.${ward.type}`)}
