@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Stethoscope, Mail, BriefcaseMedical } from 'lucide-react';
+import Link from 'next/link';
+import { Stethoscope, Mail, BriefcaseMedical, CalendarPlus } from 'lucide-react';
 
 export default function PatientDoctorsPage() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -17,8 +18,8 @@ export default function PatientDoctorsPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 lg:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-950">My Doctors</h1>
-        <p className="text-sm text-slate-600">Profiles are shown for doctors assigned to you or who attended to you before.</p>
+        <h1 className="text-2xl font-bold text-slate-950">Doctors</h1>
+        <p className="text-sm text-slate-600">Browse all available doctors and book a consultation with any provider.</p>
       </div>
 
       {loading ? (
@@ -60,6 +61,13 @@ export default function PatientDoctorsPage() {
                 ) : null}
                 {doctor.qualifications?.length ? <p>{doctor.qualifications.join(', ')}</p> : null}
               </div>
+              <Link
+                href={`/patient-portal/appointments/new?doctorId=${doctor._id}`}
+                className="mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
+              >
+                <CalendarPlus className="h-4 w-4" />
+                Book appointment
+              </Link>
             </article>
           ))}
         </div>

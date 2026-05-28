@@ -15,7 +15,8 @@ import {
   Filter,
   Search,
   Video,
-  ExternalLink
+  ExternalLink,
+  Plus
 } from 'lucide-react';
 
 interface TelemedicineSession {
@@ -178,9 +179,18 @@ export default function PatientAppointmentsPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">{t('patientPortal.appointments.title')}</h1>
-        <p className="mt-0.5 text-sm text-gray-600">{t('patientPortal.appointments.subtitle')}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">{t('patientPortal.appointments.title')}</h1>
+          <p className="mt-0.5 text-sm text-gray-600">{t('patientPortal.appointments.subtitle')}</p>
+        </div>
+        <Link
+          href="/patient-portal/appointments/new"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
+        >
+          <Plus className="h-4 w-4" />
+          Book appointment
+        </Link>
       </div>
 
       {/* Filters */}
@@ -335,6 +345,13 @@ export default function PatientAppointmentsPage() {
             <Calendar className="mx-auto mb-2 h-12 w-12 text-gray-300" />
             <h3 className="text-base font-medium text-gray-900">{t('patientPortal.appointments.noAppointments')}</h3>
             <p className="mt-0.5 text-sm text-gray-500">{t('patientPortal.appointments.noAppointmentsDesc')}</p>
+            <Link
+              href="/patient-portal/appointments/new"
+              className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
+            >
+              <Plus className="h-4 w-4" />
+              Book appointment
+            </Link>
           </div>
         )}
       </div>

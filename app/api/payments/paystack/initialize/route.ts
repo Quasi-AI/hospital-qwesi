@@ -20,6 +20,15 @@ function callbackUrlFromRequest(request: NextRequest, configuredUrl?: string) {
   return `${baseUrl.replace(/\/$/, '')}/patient-portal/subscriptions`;
 }
 
+function callbackUrlWithPath(request: NextRequest, callbackPath?: unknown, configuredUrl?: string) {
+  const path = String(callbackPath || '').trim();
+  if (path.startsWith('/') && !path.startsWith('//')) {
+    const baseUrl = process.env.NEXTAUTH_URL || request.nextUrl.origin;
+    return `${baseUrl.replace(/\/$/, '')}${path}`;
+  }
+  return callbackUrlFromRequest(request, configuredUrl);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -83,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     const patient = await Patient.findOne({ email: session.user.email }).lean() as any;
     const reference = `QWESI-${Date.now()}-${randomUUID().slice(0, 8).toUpperCase()}`;
-    const callback_url = callbackUrlFromRequest(request, paystack.callbackUrl);
+    const callback_url = callbackUrlWithPath(request, body.callbackPath, paystack.callbackUrl);
 
     const response = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',

@@ -23,7 +23,14 @@ export default function PatientSubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
 
   const activePlanIds = useMemo(
-    () => new Set(subscriptions.filter((sub) => sub.status === 'active').map((sub) => sub.planId)),
+    () => {
+      const now = Date.now();
+      return new Set(
+        subscriptions
+          .filter((sub) => sub.status === 'active' && new Date(sub.currentPeriodEnd).getTime() >= now)
+          .map((sub) => sub.planId)
+      );
+    },
     [subscriptions]
   );
 
