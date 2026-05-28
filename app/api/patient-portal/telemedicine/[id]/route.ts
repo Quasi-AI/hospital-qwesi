@@ -10,7 +10,7 @@ import { emitRealtimeEvent } from '@/lib/realtime';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -24,7 +24,7 @@ export async function GET(
 
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await params;
     const patientEmail = session.user.email;
 
     // Find the patient by email
@@ -70,7 +70,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -84,7 +84,7 @@ export async function PUT(
 
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await params;
     const patientEmail = session.user.email;
     const data = await request.json();
 
@@ -116,6 +116,15 @@ export async function PUT(
 
     // Handle patient actions
     if (data.action === 'join') {
+      const fee = Number(telemedicineSession.consultationFee || 0);
+      const canJoinPaidSession = ['paid', 'waived'].includes(telemedicineSession.paymentStatus);
+      if (fee > 0 && !canJoinPaidSession) {
+        return NextResponse.json(
+          { error: 'Payment is required before joining this consultation' },
+          { status: 402 }
+        );
+      }
+
       // Update participant status
       const participantIndex = telemedicineSession.participants.findIndex(
         (p: any) => p.odId.toString() === patient._id.toString() && p.odType === 'patient'

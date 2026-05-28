@@ -192,7 +192,9 @@ export default function StaffPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {filteredStaff.map((staffMember) => (
+                    {filteredStaff.map((staffMember, index) => {
+                      const openMenuUp = filteredStaff.length - index <= 2;
+                      return (
                       <tr
                         key={staffMember._id}
                         role="button"
@@ -259,7 +261,9 @@ export default function StaffPage() {
                                 {showActionsMenu === staffMember._id && (
                                   <div
                                     data-menu-id={staffMember._id}
-                                    className="absolute right-0 z-50 mt-1 w-44 rounded-md border border-gray-200 bg-white py-0.5 shadow-lg"
+                                    className={`absolute right-0 z-50 w-44 rounded-md border border-gray-200 bg-white py-0.5 shadow-lg ${
+                                      openMenuUp ? 'bottom-full mb-1' : 'mt-1'
+                                    }`}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <button
@@ -281,7 +285,8 @@ export default function StaffPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               )}

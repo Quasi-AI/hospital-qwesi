@@ -71,10 +71,36 @@ export async function PUT(request: NextRequest) {
 
     await dbConnect();
 
-    // Update or create settings
+    if (updates?._id) delete updates._id;
+    if (updates?.__v !== undefined) delete updates.__v;
+    if (updates?.createdAt) delete updates.createdAt;
+    if (updates?.updatedAt) delete updates.updatedAt;
+
+    const incomingSecret = updates?.paymentProviders?.paystack?.secretKey;
+    if (
+      updates?.paymentProviders?.paystack &&
+      (typeof incomingSecret !== 'string' || incomingSecret.trim() === '')
+    ) {
+      delete updates.paymentProviders.paystack.secretKey;
+    } else if (typeof incomingSecret === 'string') {
+      updates.paymentProviders.paystack.secretKey = incomingSecret.trim();
+    }
+
+    const setUpdates = flattenSettingsUpdates(updates);
+
+    if (Object.keys(setUpdates).length === 0) {
+      const settings = await Settings.findOne();
+      return NextResponse.json({
+        message: 'Settings updated successfully',
+        settings
+      });
+    }
+
+    // Update or create settings. Use dotted paths so partial nested updates do not
+    // wipe saved credentials or provider settings.
     const settings = await Settings.findOneAndUpdate(
       {},
-      { $set: updates },
+      { $set: setUpdates },
       { upsert: true, returnDocument: 'after' }
     );
 
@@ -87,4 +113,27 @@ export async function PUT(request: NextRequest) {
     console.error('Settings update error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+function flattenSettingsUpdates(value: any, prefix = '', output: Record<string, unknown> = {}) {
+  if (!value || typeof value !== 'object') return output;
+
+  Object.entries(value).forEach(([key, entry]) => {
+    if (entry === undefined) return;
+
+    const path = prefix ? `${prefix}.${key}` : key;
+    const isPlainObject =
+      entry !== null &&
+      typeof entry === 'object' &&
+      !Array.isArray(entry) &&
+      !(entry instanceof Date);
+
+    if (isPlainObject) {
+      flattenSettingsUpdates(entry, path, output);
+    } else {
+      output[path] = entry;
+    }
+  });
+
+  return output;
 }

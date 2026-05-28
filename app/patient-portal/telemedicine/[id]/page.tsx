@@ -46,6 +46,7 @@ interface TelemedicineSession {
   chatMessages: ChatMessage[];
   consultationFee: number;
   currency: string;
+  paymentStatus: string;
 }
 
 interface ChatMessage {
@@ -160,19 +161,24 @@ export default function PatientTelemedicineSessionPage() {
 
   const startCall = async () => {
     try {
-      await fetch(`/api/patient-portal/telemedicine/${sessionId}`, {
+      const res = await fetch(`/api/patient-portal/telemedicine/${sessionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'join' }),
       });
 
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to join the call.');
+      }
+
       setIsCallActive(true);
       callTimerRef.current = setInterval(() => {
         setCallDuration(prev => prev + 1);
       }, 1000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error starting call:', err);
-      setError('Failed to join the call.');
+      setError(err.message || 'Failed to join the call.');
     }
   };
 
@@ -262,6 +268,9 @@ export default function PatientTelemedicineSessionPage() {
 
   const canJoinCall = () => {
     if (!session) return false;
+    if (Number(session.consultationFee || 0) > 0 && !['paid', 'waived'].includes(session.paymentStatus)) {
+      return false;
+    }
     const now = new Date();
     const scheduledStart = new Date(session.scheduledStartTime);
     const scheduledEnd = new Date(session.scheduledEndTime);
@@ -406,6 +415,12 @@ export default function PatientTelemedicineSessionPage() {
                     {formatTimeOnly(session.scheduledStartTime)} - {formatTimeOnly(session.scheduledEndTime)}
                   </p>
                 </div>
+                {Number(session.consultationFee || 0) > 0 && !['paid', 'waived'].includes(session.paymentStatus) && (
+                  <div className="mx-auto mb-4 max-w-sm rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                    Payment is required before joining this consultation.
+                  </div>
+                )}
+
                 {canJoinCall() ? (
                   <button
                     type="button"

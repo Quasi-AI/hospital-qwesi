@@ -121,7 +121,7 @@ const NAV_SCROLL_FUZZ_PX = 18;
 const NAV_SPY_PAUSE_MS = 380;
 /** Past this scroll offset, header uses elevated (glass) chrome separate from the hero slab. */
 const HEADER_ELEVATE_SCROLL_PX = 8;
-const DEFAULT_PUBLIC_BRAND = 'Qwesi AI Virtual Hospital';
+const DEFAULT_PUBLIC_BRAND = '';
 
 /** Gutters align with hero inner column; vertical padding sets section rhythm below the header. */
 const LANDING_SECTION_SHELL =

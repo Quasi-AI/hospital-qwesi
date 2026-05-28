@@ -188,18 +188,23 @@ export default function SessionDetailPage() {
 
   const startCall = async () => {
     try {
-      await fetch(`/api/telemedicine/sessions/${sessionId}`, {
+      const res = await fetch(`/api/telemedicine/sessions/${sessionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'in-progress' }),
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to start call.');
+      }
 
       setIsCallActive(true);
       setCallDuration(0);
       fetchSession();
     } catch (error: any) {
       console.error('Error starting call:', error);
-      setError('Failed to start call.');
+      setError(error.message || 'Failed to start call.');
     }
   };
 
@@ -339,7 +344,7 @@ export default function SessionDetailPage() {
 
   if (loading) {
     return (
-      <SidebarLayout dense>
+      <SidebarLayout title="Telemedicine Session" dense>
         <div className="flex h-48 items-center justify-center">
           <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
         </div>
@@ -349,7 +354,7 @@ export default function SessionDetailPage() {
 
   if (error || !session) {
     return (
-      <SidebarLayout dense>
+      <SidebarLayout title="Telemedicine Session" dense>
         <div className="flex flex-col items-center justify-center gap-3 py-12">
           <AlertCircle className="h-8 w-8 text-red-500" />
           <p className="text-sm text-gray-600">{error || 'Session not found'}</p>
@@ -366,7 +371,7 @@ export default function SessionDetailPage() {
   }
 
   return (
-    <SidebarLayout dense>
+    <SidebarLayout title="Telemedicine Session" dense>
       <div className="h-screen flex flex-col bg-gray-900">
         {/* Header */}
         <div className="bg-gray-800 px-3 py-2 flex items-center justify-between">
@@ -486,6 +491,12 @@ export default function SessionDetailPage() {
                   </p>
                 )}
                 
+                {Number(session.consultationFee || 0) > 0 && !['paid', 'waived'].includes(session.paymentStatus) && (
+                  <div className="mx-auto mb-4 max-w-sm rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                    Payment is required before this consultation can start.
+                  </div>
+                )}
+
                 {session.status === 'completed' ? (
                   <div className="flex items-center justify-center gap-2 text-sm text-green-500">
                     <CheckCircle className="h-4 w-4" />
@@ -500,7 +511,8 @@ export default function SessionDetailPage() {
                   <button
                     type="button"
                     onClick={startCall}
-                    className="mx-auto flex items-center gap-2 rounded-full bg-green-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-green-600"
+                    disabled={Number(session.consultationFee || 0) > 0 && !['paid', 'waived'].includes(session.paymentStatus)}
+                    className="mx-auto flex items-center gap-2 rounded-full bg-green-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {session.consultationType === 'video' ? (
                       <>

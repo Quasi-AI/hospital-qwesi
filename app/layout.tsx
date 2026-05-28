@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Qwesi AI Virtual Hospital",
+  title: "",
   description: "AI-powered virtual hospital and healthcare management platform",
   icons: {
     icon: "/favicon.ico",

@@ -91,6 +91,14 @@ export async function PUT(
 
       // Start session
       if (newStatus === 'in-progress' && oldStatus !== 'in-progress') {
+        const fee = Number(telemedicineSession.consultationFee || 0);
+        const canStartPaidSession = ['paid', 'waived'].includes(telemedicineSession.paymentStatus);
+        if (fee > 0 && !canStartPaidSession) {
+          return NextResponse.json(
+            { error: 'Payment is required before this consultation can start' },
+            { status: 402 }
+          );
+        }
         data.actualStartTime = new Date();
       }
 

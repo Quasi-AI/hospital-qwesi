@@ -257,7 +257,9 @@ export default function DoctorsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {filteredDoctors.map((doctor) => (
+                    {filteredDoctors.map((doctor, index) => {
+                      const openMenuUp = filteredDoctors.length - index <= 2;
+                      return (
                       <tr
                         key={doctor._id}
                         role="button"
@@ -373,7 +375,9 @@ export default function DoctorsPage() {
                                 {showActionsMenu === doctor._id && (
                                   <div
                                     data-menu-id={doctor._id}
-                                    className="absolute right-0 z-50 mt-1 w-44 rounded-md border border-gray-200 bg-white py-0.5 shadow-lg"
+                                    className={`absolute right-0 z-50 w-44 rounded-md border border-gray-200 bg-white py-0.5 shadow-lg ${
+                                      openMenuUp ? 'bottom-full mb-1' : 'mt-1'
+                                    }`}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <div>
@@ -397,7 +401,8 @@ export default function DoctorsPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               )}

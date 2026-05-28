@@ -50,41 +50,41 @@ interface DashboardStats {
 }
 
 interface OperationalStats {
-  beds: {
+  beds?: {
     total: number;
     available: number;
     occupied: number;
     occupancyRate: number;
   };
-  inpatient: {
+  inpatient?: {
     activeAdmissions: number;
     criticalPatients: number;
   };
-  billing: {
+  billing?: {
     pendingInvoices: number;
     todayRevenue: number;
     monthlyRevenue: number;
   };
-  laboratory: {
+  laboratory?: {
     pending: number;
     urgent: number;
     criticalResults: number;
   };
-  bloodBank: {
+  bloodBank?: {
     inventory: { _id: string; count: number }[];
     isLowStock: boolean;
     expiringSoon: number;
   };
-  emergency: {
+  emergency?: {
     active: number;
     critical: number;
     waiting: number;
   };
-  pharmacy: {
+  pharmacy?: {
     lowStock: number;
     expiringSoon: number;
   };
-  telemedicine: {
+  telemedicine?: {
     active: number;
     waiting: number;
   };
@@ -167,6 +167,7 @@ export default function DashboardPage() {
   const [criticalAlerts, setCriticalAlerts] = useState<CriticalAlert[]>([]);
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState<UpcomingAppointment[]>([]);
+  const [dashboardRole, setDashboardRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const dataFetchedRef = useRef(false);
@@ -191,6 +192,7 @@ export default function DashboardPage() {
           let icon, color;
           switch (stat.name) {
             case 'totalPatients':
+            case 'myPatients':
               icon = Users;
               color = 'blue';
               break;
@@ -201,6 +203,14 @@ export default function DashboardPage() {
             case 'reportsGenerated':
               icon = FileText;
               color = 'purple';
+              break;
+            case 'pendingLabTests':
+              icon = FlaskConical;
+              color = 'cyan';
+              break;
+            case 'activeAdmissions':
+              icon = Bed;
+              color = 'indigo';
               break;
             case 'todayRevenue':
               icon = DollarSign;
@@ -248,6 +258,10 @@ export default function DashboardPage() {
               icon = Bed;
               color = 'indigo';
               break;
+            case 'telemedicine':
+              icon = Video;
+              color = 'blue';
+              break;
             default:
               icon = Activity;
               color = 'gray';
@@ -265,6 +279,7 @@ export default function DashboardPage() {
         setCriticalAlerts(data.criticalAlerts || []);
         setRecentActivities(transformedActivities);
         setUpcomingAppointments(data.upcomingAppointments || []);
+        setDashboardRole(data.dashboardRole || session?.user?.role || '');
         setError(null);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -302,6 +317,25 @@ export default function DashboardPage() {
     router.push('/login');
     return null;
   }
+
+  const role = dashboardRole || session?.user?.role || 'doctor';
+  const isAdmin = role === 'admin';
+  const isDoctor = role === 'doctor';
+  const isStaff = role === 'staff';
+  const statFallbacks: Record<string, string> = {
+    myPatients: 'My Patients',
+    totalPatients: 'Total Patients',
+    appointmentsToday: 'Appointments Today',
+    reportsGenerated: 'Reports Generated',
+    todayRevenue: "Today's Revenue",
+    monthlyRevenue: 'Monthly Revenue',
+    pendingLabTests: 'Pending Lab Tests',
+    activeAdmissions: 'Active Admissions',
+  };
+  const statLabel = (key: string) => {
+    const translated = t(`dashboard.stats.${key}`);
+    return translated === `dashboard.stats.${key}` ? statFallbacks[key] || key : translated;
+  };
 
   return (
     <ProtectedRoute>
@@ -352,9 +386,9 @@ export default function DashboardPage() {
           )}
 
           {/* Primary Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, index) => (
+              Array.from({ length: isAdmin ? 5 : 4 }).map((_, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-sm p-3.5 animate-pulse border border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -371,6 +405,7 @@ export default function DashboardPage() {
                 let href = '#';
                 switch (stat.nameKey) {
                   case 'totalPatients':
+                  case 'myPatients':
                     href = '/patients';
                     break;
                   case 'appointmentsToday':
@@ -393,8 +428,8 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-gray-500 truncate">{t(`dashboard.stats.${stat.nameKey}`)}</p>
-                        <p className="text-xl font-bold text-gray-900 mt-0.5 leading-tight">{stat.value}</p>
+                        <p className="text-xs font-medium text-gray-500 truncate">{statLabel(stat.nameKey)}</p>
+                        <p className="mt-0.5 break-words text-lg font-bold leading-tight text-gray-900 sm:text-xl">{stat.value}</p>
                         <p className={`text-xs mt-0.5 truncate ${
                           stat.changeType === 'positive' ? 'text-green-600' :
                           stat.changeType === 'negative' ? 'text-red-600' : 'text-gray-500'
@@ -414,8 +449,9 @@ export default function DashboardPage() {
 
           {/* Operational Stats Grid */}
           {operationalStats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
               {/* Bed Occupancy */}
+              {isAdmin && operationalStats.beds && (
               <Link href="/inpatient/beds" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900 leading-tight">{t('dashboard.operationalStats.bedOccupancy')}</h4>
@@ -442,8 +478,10 @@ export default function DashboardPage() {
                   <p className="text-[11px] text-gray-500 text-right">{t('dashboard.operationalStats.percentOccupied', { percent: operationalStats.beds.occupancyRate })}</p>
                 </div>
               </Link>
+              )}
 
               {/* Active Inpatients */}
+              {(isAdmin || isDoctor || isStaff) && operationalStats.inpatient && (
               <Link href="/inpatient/admissions" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900">{t('dashboard.operationalStats.inpatients')}</h4>
@@ -462,8 +500,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </Link>
+              )}
 
               {/* Laboratory */}
+              {(isAdmin || isDoctor || isStaff) && operationalStats.laboratory && (
               <Link href="/lab" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900">{t('dashboard.operationalStats.laboratory')}</h4>
@@ -488,8 +528,10 @@ export default function DashboardPage() {
                   )}
                 </div>
               </Link>
+              )}
 
               {/* Emergency */}
+              {(isAdmin || isStaff) && operationalStats.emergency && (
               <Link href="/emergency" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900">{t('dashboard.operationalStats.emergency')}</h4>
@@ -514,8 +556,10 @@ export default function DashboardPage() {
                   )}
                 </div>
               </Link>
+              )}
 
               {/* Blood Bank */}
+              {isAdmin && operationalStats.bloodBank && (
               <Link href="/blood-bank" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900">{t('dashboard.operationalStats.bloodBank')}</h4>
@@ -523,7 +567,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex flex-wrap gap-0.5">
                   {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => {
-                    const item = operationalStats.bloodBank.inventory.find(i => i._id === group);
+                    const item = operationalStats.bloodBank!.inventory.find(i => i._id === group);
                     const count = item?.count || 0;
                     return (
                       <span 
@@ -545,8 +589,10 @@ export default function DashboardPage() {
                   </p>
                 )}
               </Link>
+              )}
 
               {/* Pharmacy */}
+              {isAdmin && operationalStats.pharmacy && (
               <Link href="/pharmacy" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900">{t('dashboard.operationalStats.pharmacy')}</h4>
@@ -567,8 +613,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </Link>
+              )}
 
               {/* Telemedicine */}
+              {(isAdmin || isDoctor || isStaff) && operationalStats.telemedicine && (
               <Link href="/telemedicine" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900">{t('dashboard.operationalStats.telemedicine')}</h4>
@@ -585,8 +633,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </Link>
+              )}
 
               {/* Pending Billing */}
+              {(isAdmin || isDoctor || isStaff) && operationalStats.billing && (
               <Link href="/billing" className="bg-white rounded-lg shadow-sm p-3 hover:shadow transition-all border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-900">{t('dashboard.operationalStats.billing')}</h4>
@@ -607,6 +657,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </Link>
+              )}
             </div>
           )}
 
@@ -646,6 +697,7 @@ export default function DashboardPage() {
                       else if (activity.type === 'report') href = `/reports/${activity.id}`;
                       else if (activity.type === 'emergency') href = `/emergency/${activity.id}`;
                       else if (activity.type === 'admission') href = `/inpatient/admissions/${activity.id}`;
+                      else if (activity.type === 'telemedicine') href = `/telemedicine/sessions/${activity.id}`;
 
                       return (
                         <Link
@@ -747,6 +799,7 @@ export default function DashboardPage() {
                     <UserPlus className="h-5 w-5 text-blue-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.newPatient')}</span>
                   </Link>
+                  {(isAdmin || isDoctor || isStaff) && (
                   <Link 
                     href="/appointments/new"
                     className="flex flex-col items-center gap-1 p-2.5 rounded-md border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all"
@@ -754,6 +807,8 @@ export default function DashboardPage() {
                     <Calendar className="h-5 w-5 text-green-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.schedule')}</span>
                   </Link>
+                  )}
+                  {(isAdmin || isDoctor || isStaff) && (
                   <Link 
                     href="/lab/new"
                     className="flex flex-col items-center gap-1 p-2.5 rounded-md border border-gray-200 hover:border-cyan-300 hover:bg-cyan-50 transition-all"
@@ -761,6 +816,8 @@ export default function DashboardPage() {
                     <TestTube className="h-5 w-5 text-cyan-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.labOrder')}</span>
                   </Link>
+                  )}
+                  {isAdmin && (
                   <Link 
                     href="/billing/invoices/new"
                     className="flex flex-col items-center gap-1 p-2.5 rounded-md border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all"
@@ -768,6 +825,8 @@ export default function DashboardPage() {
                     <Receipt className="h-5 w-5 text-emerald-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.newInvoice')}</span>
                   </Link>
+                  )}
+                  {(isAdmin || isStaff) && (
                   <Link 
                     href="/inpatient/admissions/new"
                     className="flex flex-col items-center gap-1 p-2.5 rounded-md border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all"
@@ -775,6 +834,8 @@ export default function DashboardPage() {
                     <Bed className="h-5 w-5 text-purple-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.admitPatient')}</span>
                   </Link>
+                  )}
+                  {(isAdmin || isStaff) && (
                   <Link 
                     href="/emergency/new"
                     className="flex flex-col items-center gap-1 p-2.5 rounded-md border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all"
@@ -782,6 +843,8 @@ export default function DashboardPage() {
                     <Siren className="h-5 w-5 text-red-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.emergency')}</span>
                   </Link>
+                  )}
+                  {(isAdmin || isDoctor) && (
                   <Link 
                     href="/telemedicine/sessions/new"
                     className="flex flex-col items-center gap-1 p-2.5 rounded-md border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all"
@@ -789,6 +852,8 @@ export default function DashboardPage() {
                     <Video className="h-5 w-5 text-blue-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.telemedicine')}</span>
                   </Link>
+                  )}
+                  {(isAdmin || isDoctor) && (
                   <Link 
                     href="/reports/new"
                     className="flex flex-col items-center gap-1 p-2.5 rounded-md border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all"
@@ -796,6 +861,7 @@ export default function DashboardPage() {
                     <FileText className="h-5 w-5 text-purple-600" />
                     <span className="text-xs font-medium text-gray-700 text-center leading-tight">{t('dashboard.quickActions.newReport')}</span>
                   </Link>
+                  )}
                 </div>
               </div>
             </div>

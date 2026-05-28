@@ -1,7 +1,7 @@
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
 
-export const DEFAULT_HOSPITAL_NAME = 'Qwesi AI Virtual Hospital';
+export const DEFAULT_HOSPITAL_NAME = '';
 
 export function normalizeHospitalName(value: unknown) {
   const title = String(value || '').trim();

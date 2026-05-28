@@ -154,11 +154,11 @@ export default function PatientPortalDashboard() {
   return (
     <div className="space-y-4">
       {/* Welcome Header */}
-      <div className="rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 p-4 text-white shadow-md">
-        <div className="flex items-center justify-between gap-3">
-          <div>
+      <div className="rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 p-4 text-white shadow-md">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <h1 className="mb-1 text-xl font-bold">
-              {t('patientPortal.dashboard.welcome')}, {session?.user?.name?.split(' ')[0]}! 👋
+              {t('patientPortal.dashboard.welcome')}, {session?.user?.name?.split(' ')[0]}!
             </h1>
             <p className="text-sm text-teal-100">
               {t('patientPortal.dashboard.subtitle')}
@@ -171,7 +171,7 @@ export default function PatientPortalDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/patient-portal/appointments" className="rounded-lg border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
@@ -225,7 +225,7 @@ export default function PatientPortalDashboard() {
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Upcoming Appointments */}
         <div className="rounded-lg border border-gray-100 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
+          <div className="flex flex-col gap-1.5 border-b border-gray-100 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
               <Calendar className="h-4 w-4 text-teal-600" />
               {t('patientPortal.dashboard.recentAppointments')}
@@ -239,7 +239,7 @@ export default function PatientPortalDashboard() {
             {recentAppointments.length > 0 ? (
               <div className="space-y-2">
                 {recentAppointments.map((apt) => (
-                  <div key={apt._id} className="flex items-center gap-3 rounded-md bg-gray-50 p-2 transition-colors hover:bg-gray-100">
+                  <div key={apt._id} className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-2 transition-colors hover:bg-gray-100 sm:flex-nowrap">
                     <div className={`h-10 w-0.5 shrink-0 rounded-full ${getAppointmentTypeColor(apt.appointmentType)}`} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-gray-900">{apt.doctorName}</p>
@@ -264,7 +264,7 @@ export default function PatientPortalDashboard() {
 
         {/* Recent Reports */}
         <div className="rounded-lg border border-gray-100 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
+          <div className="flex flex-col gap-1.5 border-b border-gray-100 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
               <FileText className="h-4 w-4 text-teal-600" />
               {t('patientPortal.dashboard.recentReports')}
@@ -281,7 +281,7 @@ export default function PatientPortalDashboard() {
                   <Link 
                     key={report._id} 
                     href={`/patient-portal/reports/${report._id}`}
-                    className="flex items-center gap-3 rounded-md bg-gray-50 p-2 transition-colors hover:bg-gray-100"
+                    className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-2 transition-colors hover:bg-gray-100 sm:flex-nowrap"
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-purple-100">
                       <FileText className="h-4 w-4 text-purple-600" />

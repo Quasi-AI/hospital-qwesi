@@ -12,6 +12,7 @@ import BloodInventory from '../../../models/BloodInventory';
 import EmergencyCase from '../../../models/EmergencyCase';
 import Medicine from '../../../models/Medicine';
 import TelemedicineSession from '../../../models/TelemedicineSession';
+import User from '../../../models/User';
 import dbConnect from '../../../lib/mongodb';
 import { getSystemCurrency } from '../../../lib/getSystemCurrency';
 import { formatCurrencyAmount } from '../../../lib/formatCurrency';
@@ -36,6 +37,368 @@ export async function GET(request: NextRequest) {
     
     // Date for expiring items (next 30 days)
     const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    if (session.user.role === 'doctor') {
+      const doctorUser = await User.findOne({ email: session.user.email }).lean() as any;
+      const doctorId = doctorUser?._id;
+      const doctorIdentity = [session.user.id, session.user.email, doctorUser?.name || session.user.name].filter(Boolean);
+      const doctorAppointmentOr: any[] = [
+        { doctorEmail: session.user.email },
+        { doctorName: doctorUser?.name || session.user.name },
+      ];
+      if (doctorId) doctorAppointmentOr.push({ doctorId });
+
+      const doctorAppointmentMatch = { $or: doctorAppointmentOr };
+      const doctorReportMatch = {
+        $or: [
+          { doctorId: { $in: doctorIdentity.map(String) } },
+          { doctorName: doctorUser?.name || session.user.name },
+        ],
+      };
+
+      const doctorAppointments = await Appointment.find(doctorAppointmentMatch)
+        .select('patientId patientName patientEmail doctorName doctorEmail appointmentDate appointmentTime status createdAt')
+        .lean();
+      const telemedicinePatientIds = doctorId
+        ? await TelemedicineSession.distinct('patientId', { doctorId })
+        : [];
+      const telemedicinePatients = telemedicinePatientIds.length > 0
+        ? await Patient.find({ _id: { $in: telemedicinePatientIds } }).select('_id patientId name email').lean()
+        : [];
+
+      const patientIds = new Set<string>();
+      const patientEmails = new Set<string>();
+      const patientNames = new Set<string>();
+      doctorAppointments.forEach((appointment: any) => {
+        if (appointment.patientId) patientIds.add(String(appointment.patientId));
+        if (appointment.patientEmail) patientEmails.add(String(appointment.patientEmail).toLowerCase());
+        if (appointment.patientName) patientNames.add(String(appointment.patientName));
+      });
+      telemedicinePatients.forEach((patient: any) => {
+        if (patient._id) patientIds.add(String(patient._id));
+        if (patient.patientId) patientIds.add(String(patient.patientId));
+        if (patient.email) patientEmails.add(String(patient.email).toLowerCase());
+        if (patient.name) patientNames.add(String(patient.name));
+      });
+
+      const patientFilters: any[] = [];
+      if (patientIds.size > 0) patientFilters.push({ patientId: { $in: Array.from(patientIds) } });
+      if (patientEmails.size > 0) patientFilters.push({ patientEmail: { $in: Array.from(patientEmails) } });
+      if (patientNames.size > 0) patientFilters.push({ patientName: { $in: Array.from(patientNames) } });
+      patientFilters.push({ createdBy: { $in: doctorIdentity.map(String) } });
+
+      const invoiceMatch = {
+        status: 'paid',
+        $or: patientFilters,
+      };
+
+      const [
+        totalDoctorPatients,
+        appointmentsToday,
+        appointmentsLastMonth,
+        totalReports,
+        reportsLastMonth,
+        todayRevenue,
+        monthlyRevenue,
+        previousMonthlyRevenue,
+        pendingInvoices,
+        pendingLabTests,
+        urgentLabTests,
+        activeTelemedicineSessions,
+        waitingTelemedicineSessions,
+        activeAdmissions,
+        criticalPatients,
+        recentReports,
+        recentTelemedicine,
+      ] = await Promise.all([
+        Patient.countDocuments({
+          $or: [
+            { patientId: { $in: Array.from(patientIds) } },
+            { email: { $in: Array.from(patientEmails) } },
+            { name: { $in: Array.from(patientNames) } },
+          ],
+        }),
+        Appointment.countDocuments({ ...doctorAppointmentMatch, appointmentDate: { $gte: startOfToday, $lt: endOfToday }, status: { $ne: 'cancelled' } }),
+        Appointment.countDocuments({ ...doctorAppointmentMatch, appointmentDate: { $gte: startOfLastMonth, $lt: endOfLastMonth }, status: { $ne: 'cancelled' } }),
+        Report.countDocuments(doctorReportMatch),
+        Report.countDocuments({ ...doctorReportMatch, createdAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } }),
+        Invoice.aggregate([
+          { $match: { ...invoiceMatch, updatedAt: { $gte: startOfToday, $lt: endOfToday } } },
+          { $group: { _id: null, total: { $sum: '$total' } } }
+        ]),
+        Invoice.aggregate([
+          { $match: { ...invoiceMatch, updatedAt: { $gte: startOfMonth, $lt: endOfToday } } },
+          { $group: { _id: null, total: { $sum: '$total' } } }
+        ]),
+        Invoice.aggregate([
+          { $match: { ...invoiceMatch, updatedAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } } },
+          { $group: { _id: null, total: { $sum: '$total' } } }
+        ]),
+        Invoice.countDocuments({ status: { $in: ['pending', 'partial'] }, $or: patientFilters }),
+        LabTest.countDocuments({ doctorId: { $in: doctorIdentity.map(String) }, status: { $in: ['pending', 'sample-collected', 'in-progress'] } }),
+        LabTest.countDocuments({ doctorId: { $in: doctorIdentity.map(String) }, status: { $in: ['pending', 'sample-collected', 'in-progress'] }, priority: { $in: ['urgent', 'stat'] } }),
+        doctorId ? TelemedicineSession.countDocuments({ doctorId, status: 'in-progress' }) : 0,
+        doctorId ? TelemedicineSession.countDocuments({ doctorId, status: 'waiting' }) : 0,
+        Admission.countDocuments({ patientId: { $in: Array.from(patientIds) }, status: { $in: ['admitted', 'in-treatment'] } } as any),
+        Admission.countDocuments({ patientId: { $in: Array.from(patientIds) }, status: { $in: ['admitted', 'in-treatment'] }, priority: 'critical' } as any),
+        Report.find(doctorReportMatch).sort({ createdAt: -1 }).limit(5).select('_id patientName doctorName reportType status createdAt'),
+        doctorId
+          ? TelemedicineSession.find({ doctorId }).populate('patientId', 'name').sort({ createdAt: -1 }).limit(5).select('_id sessionNumber patientId status createdAt')
+          : [],
+      ]);
+
+      const calculateChange = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? '+100%' : '0%';
+        const change = ((current - previous) / previous) * 100;
+        const sign = change >= 0 ? '+' : '';
+        return `${sign}${Math.round(change)}%`;
+      };
+
+      const monthlyTotal = monthlyRevenue[0]?.total || 0;
+      const previousMonthlyTotal = previousMonthlyRevenue[0]?.total || 0;
+      const recentDoctorAppointments = doctorAppointments
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
+
+      const recentActivities: any[] = [];
+      recentDoctorAppointments.forEach((appointment: any) => {
+        recentActivities.push({
+          id: String(appointment._id),
+          type: 'appointment',
+          title: `Appointment: ${appointment.patientName}`,
+          description: `${appointment.appointmentTime || 'Scheduled'} - ${appointment.status}`,
+          time: formatTimeAgo(appointment.createdAt),
+          createdAt: appointment.createdAt,
+          status: appointment.status,
+        });
+      });
+      recentReports.forEach((report: any) => {
+        recentActivities.push({
+          id: String(report._id),
+          type: 'report',
+          title: 'Report generated',
+          description: `${report.patientName} - ${report.reportType}`,
+          time: formatTimeAgo(report.createdAt),
+          createdAt: report.createdAt,
+          status: report.status,
+        });
+      });
+      recentTelemedicine.forEach((tm: any) => {
+        recentActivities.push({
+          id: String(tm._id),
+          type: 'telemedicine',
+          title: `Telemedicine: ${tm.sessionNumber}`,
+          description: `${tm.patientId?.name || 'Patient'} - ${String(tm.status).replace('-', ' ')}`,
+          time: formatTimeAgo(tm.createdAt),
+          createdAt: tm.createdAt,
+          status: tm.status,
+        });
+      });
+      recentActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      const upcomingAppointments = await Appointment.find({
+        ...doctorAppointmentMatch,
+        appointmentDate: { $gte: startOfToday },
+        status: { $in: ['scheduled', 'confirmed'] }
+      })
+        .sort({ appointmentDate: 1, appointmentTime: 1 })
+        .limit(5)
+        .select('_id patientName appointmentTime appointmentType status appointmentDate');
+
+      return NextResponse.json({
+        dashboardRole: 'doctor',
+        stats: [
+          {
+            name: 'myPatients',
+            value: totalDoctorPatients.toString(),
+            change: '0%',
+            changeType: 'neutral',
+          },
+          {
+            name: 'appointmentsToday',
+            value: appointmentsToday.toString(),
+            change: calculateChange(appointmentsToday, appointmentsLastMonth),
+            changeType: appointmentsToday >= appointmentsLastMonth ? 'positive' : 'negative',
+          },
+          {
+            name: 'reportsGenerated',
+            value: totalReports.toString(),
+            change: calculateChange(totalReports, reportsLastMonth),
+            changeType: totalReports >= reportsLastMonth ? 'positive' : 'negative',
+          },
+          {
+            name: 'monthlyRevenue',
+            value: formatCurrencyAmount(monthlyTotal, systemCurrency),
+            change: calculateChange(monthlyTotal, previousMonthlyTotal),
+            changeType: monthlyTotal >= previousMonthlyTotal ? 'positive' : 'negative',
+          },
+        ],
+        operationalStats: {
+          inpatient: { activeAdmissions, criticalPatients },
+          billing: { pendingInvoices, todayRevenue: todayRevenue[0]?.total || 0, monthlyRevenue: monthlyTotal },
+          laboratory: { pending: pendingLabTests, urgent: urgentLabTests, criticalResults: 0 },
+          telemedicine: { active: activeTelemedicineSessions, waiting: waitingTelemedicineSessions },
+        },
+        criticalAlerts: urgentLabTests > 0
+          ? [{
+              id: 'urgent-lab',
+              type: 'info',
+              titleKey: urgentLabTests > 1 ? 'urgentLabTestPlural' : 'urgentLabTest',
+              descriptionKey: 'pendingProcessing',
+              count: urgentLabTests,
+              link: '/lab?priority=urgent',
+              icon: 'lab',
+            }]
+          : [],
+        recentActivities: recentActivities.slice(0, 10),
+        upcomingAppointments: upcomingAppointments.map((appointment: any) => ({
+          id: appointment._id.toString(),
+          patient: appointment.patientName || 'Unknown Patient',
+          time: appointment.appointmentTime || 'N/A',
+          type: appointment.appointmentType || 'consultation',
+          status: appointment.status === 'confirmed' ? 'confirmed' : 'pending',
+        })),
+      });
+    }
+
+    if (session.user.role === 'staff') {
+      const [
+        totalPatients,
+        appointmentsToday,
+        activeAdmissions,
+        criticalPatients,
+        pendingLabTests,
+        urgentLabTests,
+        activeEmergencies,
+        waitingEmergencies,
+        activeTelemedicineSessions,
+        waitingTelemedicineSessions,
+        todayRevenue,
+        monthlyRevenue,
+        previousMonthlyRevenue,
+        pendingInvoices,
+        recentAppointments,
+        recentAdmissions,
+      ] = await Promise.all([
+        Patient.countDocuments(),
+        Appointment.countDocuments({ appointmentDate: { $gte: startOfToday, $lt: endOfToday }, status: { $ne: 'cancelled' } }),
+        Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] } }),
+        Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] }, priority: 'critical' }),
+        LabTest.countDocuments({ status: { $in: ['pending', 'sample-collected', 'in-progress'] } }),
+        LabTest.countDocuments({ status: { $in: ['pending', 'sample-collected', 'in-progress'] }, priority: { $in: ['urgent', 'stat'] } }),
+        EmergencyCase.countDocuments({ status: { $in: ['waiting', 'in-triage', 'in-treatment', 'under-observation'] } }),
+        EmergencyCase.countDocuments({ status: 'waiting' }),
+        TelemedicineSession.countDocuments({ status: 'in-progress' }),
+        TelemedicineSession.countDocuments({ status: 'waiting' }),
+        Invoice.aggregate([
+          { $match: { status: 'paid', updatedAt: { $gte: startOfToday, $lt: endOfToday } } },
+          { $group: { _id: null, total: { $sum: '$total' } } }
+        ]),
+        Invoice.aggregate([
+          { $match: { status: 'paid', updatedAt: { $gte: startOfMonth, $lt: endOfToday } } },
+          { $group: { _id: null, total: { $sum: '$total' } } }
+        ]),
+        Invoice.aggregate([
+          { $match: { status: 'paid', updatedAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } } },
+          { $group: { _id: null, total: { $sum: '$total' } } }
+        ]),
+        Invoice.countDocuments({ status: { $in: ['pending', 'partial'] } }),
+        Appointment.find().sort({ createdAt: -1 }).limit(6).select('_id patientName doctorName appointmentDate appointmentTime status createdAt'),
+        Admission.find().sort({ createdAt: -1 }).limit(4).select('_id admissionNumber patientName wardName status createdAt'),
+      ]);
+
+      const calculateChange = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? '+100%' : '0%';
+        const change = ((current - previous) / previous) * 100;
+        const sign = change >= 0 ? '+' : '';
+        return `${sign}${Math.round(change)}%`;
+      };
+
+      const monthlyTotal = monthlyRevenue[0]?.total || 0;
+      const previousMonthlyTotal = previousMonthlyRevenue[0]?.total || 0;
+      const recentActivities: any[] = [];
+      recentAppointments.forEach((appointment: any) => {
+        recentActivities.push({
+          id: appointment._id.toString(),
+          type: 'appointment',
+          title: `Appointment: ${appointment.patientName}`,
+          description: `${appointment.doctorName} - ${appointment.appointmentTime}`,
+          time: formatTimeAgo(appointment.createdAt),
+          createdAt: appointment.createdAt,
+          status: appointment.status,
+        });
+      });
+      recentAdmissions.forEach((admission: any) => {
+        recentActivities.push({
+          id: admission._id.toString(),
+          type: 'admission',
+          title: `Admission: ${admission.admissionNumber}`,
+          description: `${admission.patientName} - ${admission.wardName}`,
+          time: formatTimeAgo(admission.createdAt),
+          createdAt: admission.createdAt,
+          status: admission.status,
+        });
+      });
+      recentActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      const upcomingAppointments = await Appointment.find({
+        appointmentDate: { $gte: startOfToday },
+        status: { $in: ['scheduled', 'confirmed'] }
+      })
+        .sort({ appointmentDate: 1, appointmentTime: 1 })
+        .limit(5)
+        .select('_id patientName appointmentTime appointmentType status appointmentDate');
+
+      return NextResponse.json({
+        dashboardRole: 'staff',
+        stats: [
+          { name: 'totalPatients', value: totalPatients.toString(), change: '0%', changeType: 'neutral' },
+          { name: 'appointmentsToday', value: appointmentsToday.toString(), change: '0%', changeType: 'neutral' },
+          { name: 'pendingLabTests', value: pendingLabTests.toString(), change: '0%', changeType: pendingLabTests > 0 ? 'negative' : 'neutral' },
+          {
+            name: 'monthlyRevenue',
+            value: formatCurrencyAmount(monthlyTotal, systemCurrency),
+            change: calculateChange(monthlyTotal, previousMonthlyTotal),
+            changeType: monthlyTotal >= previousMonthlyTotal ? 'positive' : 'negative',
+          },
+        ],
+        operationalStats: {
+          inpatient: { activeAdmissions, criticalPatients },
+          billing: { pendingInvoices, todayRevenue: todayRevenue[0]?.total || 0, monthlyRevenue: monthlyTotal },
+          laboratory: { pending: pendingLabTests, urgent: urgentLabTests, criticalResults: 0 },
+          emergency: { active: activeEmergencies, critical: 0, waiting: waitingEmergencies },
+          telemedicine: { active: activeTelemedicineSessions, waiting: waitingTelemedicineSessions },
+        },
+        criticalAlerts: [
+          ...(criticalPatients > 0 ? [{
+            id: 'critical-patients',
+            type: 'warning',
+            titleKey: criticalPatients > 1 ? 'criticalInpatientPlural' : 'criticalInpatient',
+            descriptionKey: 'requiresMonitoring',
+            count: criticalPatients,
+            link: '/inpatient/admissions?priority=critical',
+            icon: 'inpatient',
+          }] : []),
+          ...(urgentLabTests > 0 ? [{
+            id: 'urgent-lab',
+            type: 'info',
+            titleKey: urgentLabTests > 1 ? 'urgentLabTestPlural' : 'urgentLabTest',
+            descriptionKey: 'pendingProcessing',
+            count: urgentLabTests,
+            link: '/lab?priority=urgent',
+            icon: 'lab',
+          }] : []),
+        ],
+        recentActivities: recentActivities.slice(0, 10),
+        upcomingAppointments: upcomingAppointments.map((appointment: any) => ({
+          id: appointment._id.toString(),
+          patient: appointment.patientName || 'Unknown Patient',
+          time: appointment.appointmentTime || 'N/A',
+          type: appointment.appointmentType || 'consultation',
+          status: appointment.status === 'confirmed' ? 'confirmed' : 'pending',
+        })),
+      });
+    }
 
     // Fetch all stats in parallel
     const [
@@ -350,7 +713,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build recent activities
-    const recentActivities = [];
+    const recentActivities: any[] = [];
 
     recentAppointments.forEach(appointment => {
       recentActivities.push({

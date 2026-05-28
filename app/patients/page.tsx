@@ -220,7 +220,9 @@ export default function PatientsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {filteredPatients.map((patient) => (
+                    {filteredPatients.map((patient, index) => {
+                      const openMenuUp = filteredPatients.length - index <= 2;
+                      return (
                       <tr
                         key={patient._id}
                         className="cursor-pointer hover:bg-blue-50/50"
@@ -311,7 +313,9 @@ export default function PatientsPage() {
                               {showActionsMenu === patient._id && (
                                 <div
                                   data-menu-id={patient._id}
-                                  className="absolute right-0 z-50 mt-1 w-44 rounded-md border border-gray-200 bg-white py-0.5 shadow-lg"
+                                  className={`absolute right-0 z-50 w-44 rounded-md border border-gray-200 bg-white py-0.5 shadow-lg ${
+                                    openMenuUp ? 'bottom-full mb-1' : 'mt-1'
+                                  }`}
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <button
@@ -356,7 +360,8 @@ export default function PatientsPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               )}

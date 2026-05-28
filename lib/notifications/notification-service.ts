@@ -5,6 +5,8 @@ import Appointment from '@/models/Appointment';
 import LabTest from '@/models/LabTest';
 import Invoice from '@/models/Invoice';
 import Patient from '@/models/Patient';
+import TelemedicineSession from '@/models/TelemedicineSession';
+import User from '@/models/User';
 import { sendEmail } from './email-provider';
 import { sendSMS } from './sms-provider';
 import { getTemplate, TemplateData } from './templates';
@@ -65,6 +67,33 @@ async function getClinicInfo() {
     clinicPhone: settings?.address?.phone || '',
     clinicEmail: settings?.address?.email || '',
   };
+}
+
+function channelsForEmail(recipientEmail?: string): ('email' | 'in_app')[] {
+  return recipientEmail ? ['in_app', 'email'] : ['in_app'];
+}
+
+function parseDurationDays(duration?: string) {
+  const text = String(duration || '').toLowerCase();
+  const match = text.match(/(\d+)/);
+  const amount = match ? Number(match[1]) : 7;
+  const days = text.includes('week') ? amount * 7 : amount;
+  return Math.min(Math.max(days || 7, 1), 14);
+}
+
+function reminderHoursForFrequency(frequency?: string) {
+  const text = String(frequency || '').toLowerCase();
+  if (!text || text.includes('as needed')) return [];
+  if (text.includes('four') || text.includes('4 times')) return [6, 12, 18, 22];
+  if (text.includes('three') || text.includes('3 times')) return [8, 14, 20];
+  if (text.includes('twice') || text.includes('2 times')) return [9, 21];
+  if (text.includes('every 4')) return [6, 10, 14, 18, 22];
+  if (text.includes('every 6')) return [6, 12, 18, 22];
+  if (text.includes('every 8')) return [6, 14, 22];
+  if (text.includes('before meal')) return [7, 12, 18];
+  if (text.includes('after meal')) return [9, 14, 20];
+  if (text.includes('bedtime')) return [21];
+  return [9];
 }
 
 export async function createNotification(options: CreateNotificationOptions): Promise<NotificationResult> {
@@ -532,6 +561,211 @@ export async function sendMedicationReminder(
   } catch (error: any) {
     console.error('Send medication reminder error:', error);
     return { success: false, error: error.message };
+  }
+}
+
+export async function scheduleMedicationReminders(
+  patientId: string,
+  medications: { name: string; dosage?: string; frequency?: string; duration?: string; instructions?: string }[],
+  options: { prescriptionId?: string; startDate?: Date } = {}
+): Promise<{ success: boolean; scheduled: number; error?: string }> {
+  try {
+    await dbConnect();
+
+    const patient = await findPatientForAppointment(patientId);
+    if (!patient) {
+      return { success: false, scheduled: 0, error: 'Patient not found' };
+    }
+
+    const validMedications = medications.filter((med) => med.name?.trim());
+    if (validMedications.length === 0) {
+      return { success: true, scheduled: 0 };
+    }
+
+    if (options.prescriptionId) {
+      await Notification.deleteMany({
+        type: 'medication_reminder',
+        status: 'pending',
+        'relatedEntity.type': 'prescription',
+        'relatedEntity.id': options.prescriptionId,
+      });
+    }
+
+    const clinicInfo = await getClinicInfo();
+    const start = options.startDate || new Date();
+    const now = new Date();
+    let scheduled = 0;
+
+    for (const [index, medication] of validMedications.entries()) {
+      const hours = reminderHoursForFrequency(medication.frequency);
+      if (hours.length === 0) continue;
+
+      const durationDays = parseDurationDays(medication.duration);
+      const template = getTemplate('medication_reminder', {
+        patientName: patient.name,
+        medicationName: medication.name,
+        dosage: medication.dosage,
+        instructions: [medication.frequency, medication.instructions].filter(Boolean).join(' - '),
+        ...clinicInfo,
+      });
+
+      for (let day = 0; day < durationDays; day++) {
+        for (const hour of hours) {
+          const scheduledFor = new Date(start);
+          scheduledFor.setDate(start.getDate() + day);
+          scheduledFor.setHours(hour, 0, 0, 0);
+          if (scheduledFor <= now) continue;
+
+          const medicationKey = `${options.prescriptionId || patientId}:${index}:${medication.name}:${scheduledFor.toISOString()}`;
+          const exists = await Notification.exists({
+            recipientId: String(patient._id),
+            type: 'medication_reminder',
+            scheduledFor,
+            'metadata.medicationKey': medicationKey,
+          });
+          if (exists) continue;
+
+          const result = await createNotification({
+            type: 'medication_reminder',
+            recipientId: String(patient._id),
+            recipientType: 'patient',
+            recipientEmail: patient.email,
+            recipientPhone: patient.phone,
+            title: template.subject,
+            message: template.sms,
+            channels: channelsForEmail(patient.email),
+            scheduledFor,
+            relatedEntity: options.prescriptionId
+              ? { type: 'prescription', id: options.prescriptionId }
+              : undefined,
+            metadata: {
+              emailHtml: template.html,
+              smsText: template.sms,
+              medication,
+              medicationKey,
+              prescriptionId: options.prescriptionId,
+            },
+            sendImmediately: false,
+          });
+
+          if (result.success) scheduled++;
+        }
+      }
+    }
+
+    return { success: true, scheduled };
+  } catch (error: any) {
+    console.error('Schedule medication reminders error:', error);
+    return { success: false, scheduled: 0, error: error.message };
+  }
+}
+
+export async function scheduleTelemedicineSessionReminders(
+  telemedicineSessionId: string,
+  reminderMinutes?: number
+): Promise<{ success: boolean; scheduled: number; error?: string }> {
+  try {
+    await dbConnect();
+
+    const telemedicineSession = await TelemedicineSession.findById(telemedicineSessionId)
+      .populate('patientId', 'name email phone patientId')
+      .populate({ path: 'doctorId', model: User, select: 'name email phone' });
+
+    if (!telemedicineSession) {
+      return { success: false, scheduled: 0, error: 'Telemedicine session not found' };
+    }
+
+    const settings = await getSettings();
+    const minutes = reminderMinutes || settings?.reminderTime || 30;
+    const scheduledFor = new Date(telemedicineSession.scheduledStartTime.getTime() - minutes * 60 * 1000);
+
+    if (scheduledFor <= new Date()) {
+      return { success: false, scheduled: 0, error: 'Reminder time has already passed' };
+    }
+
+    await Notification.deleteMany({
+      type: 'telemedicine',
+      status: 'pending',
+      'relatedEntity.type': 'telemedicineSession',
+      'relatedEntity.id': telemedicineSessionId,
+      'metadata.reminderKind': 'telemedicine_session_reminder',
+    });
+
+    const clinicInfo = await getClinicInfo();
+    const patient = (telemedicineSession as any).patientId;
+    const doctor = (telemedicineSession as any).doctorId;
+    const appointmentDate = telemedicineSession.scheduledStartTime.toLocaleDateString();
+    const appointmentTime = telemedicineSession.scheduledStartTime.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const sessionUrl = `/telemedicine/sessions/${telemedicineSessionId}`;
+    const patientUrl = `/patient-portal/telemedicine/${telemedicineSessionId}`;
+
+    const reminders = [
+      {
+        recipientId: String(doctor?._id || telemedicineSession.doctorId),
+        recipientType: 'user' as const,
+        recipientEmail: doctor?.email,
+        recipientPhone: doctor?.phone,
+        name: doctor?.name || 'Doctor',
+        title: 'Telemedicine session starting soon',
+        message: `${patient?.name || 'Your patient'} has a telemedicine session with you on ${appointmentDate} at ${appointmentTime}.`,
+        link: sessionUrl,
+        role: 'doctor',
+      },
+      {
+        recipientId: String(patient?._id || telemedicineSession.patientId),
+        recipientType: 'patient' as const,
+        recipientEmail: patient?.email,
+        recipientPhone: patient?.phone,
+        name: patient?.name || 'Patient',
+        title: 'Your telemedicine session starts soon',
+        message: `Your telemedicine session with Dr. ${doctor?.name || 'your doctor'} is on ${appointmentDate} at ${appointmentTime}.`,
+        link: patientUrl,
+        role: 'patient',
+      },
+    ];
+
+    let scheduled = 0;
+    for (const reminder of reminders) {
+      const template = getTemplate('system', {
+        patientName: reminder.name,
+        title: reminder.title,
+        message: reminder.message,
+        ...clinicInfo,
+      });
+
+      const result = await createNotification({
+        type: 'telemedicine',
+        recipientId: reminder.recipientId,
+        recipientType: reminder.recipientType,
+        recipientEmail: reminder.recipientEmail,
+        recipientPhone: reminder.recipientPhone,
+        title: reminder.title,
+        message: reminder.message,
+        channels: channelsForEmail(reminder.recipientEmail),
+        priority: 'high',
+        scheduledFor,
+        relatedEntity: { type: 'telemedicineSession', id: telemedicineSessionId },
+        metadata: {
+          emailHtml: template.html,
+          smsText: reminder.message,
+          reminderKind: 'telemedicine_session_reminder',
+          reminderRole: reminder.role,
+          sessionId: telemedicineSessionId,
+          sessionNumber: telemedicineSession.sessionNumber,
+          link: reminder.link,
+        },
+        sendImmediately: false,
+      });
+      if (result.success) scheduled++;
+    }
+
+    return { success: true, scheduled };
+  } catch (error: any) {
+    console.error('Schedule telemedicine reminders error:', error);
+    return { success: false, scheduled: 0, error: error.message };
   }
 }
 

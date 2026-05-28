@@ -14,7 +14,7 @@ export default function LandingPage() {
           <Stethoscope className="h-8 w-8 text-white" />
         </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl">
-          Qwesi AI Virtual Hospital
+          Virtual Hospital
         </h1>
         <p className="mb-8 max-w-xl text-base text-gray-600 sm:mx-auto sm:text-lg">
           AI-powered virtual hospital and healthcare management platform
