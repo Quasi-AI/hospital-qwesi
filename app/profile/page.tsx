@@ -10,7 +10,8 @@ import {
   Save, 
   Eye, 
   EyeOff,
-  ArrowLeft
+  ArrowLeft,
+  Camera
 } from 'lucide-react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { t } = useTranslations();
   const [loading, setLoading] = useState(false);
+  const [photoRequired, setPhotoRequired] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,6 +32,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    image: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -40,10 +43,40 @@ export default function ProfilePage() {
       setFormData(prev => ({
         ...prev,
         name: session.user.name || '',
-        email: session.user.email || ''
+        email: session.user.email || '',
+        image: session.user.image || ''
       }));
     }
   }, [session]);
+
+  useEffect(() => {
+    setPhotoRequired(new URLSearchParams(window.location.search).get('photoRequired') === '1');
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProfile = async () => {
+      try {
+        const response = await fetch('/api/profile');
+        if (!response.ok || cancelled) return;
+        const data = await response.json();
+        if (data.user) {
+          setFormData((prev) => ({
+            ...prev,
+            name: data.user.name || prev.name,
+            email: data.user.email || prev.email,
+            image: data.user.image || '',
+          }));
+        }
+      } catch {
+        /* session data is enough as fallback */
+      }
+    };
+    loadProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -51,6 +84,25 @@ export default function ProfilePage() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setMessage({ type: 'error', text: 'Please upload a JPG, PNG, or WEBP photo.' });
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Photo is too large. Please upload an image under 1 MB.' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev) => ({ ...prev, image: String(reader.result || '') }));
+      setMessage(null);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -67,6 +119,7 @@ export default function ProfilePage() {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
+          image: formData.image,
         }),
       });
 
@@ -81,6 +134,7 @@ export default function ProfilePage() {
             ...session?.user,
             name: formData.name,
             email: formData.email,
+            image: formData.image,
           }
         });
       } else {
@@ -170,6 +224,12 @@ export default function ProfilePage() {
             </div>
           )}
 
+          {photoRequired && session?.user?.role === 'doctor' && !formData.image && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              Doctors must upload a profile photo before continuing. Patients will see this photo when choosing and viewing a doctor.
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Profile Information */}
             <div className="bg-white rounded-lg shadow p-6">
@@ -184,6 +244,37 @@ export default function ProfilePage() {
               </div>
 
               <form onSubmit={handleProfileUpdate} className="space-y-4">
+                {session?.user?.role === 'doctor' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Doctor profile photo <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex items-center gap-4">
+                      {formData.image ? (
+                        <img
+                          src={formData.image}
+                          alt={formData.name || 'Doctor profile'}
+                          className="h-20 w-20 rounded-lg object-cover ring-1 ring-gray-200"
+                        />
+                      ) : (
+                        <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+                          <Camera className="h-7 w-7" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <input
+                          id="doctorImage"
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          onChange={handleImageChange}
+                          className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">JPG, PNG, or WEBP. Max 1 MB.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                     {t('profile.fullName')}

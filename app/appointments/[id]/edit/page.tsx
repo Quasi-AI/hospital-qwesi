@@ -532,6 +532,7 @@ export default function AppointmentEditPage() {
                     <option value="">Select appointment type</option>
                     <option value="consultation">Consultation</option>
                     <option value="follow-up">Follow-up</option>
+                    <option value="home-nurse-visit">Home nurse visit</option>
                     <option value="examination">Examination</option>
                     <option value="procedure">Procedure</option>
                     <option value="emergency">Emergency</option>

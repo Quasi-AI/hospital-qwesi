@@ -99,13 +99,19 @@ export const authOptions: AuthOptions = {
     strategy: 'jwt' as const,
   },
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, trigger, session }: any) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.image = user.image || '';
         if (user.patientId) {
           token.patientId = user.patientId;
         }
+      }
+      if (trigger === 'update' && session?.user) {
+        token.name = session.user.name ?? token.name;
+        token.email = session.user.email ?? token.email;
+        token.image = session.user.image ?? token.image;
       }
       return token;
     },
@@ -113,6 +119,7 @@ export const authOptions: AuthOptions = {
       if (session?.user) {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
+        session.user.image = token.image as string;
         if (token.patientId) {
           session.user.patientId = token.patientId as string;
         }

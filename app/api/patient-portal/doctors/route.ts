@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email || session.user.role !== 'patient') {
@@ -12,6 +12,19 @@ export async function GET() {
     }
 
     await dbConnect();
+    const id = request.nextUrl.searchParams.get('id');
+
+    if (id) {
+      const doctor = await User.findOne({ _id: id, role: 'doctor' })
+        .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone address gender')
+        .lean();
+
+      if (!doctor) {
+        return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+      }
+
+      return NextResponse.json({ doctor });
+    }
 
     const doctors = await User.find({ role: 'doctor' })
       .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone')

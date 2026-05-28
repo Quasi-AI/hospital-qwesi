@@ -174,7 +174,7 @@ export function RequestAppointmentForm({
   const [patientGender, setPatientGender] = useState('');
   const [portalAccountCreated, setPortalAccountCreated] = useState(false);
 
-  const brand = settings?.systemTitle?.trim();
+  const brand = settings?.systemTitle?.trim() || 'Healthcare';
   const logoUrl = settings?.invoiceLogoUrl?.trim() || '';
   const phoneDefaultCountry = countryCodeFromAddressField(settings?.address?.country);
 

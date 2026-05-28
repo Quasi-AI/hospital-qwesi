@@ -4,6 +4,28 @@ import { authOptions } from '../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    await dbConnect();
+
+    const user = await User.findById(session.user.id).select('-password').lean();
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ user });
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -12,10 +34,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, email } = await request.json();
+    const { name, email, image } = await request.json();
 
     if (!name || !email) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
+    }
+
+    if (image !== undefined) {
+      const imageValue = String(image || '').trim();
+      const validDataImage = imageValue === '' || /^data:image\/(png|jpe?g|webp);base64,/i.test(imageValue);
+      if (!validDataImage) {
+        return NextResponse.json({ error: 'Photo must be a PNG, JPG, or WEBP image' }, { status: 400 });
+      }
+      if (imageValue.length > 1_600_000) {
+        return NextResponse.json({ error: 'Photo is too large. Please upload an image under 1 MB.' }, { status: 400 });
+      }
     }
 
     await dbConnect();
@@ -48,7 +81,8 @@ export async function PUT(request: NextRequest) {
       session.user.id,
       { 
         name: name.trim(),
-        email: email.toLowerCase().trim()
+        email: email.toLowerCase().trim(),
+        ...(image !== undefined ? { image: String(image || '').trim() } : {}),
       },
       { returnDocument: 'after' }
     );
@@ -63,7 +97,8 @@ export async function PUT(request: NextRequest) {
         id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
-        role: updatedUser.role
+        role: updatedUser.role,
+        image: updatedUser.image || '',
       }
     });
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Stethoscope, Mail, BriefcaseMedical, CalendarPlus } from 'lucide-react';
+import { Stethoscope, Mail, BriefcaseMedical, CalendarPlus, Eye } from 'lucide-react';
 
 export default function PatientDoctorsPage() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -62,8 +62,15 @@ export default function PatientDoctorsPage() {
                 {doctor.qualifications?.length ? <p>{doctor.qualifications.join(', ')}</p> : null}
               </div>
               <Link
+                href={`/patient-portal/doctors/${doctor._id}`}
+                className="mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <Eye className="h-4 w-4" />
+                View details
+              </Link>
+              <Link
                 href={`/patient-portal/appointments/new?doctorId=${doctor._id}`}
-                className="mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
+                className="mt-2 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
               >
                 <CalendarPlus className="h-4 w-4" />
                 Book appointment

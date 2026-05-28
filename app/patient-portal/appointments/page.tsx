@@ -120,6 +120,7 @@ export default function PatientAppointmentsPage() {
     switch (type) {
       case 'consultation': return 'bg-blue-500';
       case 'follow-up': case 'followUp': return 'bg-purple-500';
+      case 'home-nurse-visit': return 'bg-teal-500';
       case 'checkup': return 'bg-green-500';
       case 'emergency': return 'bg-red-500';
       case 'surgery': return 'bg-orange-500';

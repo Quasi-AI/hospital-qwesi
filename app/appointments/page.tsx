@@ -79,6 +79,8 @@ export default function AppointmentsPage() {
         return 'bg-blue-100 text-blue-800';
       case 'follow-up':
         return 'bg-purple-100 text-purple-800';
+      case 'home-nurse-visit':
+        return 'bg-teal-100 text-teal-800';
       case 'examination':
         return 'bg-orange-100 text-orange-800';
       default:

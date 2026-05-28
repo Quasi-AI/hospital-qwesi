@@ -401,8 +401,8 @@ export async function sendAppointmentReminder(appointmentId: string): Promise<No
     const templateData: TemplateData = {
       patientName: appointment.patientName || patient?.name,
       doctorName: appointment.doctorName,
-      appointmentDate: new Date(appointment.date).toLocaleDateString(),
-      appointmentTime: appointment.time,
+      appointmentDate: new Date(appointment.appointmentDate).toLocaleDateString(),
+      appointmentTime: appointment.appointmentTime,
       location: appointment.location,
       ...clinicInfo,
     };
@@ -411,7 +411,7 @@ export async function sendAppointmentReminder(appointmentId: string): Promise<No
     
     return createNotification({
       type: 'appointment_reminder',
-      recipientId: appointment.patientId,
+      recipientId: String(patient?._id || appointment.patientId || appointment.patientEmail),
       recipientType: 'patient',
       recipientEmail: appointment.patientEmail || patient?.email,
       recipientPhone: appointment.patientPhone || patient?.phone,
@@ -794,7 +794,7 @@ export async function sendFollowUpReminder(appointmentId: string): Promise<Notif
     
     return createNotification({
       type: 'follow_up',
-      recipientId: appointment.patientId,
+      recipientId: String(patient?._id || appointment.patientId || appointment.patientEmail),
       recipientType: 'patient',
       recipientEmail: appointment.patientEmail || patient?.email,
       recipientPhone: appointment.patientPhone || patient?.phone,
@@ -826,7 +826,8 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
     const minutes = reminderMinutes || settings?.reminderTime || 30;
     
     // Calculate scheduled time
-    const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
+    const appointmentDate = new Date(appointment.appointmentDate).toISOString().slice(0, 10);
+    const appointmentDateTime = new Date(`${appointmentDate}T${appointment.appointmentTime}`);
     const scheduledFor = new Date(appointmentDateTime.getTime() - minutes * 60 * 1000);
     
     // Don't schedule if the time has already passed
@@ -843,8 +844,8 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
     const templateData: TemplateData = {
       patientName: appointment.patientName || patient?.name,
       doctorName: appointment.doctorName,
-      appointmentDate: new Date(appointment.date).toLocaleDateString(),
-      appointmentTime: appointment.time,
+      appointmentDate: new Date(appointment.appointmentDate).toLocaleDateString(),
+      appointmentTime: appointment.appointmentTime,
       location: appointment.location,
       ...clinicInfo,
     };
@@ -853,7 +854,7 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
     
     return createNotification({
       type: 'appointment_reminder',
-      recipientId: appointment.patientId,
+      recipientId: String(patient?._id || appointment.patientId || appointment.patientEmail),
       recipientType: 'patient',
       recipientEmail: appointment.patientEmail || patient?.email,
       recipientPhone: appointment.patientPhone || patient?.phone,

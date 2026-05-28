@@ -139,7 +139,7 @@ function NewAppointmentPageContent() {
       setSelectedDoctor(doctor);
       setFormData(prev => ({
         ...prev,
-        doctorName: session.user.name
+        doctorName: session.user.name || ''
       }));
     }
   }, [session]);
@@ -287,6 +287,7 @@ function NewAppointmentPageContent() {
   const appointmentTypes = [
     { value: 'consultation', label: t('appointments.types.consultation') },
     { value: 'follow-up', label: t('appointments.types.followUp') },
+    { value: 'home-nurse-visit', label: 'Home nurse visit' },
     { value: 'checkup', label: t('appointments.types.checkup') },
     { value: 'emergency', label: t('appointments.types.emergency') },
     { value: 'surgery', label: t('appointments.types.surgery') },

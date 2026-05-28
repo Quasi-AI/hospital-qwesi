@@ -27,6 +27,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       if (!pathname.startsWith('/patient-portal')) {
         router.push('/patient-portal');
       }
+    } else if (session.user?.role === 'doctor' && !session.user?.image && pathname !== '/profile') {
+      router.push('/profile?photoRequired=1');
     }
   }, [session, status, router, pathname]);
 
