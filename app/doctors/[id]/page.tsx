@@ -20,6 +20,9 @@ import {
   CalendarDays,
   CalendarPlus,
   ExternalLink,
+  FileText,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import ProtectedRoute from '../../protected-route';
 import SidebarLayout from '../../components/sidebar-layout';
@@ -34,6 +37,10 @@ interface DoctorRecord {
   specialization?: string;
   department?: string;
   licenseNumber?: string;
+  licenseCertificate?: { fileName?: string; fileType?: string; data?: string; uploadedAt?: string };
+  approvalStatus?: string;
+  licenseVerification?: { status?: string; method?: string; message?: string; checkedAt?: string };
+  rejectionReason?: string;
   qualifications?: string[];
   yearsOfExperience?: number;
   bio?: string;
@@ -118,6 +125,28 @@ export default function DoctorDetailPage() {
     if (id) load();
   }, [isAdmin, id, load, router]);
 
+  const handleApproval = async (action: 'approve' | 'reject' | 'auto-verify') => {
+    if (!doctor) return;
+    const reason = action === 'reject' ? prompt('Reason for rejection') || '' : '';
+    const res = await fetch(`/api/users/${doctor._id}/approval`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, reason }),
+    });
+    if (res.ok) {
+      load();
+    } else {
+      const data = await res.json();
+      alert(data.error || 'Failed to update approval status');
+    }
+  };
+
+  const approvalBadgeClass = (status?: string) => {
+    if (!status || status === 'approved') return 'bg-green-50 text-green-700 ring-green-200';
+    if (status === 'rejected') return 'bg-red-50 text-red-700 ring-red-200';
+    return 'bg-amber-50 text-amber-800 ring-amber-200';
+  };
+
   const genderLabel = (g?: string) => {
     switch (g) {
       case 'male':
@@ -170,6 +199,34 @@ export default function DoctorDetailPage() {
                   <Pencil className="h-4 w-4" />
                   {t('doctors.detail.editProfile')}
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => handleApproval('auto-verify')}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  Auto-check
+                </button>
+                {doctor.approvalStatus !== 'approved' && (
+                  <button
+                    type="button"
+                    onClick={() => handleApproval('approve')}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Approve
+                  </button>
+                )}
+                {doctor.approvalStatus !== 'rejected' && (
+                  <button
+                    type="button"
+                    onClick={() => handleApproval('reject')}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Reject
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -297,6 +354,35 @@ export default function DoctorDetailPage() {
                       <div className="flex gap-2">
                         <dt className="w-36 shrink-0 text-gray-500">{t('doctors.detail.license')}</dt>
                         <dd className="font-mono text-gray-900">{doctor.licenseNumber || t('doctors.notAvailable')}</dd>
+                      </div>
+                      <div className="flex gap-2">
+                        <dt className="w-36 shrink-0 text-gray-500">Approval</dt>
+                        <dd>
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ${approvalBadgeClass(doctor.approvalStatus)}`}>
+                            {(doctor.approvalStatus || 'approved').replace(/_/g, ' ')}
+                          </span>
+                          {doctor.licenseVerification?.message && (
+                            <p className="mt-1 text-xs text-gray-600">{doctor.licenseVerification.message}</p>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="flex gap-2">
+                        <dt className="w-36 shrink-0 text-gray-500">Certificate</dt>
+                        <dd>
+                          {doctor.licenseCertificate?.data ? (
+                            <a
+                              href={doctor.licenseCertificate.data}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-blue-700 hover:underline"
+                            >
+                              <FileText className="h-3.5 w-3.5" />
+                              {doctor.licenseCertificate.fileName || 'View certificate'}
+                            </a>
+                          ) : (
+                            t('doctors.notAvailable')
+                          )}
+                        </dd>
                       </div>
                       <div className="flex gap-2">
                         <dt className="w-36 shrink-0 text-gray-500">{t('doctors.detail.experience')}</dt>

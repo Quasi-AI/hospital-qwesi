@@ -27,8 +27,19 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       if (!pathname.startsWith('/patient-portal')) {
         router.push('/patient-portal');
       }
-    } else if (session.user?.role === 'doctor' && !session.user?.image && pathname !== '/profile') {
-      router.push('/profile?photoRequired=1');
+    } else if (
+      ['doctor', 'staff'].includes(session.user?.role || '') &&
+      (!session.user?.hasImage || !session.user?.hasLicenseCertificate) &&
+      pathname !== '/profile'
+    ) {
+      router.push('/profile?verificationRequired=1');
+    } else if (
+      ['doctor', 'staff'].includes(session.user?.role || '') &&
+      session.user?.approvalStatus &&
+      session.user.approvalStatus !== 'approved' &&
+      pathname !== '/profile'
+    ) {
+      router.push('/profile?approvalRequired=1');
     }
   }, [session, status, router, pathname]);
 

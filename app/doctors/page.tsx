@@ -14,6 +14,8 @@ import {
   Phone,
   Mail,
   Stethoscope,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -100,6 +102,31 @@ export default function DoctorsPage() {
       console.error('Error deleting doctor:', error);
       alert(t('doctors.deleteError'));
     }
+  };
+
+  const handleApproval = async (doctorId: string, action: 'approve' | 'reject' | 'auto-verify') => {
+    const reason = action === 'reject' ? prompt('Reason for rejection') || '' : '';
+    try {
+      const response = await fetch(`/api/users/${doctorId}/approval`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, reason }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || 'Failed to update approval status');
+        return;
+      }
+      fetchDoctors();
+    } catch {
+      alert('Failed to update approval status');
+    }
+  };
+
+  const approvalBadgeClass = (status?: string) => {
+    if (!status || status === 'approved') return 'bg-green-50 text-green-700 ring-green-200';
+    if (status === 'rejected') return 'bg-red-50 text-red-700 ring-red-200';
+    return 'bg-amber-50 text-amber-800 ring-amber-200';
   };
 
   const toggleActionsMenu = (doctorId: string, e?: React.MouseEvent) => {
@@ -251,6 +278,9 @@ export default function DoctorsPage() {
                       <th className="hidden px-3 py-1.5 text-left text-[11px] font-medium uppercase tracking-wide text-gray-700 xl:table-cell lg:px-4">
                         {t('doctors.created')}
                       </th>
+                      <th className="hidden px-3 py-1.5 text-left text-[11px] font-medium uppercase tracking-wide text-gray-700 xl:table-cell lg:px-4">
+                        Approval
+                      </th>
                       <th className="px-3 py-1.5 text-right text-[11px] font-medium uppercase tracking-wide text-gray-700 lg:px-4">
                         {t('doctors.actions')}
                       </th>
@@ -335,6 +365,11 @@ export default function DoctorsPage() {
                         <td className="hidden whitespace-nowrap px-3 py-2 text-xs text-gray-900 sm:text-sm xl:table-cell lg:px-4">
                           {doctor.createdAt ? new Date(doctor.createdAt).toLocaleDateString() : t('doctors.notAvailable')}
                         </td>
+                        <td className="hidden whitespace-nowrap px-3 py-2 text-xs xl:table-cell lg:px-4">
+                          <span className={`inline-flex rounded-full px-2 py-0.5 font-medium capitalize ring-1 ${approvalBadgeClass(doctor.approvalStatus)}`}>
+                            {(doctor.approvalStatus || 'approved').replace(/_/g, ' ')}
+                          </span>
+                        </td>
                         <td className="whitespace-nowrap px-3 py-2 text-right text-xs font-medium sm:text-sm lg:px-4">
                           <div
                             className="flex items-center justify-end gap-1"
@@ -358,6 +393,32 @@ export default function DoctorsPage() {
                             >
                               {t('doctors.edit')}
                             </button>
+                            {doctor.approvalStatus !== 'approved' && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleApproval(doctor._id, 'approve');
+                                }}
+                                className="rounded-md px-1.5 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
+                                title="Approve doctor"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </button>
+                            )}
+                            {doctor.approvalStatus !== 'rejected' && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleApproval(doctor._id, 'reject');
+                                }}
+                                className="rounded-md px-1.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+                                title="Reject doctor"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </button>
+                            )}
                             {doctor.email !== session?.user?.email && (
                               <div className="relative">
                                 <button

@@ -3,6 +3,9 @@ import NextAuth from 'next-auth';
 declare module 'next-auth' {
   interface User {
     role?: string;
+    hasImage?: boolean;
+    hasLicenseCertificate?: boolean;
+    approvalStatus?: string;
   }
   
   interface Session {
@@ -12,6 +15,9 @@ declare module 'next-auth' {
       name?: string;
       role?: string;
       image?: string;
+      hasImage?: boolean;
+      hasLicenseCertificate?: boolean;
+      approvalStatus?: string;
       patientId?: string;
     };
   }
@@ -22,6 +28,9 @@ declare module 'next-auth/jwt' {
     role?: string;
     id?: string;
     image?: string;
+    hasImage?: boolean;
+    hasLicenseCertificate?: boolean;
+    approvalStatus?: string;
     patientId?: string;
   }
 }

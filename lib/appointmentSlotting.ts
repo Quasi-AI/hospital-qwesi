@@ -228,9 +228,16 @@ export async function computeDoctorDaySlots(
     d = pl.doctor;
     sched = pl.schedule;
   } else {
-    const doctor = await User.findById(doctorId).select('name email role').lean();
+    const doctor = await User.findById(doctorId).select('name email role approvalStatus').lean();
     if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
       return { ok: false, error: 'Doctor not found', status: 404 };
+    }
+    if (
+      options?.forPublicWebsite &&
+      (doctor as { approvalStatus?: string }).approvalStatus &&
+      (doctor as { approvalStatus?: string }).approvalStatus !== 'approved'
+    ) {
+      return { ok: false, error: 'Doctor is not available for online booking', status: 403 };
     }
 
     d = doctor as { _id: mongoose.Types.ObjectId; name: string; email: string };

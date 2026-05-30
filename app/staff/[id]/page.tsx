@@ -17,7 +17,9 @@ import {
   GraduationCap,
   FileText,
   Award,
-  Trash2
+  Trash2,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import ProtectedRoute from '../../protected-route';
 import SidebarLayout from '../../components/sidebar-layout';
@@ -34,6 +36,10 @@ interface StaffMember {
   specialization?: string;
   department?: string;
   licenseNumber?: string;
+  licenseCertificate?: { fileName?: string; fileType?: string; data?: string; uploadedAt?: string };
+  approvalStatus?: string;
+  licenseVerification?: { status?: string; method?: string; message?: string; checkedAt?: string };
+  rejectionReason?: string;
   qualifications?: string[];
   yearsOfExperience?: number;
   bio?: string;
@@ -99,6 +105,28 @@ function StaffDetailsContent() {
       console.error('Error deleting staff:', error);
       alert('Error deleting staff member');
     }
+  };
+
+  const handleApproval = async (action: 'approve' | 'reject' | 'auto-verify') => {
+    if (!staff) return;
+    const reason = action === 'reject' ? prompt('Reason for rejection') || '' : '';
+    const res = await fetch(`/api/users/${staff._id}/approval`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, reason }),
+    });
+    if (res.ok) {
+      fetchStaffDetails();
+    } else {
+      const data = await res.json();
+      alert(data.error || 'Failed to update approval status');
+    }
+  };
+
+  const approvalBadgeClass = (status?: string) => {
+    if (!status || status === 'approved') return 'bg-green-50 text-green-700 ring-green-200';
+    if (status === 'rejected') return 'bg-red-50 text-red-700 ring-red-200';
+    return 'bg-amber-50 text-amber-800 ring-amber-200';
   };
 
   if (loading) {
@@ -173,6 +201,34 @@ function StaffDetailsContent() {
                     <Pencil className="h-3.5 w-3.5" />
                     <span>Edit</span>
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleApproval('auto-verify')}
+                    className="inline-flex items-center gap-1 rounded-md border border-white/30 bg-white/15 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/25 sm:text-sm"
+                  >
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    <span>Auto-check</span>
+                  </button>
+                  {staff.approvalStatus !== 'approved' && (
+                    <button
+                      type="button"
+                      onClick={() => handleApproval('approve')}
+                      className="inline-flex items-center gap-1 rounded-md bg-green-500/90 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-500 sm:text-sm"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      <span>Approve</span>
+                    </button>
+                  )}
+                  {staff.approvalStatus !== 'rejected' && (
+                    <button
+                      type="button"
+                      onClick={() => handleApproval('reject')}
+                      className="inline-flex items-center gap-1 rounded-md bg-red-500/90 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-500 sm:text-sm"
+                    >
+                      <XCircle className="h-3.5 w-3.5" />
+                      <span>Reject</span>
+                    </button>
+                  )}
                   {staff.email !== session?.user?.email && (
                     <button
                       type="button"
@@ -256,6 +312,8 @@ function StaffDetailsContent() {
               {(staff.specialization ||
                 staff.department ||
                 staff.licenseNumber ||
+                staff.licenseCertificate ||
+                staff.approvalStatus ||
                 staff.yearsOfExperience) && (
                 <div className="border-t border-gray-100 pt-3">
                   <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-gray-900">
@@ -290,6 +348,36 @@ function StaffDetailsContent() {
                         </div>
                       </div>
                     )}
+                    <div className="flex items-center gap-2 rounded-md border border-gray-100 bg-gray-50 p-2">
+                      <CheckCircle className="h-4 w-4 shrink-0 text-gray-400" />
+                      <div className="min-w-0">
+                        <p className="text-[11px] text-gray-500">Approval</p>
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ${approvalBadgeClass(staff.approvalStatus)}`}>
+                          {(staff.approvalStatus || 'approved').replace(/_/g, ' ')}
+                        </span>
+                        {staff.licenseVerification?.message && (
+                          <p className="mt-1 text-xs text-gray-600">{staff.licenseVerification.message}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-md border border-gray-100 bg-gray-50 p-2">
+                      <FileText className="h-4 w-4 shrink-0 text-gray-400" />
+                      <div className="min-w-0">
+                        <p className="text-[11px] text-gray-500">License Certificate</p>
+                        {staff.licenseCertificate?.data ? (
+                          <a
+                            href={staff.licenseCertificate.data}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="truncate text-xs font-medium text-blue-700 hover:underline sm:text-sm"
+                          >
+                            {staff.licenseCertificate.fileName || 'View certificate'}
+                          </a>
+                        ) : (
+                          <p className="text-xs text-gray-500">Not uploaded</p>
+                        )}
+                      </div>
+                    </div>
                     {staff.yearsOfExperience !== undefined && (
                       <div className="flex items-center gap-2 rounded-md border border-gray-100 bg-gray-50 p-2">
                         <Award className="h-4 w-4 shrink-0 text-gray-400" />

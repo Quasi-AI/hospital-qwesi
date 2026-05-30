@@ -8,11 +8,30 @@ export interface IUser {
   role: 'doctor' | 'admin' | 'staff' | 'patient';
   image?: string;
   emailVerified?: Date;
+  hasImage?: boolean;
+  approvalStatus?: 'pending_profile' | 'pending_verification' | 'approved' | 'rejected';
+  approvalMethod?: 'manual' | 'official_api' | 'legacy';
+  approvedBy?: string;
+  approvedAt?: Date;
+  rejectionReason?: string;
   // Doctor/Staff specific fields
   phone?: string;
   specialization?: string;
   department?: string;
   licenseNumber?: string;
+  licenseCertificate?: {
+    fileName?: string;
+    fileType?: string;
+    data?: string;
+    uploadedAt?: Date;
+  };
+  licenseVerification?: {
+    status?: 'not_started' | 'pending' | 'verified' | 'failed' | 'manual_review';
+    method?: 'official_api' | 'manual';
+    checkedAt?: Date;
+    message?: string;
+    reference?: string;
+  };
   qualifications?: string[];
   yearsOfExperience?: number;
   bio?: string;
@@ -52,6 +71,30 @@ const userSchema = new mongoose.Schema<IUser>(
     emailVerified: {
       type: Date,
     },
+    hasImage: {
+      type: Boolean,
+      default: false,
+    },
+    approvalStatus: {
+      type: String,
+      enum: ['pending_profile', 'pending_verification', 'approved', 'rejected'],
+      default: 'approved',
+    },
+    approvalMethod: {
+      type: String,
+      enum: ['manual', 'official_api', 'legacy'],
+    },
+    approvedBy: {
+      type: String,
+      trim: true,
+    },
+    approvedAt: {
+      type: Date,
+    },
+    rejectionReason: {
+      type: String,
+      trim: true,
+    },
     // Doctor/Staff specific fields
     phone: {
       type: String,
@@ -68,6 +111,26 @@ const userSchema = new mongoose.Schema<IUser>(
     licenseNumber: {
       type: String,
       trim: true,
+    },
+    licenseCertificate: {
+      fileName: { type: String, trim: true },
+      fileType: { type: String, trim: true },
+      data: { type: String },
+      uploadedAt: { type: Date },
+    },
+    licenseVerification: {
+      status: {
+        type: String,
+        enum: ['not_started', 'pending', 'verified', 'failed', 'manual_review'],
+        default: 'not_started',
+      },
+      method: {
+        type: String,
+        enum: ['official_api', 'manual'],
+      },
+      checkedAt: { type: Date },
+      message: { type: String, trim: true },
+      reference: { type: String, trim: true },
     },
     qualifications: [{
       type: String,

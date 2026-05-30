@@ -11,7 +11,9 @@ import {
   Eye, 
   EyeOff,
   ArrowLeft,
-  Camera
+  Camera,
+  FileText,
+  ShieldCheck
 } from 'lucide-react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -23,7 +25,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const { t } = useTranslations();
   const [loading, setLoading] = useState(false);
-  const [photoRequired, setPhotoRequired] = useState(false);
+  const [verificationRequired, setVerificationRequired] = useState(false);
+  const [approvalRequired, setApprovalRequired] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,6 +36,12 @@ export default function ProfilePage() {
     name: '',
     email: '',
     image: '',
+    licenseNumber: '',
+    licenseCertificate: '',
+    licenseCertificateFileName: '',
+    licenseCertificateFileType: '',
+    approvalStatus: 'approved',
+    licenseVerificationMessage: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -44,13 +53,16 @@ export default function ProfilePage() {
         ...prev,
         name: session.user.name || '',
         email: session.user.email || '',
-        image: session.user.image || ''
+        image: session.user.image || '',
+        approvalStatus: session.user.approvalStatus || 'approved',
       }));
     }
   }, [session]);
 
   useEffect(() => {
-    setPhotoRequired(new URLSearchParams(window.location.search).get('photoRequired') === '1');
+    const params = new URLSearchParams(window.location.search);
+    setVerificationRequired(params.get('verificationRequired') === '1' || params.get('photoRequired') === '1');
+    setApprovalRequired(params.get('approvalRequired') === '1');
   }, []);
 
   useEffect(() => {
@@ -66,6 +78,12 @@ export default function ProfilePage() {
             name: data.user.name || prev.name,
             email: data.user.email || prev.email,
             image: data.user.image || '',
+            licenseNumber: data.user.licenseNumber || '',
+            licenseCertificate: data.user.licenseCertificate?.data || '',
+            licenseCertificateFileName: data.user.licenseCertificate?.fileName || '',
+            licenseCertificateFileType: data.user.licenseCertificate?.fileType || '',
+            approvalStatus: data.user.approvalStatus || 'approved',
+            licenseVerificationMessage: data.user.licenseVerification?.message || '',
           }));
         }
       } catch {
@@ -105,6 +123,30 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
+  const handleCertificateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setMessage({ type: 'error', text: 'Please upload a PDF, JPG, PNG, or WEBP license certificate.' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Certificate is too large. Please upload a file under 2 MB.' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev) => ({
+        ...prev,
+        licenseCertificate: String(reader.result || ''),
+        licenseCertificateFileName: file.name,
+        licenseCertificateFileType: file.type,
+      }));
+      setMessage(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -120,6 +162,10 @@ export default function ProfilePage() {
           name: formData.name,
           email: formData.email,
           image: formData.image,
+          licenseNumber: formData.licenseNumber,
+          licenseCertificate: formData.licenseCertificate,
+          licenseCertificateFileName: formData.licenseCertificateFileName,
+          licenseCertificateFileType: formData.licenseCertificateFileType,
         }),
       });
 
@@ -127,6 +173,12 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setMessage({ type: 'success', text: t('profile.profileUpdated') });
+        const updatedApprovalStatus = data.user?.approvalStatus || formData.approvalStatus;
+        setFormData((prev) => ({
+          ...prev,
+          approvalStatus: updatedApprovalStatus,
+          licenseVerificationMessage: data.user?.licenseVerification?.message || prev.licenseVerificationMessage,
+        }));
         // Update the session
         await update({
           ...session,
@@ -134,7 +186,10 @@ export default function ProfilePage() {
             ...session?.user,
             name: formData.name,
             email: formData.email,
-            image: formData.image,
+            image: '',
+            hasImage: Boolean(formData.image),
+            hasLicenseCertificate: Boolean(formData.licenseCertificate),
+            approvalStatus: updatedApprovalStatus,
           }
         });
       } else {
@@ -196,6 +251,15 @@ export default function ProfilePage() {
     }
   };
 
+  const isProvider = ['doctor', 'staff'].includes(session?.user?.role || '');
+  const approvalLabel = formData.approvalStatus.replace(/_/g, ' ');
+  const approvalClasses =
+    formData.approvalStatus === 'approved'
+      ? 'border-green-200 bg-green-50 text-green-800'
+      : formData.approvalStatus === 'rejected'
+        ? 'border-red-200 bg-red-50 text-red-800'
+        : 'border-amber-200 bg-amber-50 text-amber-900';
+
   return (
     <ProtectedRoute>
       <SidebarLayout 
@@ -224,9 +288,15 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {photoRequired && session?.user?.role === 'doctor' && !formData.image && (
+          {verificationRequired && isProvider && (!formData.image || !formData.licenseCertificate) && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              Doctors must upload a profile photo before continuing. Patients will see this photo when choosing and viewing a doctor.
+              Please upload your profile photo and license certificate before continuing. Your account will go to approval after submission.
+            </div>
+          )}
+
+          {approvalRequired && isProvider && formData.approvalStatus !== 'approved' && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+              Your profile is waiting for approval. You can update your details here while an admin reviews your certificate.
             </div>
           )}
 
@@ -244,10 +314,10 @@ export default function ProfilePage() {
               </div>
 
               <form onSubmit={handleProfileUpdate} className="space-y-4">
-                {session?.user?.role === 'doctor' && (
+                {isProvider && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Doctor profile photo <span className="text-red-500">*</span>
+                      Profile photo <span className="text-red-500">*</span>
                     </label>
                     <div className="flex items-center gap-4">
                       {formData.image ? (
@@ -273,6 +343,57 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {isProvider && (
+                  <>
+                    <div>
+                      <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                        License number <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <ShieldCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          id="licenseNumber"
+                          name="licenseNumber"
+                          value={formData.licenseNumber}
+                          onChange={handleInputChange}
+                          className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        License certificate <span className="text-red-500">*</span>
+                      </label>
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <div className="mb-3 flex items-center gap-2 text-sm text-gray-700">
+                          <FileText className="h-4 w-4 text-blue-600" />
+                          <span className="truncate">
+                            {formData.licenseCertificateFileName || (formData.licenseCertificate ? 'Certificate uploaded' : 'No certificate uploaded')}
+                          </span>
+                        </div>
+                        <input
+                          id="licenseCertificate"
+                          type="file"
+                          accept="application/pdf,image/png,image/jpeg,image/webp"
+                          onChange={handleCertificateChange}
+                          className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">PDF, JPG, PNG, or WEBP. Max 2 MB.</p>
+                      </div>
+                    </div>
+
+                    <div className={`rounded-lg border p-3 text-sm capitalize ${approvalClasses}`}>
+                      Approval status: {approvalLabel}
+                      {formData.licenseVerificationMessage && (
+                        <p className="mt-1 text-xs normal-case">{formData.licenseVerificationMessage}</p>
+                      )}
+                    </div>
+                  </>
                 )}
 
                 <div>

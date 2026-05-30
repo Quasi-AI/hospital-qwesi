@@ -50,7 +50,10 @@ export const authOptions: AuthOptions = {
                   email: user.email,
                   name: user.name,
                   role: safeRole,
-                  image: user.image,
+                  image: '',
+                  hasImage: Boolean(user.image || user.hasImage),
+                  hasLicenseCertificate: Boolean(user.licenseCertificate?.data),
+                  approvalStatus: user.approvalStatus || 'approved',
                 };
             }
             return null;
@@ -103,7 +106,10 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
-        token.image = user.image || '';
+        token.image = '';
+        token.hasImage = Boolean(user.hasImage || user.image);
+        token.hasLicenseCertificate = Boolean(user.hasLicenseCertificate);
+        token.approvalStatus = user.approvalStatus || 'approved';
         if (user.patientId) {
           token.patientId = user.patientId;
         }
@@ -111,7 +117,10 @@ export const authOptions: AuthOptions = {
       if (trigger === 'update' && session?.user) {
         token.name = session.user.name ?? token.name;
         token.email = session.user.email ?? token.email;
-        token.image = session.user.image ?? token.image;
+        token.image = '';
+        token.hasImage = Boolean(session.user.hasImage ?? token.hasImage);
+        token.hasLicenseCertificate = Boolean(session.user.hasLicenseCertificate ?? token.hasLicenseCertificate);
+        token.approvalStatus = session.user.approvalStatus ?? token.approvalStatus;
       }
       return token;
     },
@@ -120,6 +129,9 @@ export const authOptions: AuthOptions = {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
         session.user.image = token.image as string;
+        session.user.hasImage = Boolean(token.hasImage);
+        session.user.hasLicenseCertificate = Boolean(token.hasLicenseCertificate);
+        session.user.approvalStatus = token.approvalStatus as string;
         if (token.patientId) {
           session.user.patientId = token.patientId as string;
         }

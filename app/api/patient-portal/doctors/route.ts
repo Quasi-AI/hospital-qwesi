@@ -15,7 +15,11 @@ export async function GET(request: NextRequest) {
     const id = request.nextUrl.searchParams.get('id');
 
     if (id) {
-      const doctor = await User.findOne({ _id: id, role: 'doctor' })
+      const doctor = await User.findOne({
+        _id: id,
+        role: 'doctor',
+        $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }],
+      })
         .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone address gender')
         .lean();
 
@@ -26,7 +30,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ doctor });
     }
 
-    const doctors = await User.find({ role: 'doctor' })
+    const doctors = await User.find({
+      role: 'doctor',
+      $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }],
+    })
       .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone')
       .sort({ name: 1 })
       .lean();

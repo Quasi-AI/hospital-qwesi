@@ -65,7 +65,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Otherwise return all doctors (no search params)
-    const doctors = await User.find({ role: 'doctor' }).select('-password').sort({ createdAt: -1 });
+    const doctors = await User.find({ role: 'doctor' })
+      .select('-password -image -licenseCertificate.data')
+      .sort({ createdAt: -1 });
 
     return NextResponse.json(doctors);
 
@@ -128,6 +130,12 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase(),
       password: hashedPassword,
       role: role || 'doctor',
+      approvalStatus: ['doctor', 'staff'].includes(role || 'doctor') ? 'pending_profile' : 'approved',
+      licenseVerification: {
+        status: 'not_started',
+        method: 'manual',
+        message: 'Waiting for profile photo and license certificate upload.',
+      },
     };
 
     // Add optional doctor/staff specific fields

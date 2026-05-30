@@ -10,7 +10,8 @@ import {
   MoreVertical,
   UserCheck,
   Eye,
-  Pencil,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -81,6 +82,31 @@ export default function StaffPage() {
       console.error('Error deleting staff:', error);
       alert(t('staff.deleteError'));
     }
+  };
+
+  const handleApproval = async (staffId: string, action: 'approve' | 'reject' | 'auto-verify') => {
+    const reason = action === 'reject' ? prompt('Reason for rejection') || '' : '';
+    try {
+      const response = await fetch(`/api/users/${staffId}/approval`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, reason }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || 'Failed to update approval status');
+        return;
+      }
+      fetchStaff();
+    } catch {
+      alert('Failed to update approval status');
+    }
+  };
+
+  const approvalBadgeClass = (status?: string) => {
+    if (!status || status === 'approved') return 'bg-green-50 text-green-700 ring-green-200';
+    if (status === 'rejected') return 'bg-red-50 text-red-700 ring-red-200';
+    return 'bg-amber-50 text-amber-800 ring-amber-200';
   };
 
   const toggleActionsMenu = (staffId: string, e?: React.MouseEvent) => {
@@ -186,6 +212,9 @@ export default function StaffPage() {
                       <th className="hidden px-3 py-1.5 text-left text-[11px] font-medium uppercase tracking-wide text-gray-700 md:table-cell lg:px-4">
                         {t('staff.created')}
                       </th>
+                      <th className="hidden px-3 py-1.5 text-left text-[11px] font-medium uppercase tracking-wide text-gray-700 lg:table-cell lg:px-4">
+                        Approval
+                      </th>
                       <th className="px-3 py-1.5 text-right text-[11px] font-medium uppercase tracking-wide text-gray-700 lg:px-4">
                         {t('staff.actions')}
                       </th>
@@ -229,6 +258,11 @@ export default function StaffPage() {
                             ? new Date(staffMember.createdAt).toLocaleDateString()
                             : t('staff.notAvailable')}
                         </td>
+                        <td className="hidden whitespace-nowrap px-3 py-2 text-xs lg:table-cell lg:px-4">
+                          <span className={`inline-flex rounded-full px-2 py-0.5 font-medium capitalize ring-1 ${approvalBadgeClass(staffMember.approvalStatus)}`}>
+                            {(staffMember.approvalStatus || 'approved').replace(/_/g, ' ')}
+                          </span>
+                        </td>
                         <td className="whitespace-nowrap px-3 py-2 text-right text-xs sm:text-sm lg:px-4">
                           <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                             <Link
@@ -244,6 +278,32 @@ export default function StaffPage() {
                             >
                               {t('staff.edit')}
                             </Link>
+                            {staffMember.approvalStatus !== 'approved' && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleApproval(staffMember._id, 'approve');
+                                }}
+                                className="rounded-md px-1.5 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
+                                title="Approve staff member"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </button>
+                            )}
+                            {staffMember.approvalStatus !== 'rejected' && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleApproval(staffMember._id, 'reject');
+                                }}
+                                className="rounded-md px-1.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+                                title="Reject staff member"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </button>
+                            )}
                             {staffMember.email !== session?.user?.email && (
                               <div className="relative">
                                 <button
