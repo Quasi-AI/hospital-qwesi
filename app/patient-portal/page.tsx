@@ -8,15 +8,12 @@ import {
   Calendar,
   FileText,
   Pill,
-  ClipboardList,
   Clock,
-  CheckCircle2,
-  AlertCircle,
   ArrowRight,
   Activity,
   Heart,
-  Stethoscope,
-  TrendingUp
+  Bot,
+  Send
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -43,6 +40,17 @@ interface Report {
   doctorName: string;
 }
 
+interface AssistantMessage {
+  role: 'user' | 'assistant';
+  text: string;
+  doctors?: Array<{
+    id: string;
+    name: string;
+    specialization: string;
+    reason: string;
+  }>;
+}
+
 export default function PatientPortalDashboard() {
   const { data: session } = useSession();
   const { t } = useTranslations();
@@ -54,6 +62,14 @@ export default function PatientPortalDashboard() {
   });
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [recentReports, setRecentReports] = useState<Report[]>([]);
+  const [assistantMessages, setAssistantMessages] = useState<AssistantMessage[]>([
+    {
+      role: 'assistant',
+      text: 'Tell me what symptom or health concern you want help with, and I can suggest safe next steps and the most relevant approved doctor.',
+    },
+  ]);
+  const [assistantInput, setAssistantInput] = useState('');
+  const [assistantLoading, setAssistantLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -141,6 +157,39 @@ export default function PatientPortalDashboard() {
     }
   };
 
+  const sendAssistantMessage = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const text = assistantInput.trim();
+    if (!text || assistantLoading) return;
+
+    setAssistantInput('');
+    setAssistantMessages((current) => [...current, { role: 'user', text }]);
+    setAssistantLoading(true);
+    try {
+      const response = await fetch('/api/patient-portal/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      });
+      const data = await response.json().catch(() => ({}));
+      setAssistantMessages((current) => [
+        ...current,
+        {
+          role: 'assistant',
+          text: data.reply || data.error || 'I could not answer that right now.',
+          doctors: data.recommendedDoctors || [],
+        },
+      ]);
+    } catch {
+      setAssistantMessages((current) => [
+        ...current,
+        { role: 'assistant', text: 'I could not answer that right now. Please try again.' },
+      ]);
+    } finally {
+      setAssistantLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[320px] items-center justify-center">
@@ -169,6 +218,71 @@ export default function PatientPortalDashboard() {
             <Heart className="h-12 w-12 text-white/20" />
           </div>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-teal-100 bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+            <Bot className="h-5 w-5 text-teal-600" />
+            Health assistant
+          </h2>
+          <span className="rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
+            Health only
+          </span>
+        </div>
+        <div className="max-h-80 space-y-3 overflow-y-auto p-4">
+          {assistantMessages.map((item, index) => (
+            <div key={index} className={`flex ${item.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                  item.role === 'user'
+                    ? 'bg-teal-600 text-white'
+                    : 'border border-gray-100 bg-gray-50 text-gray-800'
+                }`}
+              >
+                <p>{item.text}</p>
+                {item.doctors?.length ? (
+                  <div className="mt-3 space-y-2">
+                    {item.doctors.map((doctor) => (
+                      <Link
+                        key={doctor.id}
+                        href={`/patient-portal/doctors/${doctor.id}`}
+                        className="block rounded-md border border-teal-100 bg-white p-2 text-gray-800 hover:border-teal-300"
+                      >
+                        <span className="block font-semibold">{doctor.name}</span>
+                        <span className="block text-xs text-teal-700">{doctor.specialization}</span>
+                        <span className="mt-1 block text-xs text-gray-500">{doctor.reason}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ))}
+          {assistantLoading ? (
+            <div className="flex justify-start">
+              <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                Thinking...
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <form onSubmit={sendAssistantMessage} className="flex gap-2 border-t border-gray-100 p-3">
+          <input
+            value={assistantInput}
+            onChange={(event) => setAssistantInput(event.target.value)}
+            placeholder="Describe a symptom or health concern..."
+            className="h-10 flex-1 rounded-md border border-gray-200 px-3 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+          />
+          <button
+            type="submit"
+            disabled={assistantLoading || !assistantInput.trim()}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+            Ask
+          </button>
+        </form>
       </div>
 
       {/* Stats Cards */}

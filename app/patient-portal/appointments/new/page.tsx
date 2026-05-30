@@ -33,9 +33,8 @@ type Slot = {
 
 type ConsultationAccess = {
   allowed: boolean;
-  source: 'free' | 'subscription' | 'payg' | 'payment_required';
+  source: 'subscription' | 'payg' | 'payment_required';
   previousConsultationCount: number;
-  freeConsultationsRemaining: number;
   hasActiveSubscription: boolean;
   message: string;
   activeSubscription?: {
@@ -202,9 +201,7 @@ function NewPatientAppointmentPageContent() {
   }, [form.doctorId, form.appointmentDate]);
 
   const accessTone = access?.allowed
-    ? access.source === 'free'
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-      : 'border-blue-200 bg-blue-50 text-blue-800'
+    ? 'border-blue-200 bg-blue-50 text-blue-800'
     : 'border-amber-200 bg-amber-50 text-amber-900';
 
   const startPaygPayment = async () => {
@@ -290,7 +287,7 @@ function NewPatientAppointmentPageContent() {
             Back to appointments
           </Link>
           <h1 className="text-xl font-bold text-gray-950">Book appointment</h1>
-          <p className="mt-0.5 text-sm text-gray-600">Choose any doctor and schedule a consultation.</p>
+          <p className="mt-0.5 text-sm text-gray-600">Choose a doctor after subscribing or paying for a consultation.</p>
         </div>
         <Link
           href="/patient-portal/doctors"

@@ -18,7 +18,10 @@ export async function GET(request: NextRequest) {
       const doctor = await User.findOne({
         _id: id,
         role: 'doctor',
-        $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }],
+        approvalStatus: 'approved',
+        hasImage: true,
+        licenseNumber: { $exists: true, $ne: '' },
+        'licenseCertificate.data': { $exists: true, $ne: '' },
       })
         .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone address gender')
         .lean();
@@ -32,7 +35,10 @@ export async function GET(request: NextRequest) {
 
     const doctors = await User.find({
       role: 'doctor',
-      $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }],
+      approvalStatus: 'approved',
+      hasImage: true,
+      licenseNumber: { $exists: true, $ne: '' },
+      'licenseCertificate.data': { $exists: true, $ne: '' },
     })
       .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone')
       .sort({ name: 1 })

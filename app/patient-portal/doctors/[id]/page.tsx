@@ -33,6 +33,8 @@ export default function PatientDoctorDetailPage() {
   const params = useParams();
   const id = typeof params.id === 'string' ? params.id : params.id?.[0];
   const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [canBook, setCanBook] = useState(false);
+  const [accessMessage, setAccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -40,11 +42,19 @@ export default function PatientDoctorDetailPage() {
     if (!id) return;
     let cancelled = false;
     setLoading(true);
-    fetch(`/api/patient-portal/doctors?id=${encodeURIComponent(id)}`)
-      .then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || 'Doctor not found');
-        if (!cancelled) setDoctor(data.doctor);
+    Promise.all([
+      fetch(`/api/patient-portal/doctors?id=${encodeURIComponent(id)}`),
+      fetch('/api/patient-portal/consultation-access'),
+    ])
+      .then(async ([doctorRes, accessRes]) => {
+        const data = await doctorRes.json().catch(() => ({}));
+        if (!doctorRes.ok) throw new Error(data.error || 'Doctor not found');
+        const accessData = await accessRes.json().catch(() => ({}));
+        if (!cancelled) {
+          setDoctor(data.doctor);
+          setCanBook(Boolean(accessData.allowed));
+          setAccessMessage(accessData.message || '');
+        }
       })
       .catch((err) => {
         if (!cancelled) setError(err.message || 'Doctor not found');
@@ -99,13 +109,19 @@ export default function PatientDoctorDetailPage() {
                   ) : null}
                 </div>
               </div>
-              <Link
-                href={`/patient-portal/appointments/new?doctorId=${doctor._id}`}
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-700"
-              >
-                <CalendarPlus className="h-4 w-4" />
-                Book appointment
-              </Link>
+              {canBook ? (
+                <Link
+                  href={`/patient-portal/appointments/new?doctorId=${doctor._id}`}
+                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-700"
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                  Book appointment
+                </Link>
+              ) : (
+                <div className="max-w-xs rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                  {accessMessage || 'Payment is required before booking.'}
+                </div>
+              )}
             </div>
           </div>
 

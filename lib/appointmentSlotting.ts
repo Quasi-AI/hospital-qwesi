@@ -3,6 +3,7 @@ import User from '@/models/User';
 import Settings from '@/models/Settings';
 import DoctorSchedule from '@/models/DoctorSchedule';
 import Appointment from '@/models/Appointment';
+import { isProviderApproved } from '@/lib/providerApproval';
 
 const WEEKDAYS = [
   'sunday',
@@ -228,14 +229,15 @@ export async function computeDoctorDaySlots(
     d = pl.doctor;
     sched = pl.schedule;
   } else {
-    const doctor = await User.findById(doctorId).select('name email role approvalStatus').lean();
+    const doctor = await User.findById(doctorId)
+      .select('name email role approvalStatus hasImage licenseNumber licenseCertificate')
+      .lean();
     if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
       return { ok: false, error: 'Doctor not found', status: 404 };
     }
     if (
       options?.forPublicWebsite &&
-      (doctor as { approvalStatus?: string }).approvalStatus &&
-      (doctor as { approvalStatus?: string }).approvalStatus !== 'approved'
+      !isProviderApproved(doctor as any)
     ) {
       return { ok: false, error: 'Doctor is not available for online booking', status: 403 };
     }

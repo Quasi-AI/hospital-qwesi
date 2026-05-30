@@ -6,6 +6,7 @@ import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { generateTemporaryPassword } from '@/lib/temporaryPassword';
 import { sendCredentialEmail } from '@/lib/notifications/credential-email';
+import { getEffectiveProviderApprovalStatus } from '@/lib/providerApproval';
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,7 +33,9 @@ export async function GET(request: NextRequest) {
       if (!doctor) {
         return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
       }
-      return NextResponse.json(doctor);
+      const doctorResponse = doctor.toObject();
+      doctorResponse.approvalStatus = getEffectiveProviderApprovalStatus(doctorResponse);
+      return NextResponse.json(doctorResponse);
     }
 
     // Server-side search: ?q= (empty = first page alphabetically) with optional &limit=
@@ -67,9 +70,15 @@ export async function GET(request: NextRequest) {
     // Otherwise return all doctors (no search params)
     const doctors = await User.find({ role: 'doctor' })
       .select('-password -image -licenseCertificate.data')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return NextResponse.json(doctors);
+    return NextResponse.json(
+      doctors.map((doctor) => ({
+        ...doctor,
+        approvalStatus: getEffectiveProviderApprovalStatus(doctor as any),
+      }))
+    );
 
   } catch (error) {
     console.error('Doctors fetch error:', error);

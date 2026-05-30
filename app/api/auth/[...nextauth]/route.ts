@@ -6,6 +6,7 @@ import dbConnect from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import Patient from '../../../../models/Patient';
 import bcrypt from 'bcryptjs';
+import { getEffectiveProviderApprovalStatus } from '@/lib/providerApproval';
 
 /** Demo/staff emails must authenticate via User, not Patient — avoids wrong portal when DB is mis-seeded */
 const STAFF_ONLY_EMAILS = new Set(['admin@aidoc.com', 'doctor@aidoc.com', 'staff@aidoc.com']);
@@ -45,6 +46,7 @@ export const authOptions: AuthOptions = {
                 const safeRole = ['admin', 'doctor', 'staff', 'patient'].includes(role)
                   ? role
                   : 'doctor';
+                const approvalStatus = getEffectiveProviderApprovalStatus(user);
                 return {
                   id: user._id.toString(),
                   email: user.email,
@@ -53,7 +55,7 @@ export const authOptions: AuthOptions = {
                   image: '',
                   hasImage: Boolean(user.image || user.hasImage),
                   hasLicenseCertificate: Boolean(user.licenseCertificate?.data),
-                  approvalStatus: user.approvalStatus || 'approved',
+                  approvalStatus,
                 };
             }
             return null;

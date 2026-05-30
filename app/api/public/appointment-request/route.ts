@@ -16,6 +16,7 @@ import { getDefaultPhoneCountry } from '@/lib/phoneDefaultCountry';
 import { phoneDigitsForMatch } from '@/lib/phoneNormalize';
 import { verifyBookingVerificationToken } from '@/lib/publicBookingToken';
 import { registerPatientFromBooking } from '@/lib/registerPatientFromBooking';
+import { isProviderApproved } from '@/lib/providerApproval';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PORTAL_GENDERS = new Set(['male', 'female', 'other', 'prefer-not-to-say']);
@@ -118,13 +119,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Please select a time slot' }, { status: 400 });
     }
 
-    const doctor = await User.findById(doctorId).select('name email role approvalStatus').lean();
+    const doctor = await User.findById(doctorId)
+      .select('name email role approvalStatus hasImage licenseNumber licenseCertificate')
+      .lean();
     if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
     if (
-      (doctor as { approvalStatus?: string }).approvalStatus &&
-      (doctor as { approvalStatus?: string }).approvalStatus !== 'approved'
+      !isProviderApproved(doctor as any)
     ) {
       return NextResponse.json({ error: 'This provider is not available for booking' }, { status: 403 });
     }

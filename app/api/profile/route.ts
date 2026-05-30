@@ -4,6 +4,7 @@ import { authOptions } from '../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { verifyProviderLicense } from '@/lib/licenseVerification';
+import { getEffectiveProviderApprovalStatus } from '@/lib/providerApproval';
 
 export async function GET() {
   try {
@@ -20,7 +21,12 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({
+      user: {
+        ...user,
+        approvalStatus: getEffectiveProviderApprovalStatus(user as any),
+      },
+    });
   } catch (error) {
     console.error('Profile fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -208,7 +214,7 @@ export async function PUT(request: NextRequest) {
         image: updatedUser.image || '',
         hasImage: Boolean(updatedUser.image || updatedUser.hasImage),
         hasLicenseCertificate: Boolean(updatedUser.licenseCertificate?.data),
-        approvalStatus: updatedUser.approvalStatus || 'approved',
+        approvalStatus: getEffectiveProviderApprovalStatus(updatedUser as any),
         licenseNumber: updatedUser.licenseNumber || '',
         licenseCertificate: updatedUser.licenseCertificate || null,
         licenseVerification: updatedUser.licenseVerification || null,

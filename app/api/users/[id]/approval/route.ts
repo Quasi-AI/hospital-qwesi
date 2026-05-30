@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { verifyProviderLicense } from '@/lib/licenseVerification';
+import { getEffectiveProviderApprovalStatus } from '@/lib/providerApproval';
 
 export async function PATCH(
   request: NextRequest,
@@ -30,6 +31,15 @@ export async function PATCH(
     }
 
     if (action === 'approve') {
+      const currentStatus = getEffectiveProviderApprovalStatus(user as any);
+      if (currentStatus === 'pending_profile') {
+        user.approvalStatus = 'pending_profile';
+        await user.save();
+        return NextResponse.json(
+          { error: 'Profile photo, license number, and license certificate are required before approval.' },
+          { status: 400 }
+        );
+      }
       user.approvalStatus = 'approved';
       user.approvalMethod = 'manual';
       user.approvedBy = session.user.email;
@@ -58,6 +68,21 @@ export async function PATCH(
     }
 
     if (action === 'auto-verify') {
+      const currentStatus = getEffectiveProviderApprovalStatus(user as any);
+      if (currentStatus === 'pending_profile') {
+        user.approvalStatus = 'pending_profile';
+        user.licenseVerification = {
+          status: 'not_started',
+          method: 'manual',
+          checkedAt: new Date(),
+          message: 'Profile photo, license number, and license certificate are required before verification.',
+        };
+        await user.save();
+        return NextResponse.json(
+          { error: 'Profile photo, license number, and license certificate are required before auto-check.' },
+          { status: 400 }
+        );
+      }
       const result = await verifyProviderLicense({
         name: user.name,
         email: user.email,
@@ -82,6 +107,7 @@ export async function PATCH(
 
     await user.save();
     const responseUser = user.toObject() as any;
+    responseUser.approvalStatus = getEffectiveProviderApprovalStatus(responseUser);
     delete responseUser.password;
 
     return NextResponse.json({

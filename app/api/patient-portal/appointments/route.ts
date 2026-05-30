@@ -15,6 +15,7 @@ import {
   consumePatientPaygCredit,
   getPatientConsultationAccess,
 } from '@/lib/patientConsultationAccess';
+import { isProviderApproved } from '@/lib/providerApproval';
 
 export async function GET(request: NextRequest) {
   try {
@@ -94,9 +95,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Please select a doctor' }, { status: 400 });
     }
 
-    const doctor = await User.findById(doctorId).select('name email phone role specialization').lean();
+    const doctor = await User.findById(doctorId)
+      .select('name email phone role specialization approvalStatus hasImage licenseNumber licenseCertificate')
+      .lean();
     if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+    }
+    if (!isProviderApproved(doctor as any)) {
+      return NextResponse.json({ error: 'This doctor is not available for booking yet' }, { status: 403 });
     }
 
     const appointmentDate = String(body.appointmentDate || '').trim();
@@ -148,13 +154,11 @@ export async function POST(request: NextRequest) {
       specialization?: string;
     };
     const coverageLabel =
-      access.source === 'free'
-        ? 'First consultation free'
-        : access.source === 'subscription'
-          ? `Subscription: ${access.activeSubscription?.planName || 'Active plan'}`
-          : access.source === 'payg'
-            ? `PAYG: ${access.paygTransaction?.reference || 'Paid'}`
-            : 'Payment required';
+      access.source === 'subscription'
+        ? `Subscription: ${access.activeSubscription?.planName || 'Active plan'}`
+        : access.source === 'payg'
+          ? `PAYG: ${access.paygTransaction?.reference || 'Paid'}`
+          : 'Payment required';
     const notes = [String(body.notes || '').trim(), `Billing cover: ${coverageLabel}`]
       .filter(Boolean)
       .join('\n');

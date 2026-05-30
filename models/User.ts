@@ -78,7 +78,7 @@ const userSchema = new mongoose.Schema<IUser>(
     approvalStatus: {
       type: String,
       enum: ['pending_profile', 'pending_verification', 'approved', 'rejected'],
-      default: 'approved',
+      default: 'pending_profile',
     },
     approvalMethod: {
       type: String,

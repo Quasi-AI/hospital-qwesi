@@ -9,7 +9,10 @@ export async function GET() {
     await dbConnect();
     const doctors = await User.find({
       role: 'doctor',
-      $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }],
+      approvalStatus: 'approved',
+      hasImage: true,
+      licenseNumber: { $exists: true, $ne: '' },
+      'licenseCertificate.data': { $exists: true, $ne: '' },
     })
       .select('_id name email specialization department')
       .sort({ name: 1 })

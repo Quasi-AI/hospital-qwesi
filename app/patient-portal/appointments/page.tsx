@@ -16,7 +16,8 @@ import {
   Search,
   Video,
   ExternalLink,
-  Plus
+  Plus,
+  CreditCard
 } from 'lucide-react';
 
 interface TelemedicineSession {
@@ -71,14 +72,22 @@ export default function PatientAppointmentsPage() {
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [canBook, setCanBook] = useState(false);
+  const [accessMessage, setAccessMessage] = useState('');
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const res = await fetch('/api/patient-portal/appointments');
+        const [res, accessRes] = await Promise.all([
+          fetch('/api/patient-portal/appointments'),
+          fetch('/api/patient-portal/consultation-access'),
+        ]);
         const data = await res.json();
+        const accessData = await accessRes.json().catch(() => ({}));
         setAppointments(data.appointments || []);
         setTelemedicineSessions(data.telemedicineSessions || []);
+        setCanBook(Boolean(accessData.allowed));
+        setAccessMessage(accessData.message || '');
       } catch (error) {
         console.error('Error fetching appointments:', error);
       } finally {
@@ -185,14 +194,30 @@ export default function PatientAppointmentsPage() {
           <h1 className="text-xl font-bold text-gray-900">{t('patientPortal.appointments.title')}</h1>
           <p className="mt-0.5 text-sm text-gray-600">{t('patientPortal.appointments.subtitle')}</p>
         </div>
-        <Link
-          href="/patient-portal/appointments/new"
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
-        >
-          <Plus className="h-4 w-4" />
-          Book appointment
-        </Link>
+        {canBook ? (
+          <Link
+            href="/patient-portal/appointments/new"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
+          >
+            <Plus className="h-4 w-4" />
+            Book appointment
+          </Link>
+        ) : (
+          <Link
+            href="/patient-portal/subscriptions"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-amber-600 px-3 text-sm font-semibold text-white hover:bg-amber-700"
+          >
+            <CreditCard className="h-4 w-4" />
+            Subscribe or pay first
+          </Link>
+        )}
       </div>
+
+      {!canBook && accessMessage ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {accessMessage}
+        </div>
+      ) : null}
 
       {/* Filters */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -346,13 +371,23 @@ export default function PatientAppointmentsPage() {
             <Calendar className="mx-auto mb-2 h-12 w-12 text-gray-300" />
             <h3 className="text-base font-medium text-gray-900">{t('patientPortal.appointments.noAppointments')}</h3>
             <p className="mt-0.5 text-sm text-gray-500">{t('patientPortal.appointments.noAppointmentsDesc')}</p>
-            <Link
-              href="/patient-portal/appointments/new"
-              className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
-            >
-              <Plus className="h-4 w-4" />
-              Book appointment
-            </Link>
+            {canBook ? (
+              <Link
+                href="/patient-portal/appointments/new"
+                className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
+              >
+                <Plus className="h-4 w-4" />
+                Book appointment
+              </Link>
+            ) : (
+              <Link
+                href="/patient-portal/subscriptions"
+                className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-md bg-amber-600 px-3 text-sm font-semibold text-white hover:bg-amber-700"
+              >
+                <CreditCard className="h-4 w-4" />
+                Subscribe or pay first
+              </Link>
+            )}
           </div>
         )}
       </div>

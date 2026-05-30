@@ -10,7 +10,6 @@ export const DOCTOR_CONSULTATION_PAYG_IDS = [
 ] as const;
 
 export type PatientConsultationAccessSource =
-  | 'free'
   | 'subscription'
   | 'payg'
   | 'payment_required';
@@ -19,7 +18,6 @@ export type PatientConsultationAccess = {
   allowed: boolean;
   source: PatientConsultationAccessSource;
   previousConsultationCount: number;
-  freeConsultationsRemaining: number;
   hasActiveSubscription: boolean;
   activeSubscription?: {
     _id: string;
@@ -92,7 +90,6 @@ export async function getPatientConsultationAccess(params: {
     ]);
 
   const previousConsultationCount = appointmentCount + standaloneSessionCount;
-  const freeConsultationsRemaining = previousConsultationCount === 0 ? 1 : 0;
 
   if (activeSubscription) {
     const sub = activeSubscription as {
@@ -105,7 +102,6 @@ export async function getPatientConsultationAccess(params: {
       allowed: true,
       source: 'subscription',
       previousConsultationCount,
-      freeConsultationsRemaining,
       hasActiveSubscription: true,
       activeSubscription: {
         _id: sub._id.toString(),
@@ -114,17 +110,6 @@ export async function getPatientConsultationAccess(params: {
         currentPeriodEnd: sub.currentPeriodEnd,
       },
       message: `Covered by active ${sub.planName} subscription.`,
-    };
-  }
-
-  if (freeConsultationsRemaining > 0) {
-    return {
-      allowed: true,
-      source: 'free',
-      previousConsultationCount,
-      freeConsultationsRemaining,
-      hasActiveSubscription: false,
-      message: 'Your first doctor consultation is free.',
     };
   }
 
@@ -141,7 +126,6 @@ export async function getPatientConsultationAccess(params: {
       allowed: true,
       source: 'payg',
       previousConsultationCount,
-      freeConsultationsRemaining,
       hasActiveSubscription: false,
       paygTransaction: {
         _id: tx._id.toString(),
@@ -159,9 +143,8 @@ export async function getPatientConsultationAccess(params: {
     allowed: false,
     source: 'payment_required',
     previousConsultationCount,
-    freeConsultationsRemaining,
     hasActiveSubscription: false,
-    message: 'Please pay as you go or subscribe before booking another doctor consultation.',
+    message: 'Please pay as you go or subscribe before booking a doctor consultation.',
   };
 }
 

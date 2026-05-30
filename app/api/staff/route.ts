@@ -6,6 +6,7 @@ import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { generateTemporaryPassword } from '@/lib/temporaryPassword';
 import { sendCredentialEmail } from '@/lib/notifications/credential-email';
+import { getEffectiveProviderApprovalStatus } from '@/lib/providerApproval';
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,15 +28,23 @@ export async function GET(request: NextRequest) {
       if (!staffMember) {
         return NextResponse.json({ error: 'Staff member not found' }, { status: 404 });
       }
-      return NextResponse.json(staffMember);
+      const staffResponse = staffMember.toObject();
+      staffResponse.approvalStatus = getEffectiveProviderApprovalStatus(staffResponse);
+      return NextResponse.json(staffResponse);
     }
 
     // Otherwise return all staff members
     const staff = await User.find({ role: 'staff' })
       .select('-password -image -licenseCertificate.data')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return NextResponse.json(staff);
+    return NextResponse.json(
+      staff.map((staffMember) => ({
+        ...staffMember,
+        approvalStatus: getEffectiveProviderApprovalStatus(staffMember as any),
+      }))
+    );
 
   } catch (error) {
     console.error('Staff fetch error:', error);

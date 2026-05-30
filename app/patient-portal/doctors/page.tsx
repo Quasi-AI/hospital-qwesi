@@ -6,12 +6,20 @@ import { Stethoscope, Mail, BriefcaseMedical, CalendarPlus, Eye } from 'lucide-r
 
 export default function PatientDoctorsPage() {
   const [doctors, setDoctors] = useState<any[]>([]);
+  const [canBook, setCanBook] = useState(false);
+  const [accessMessage, setAccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/patient-portal/doctors')
-      .then((res) => res.json())
-      .then((data) => setDoctors(data.doctors || []))
+    Promise.all([
+      fetch('/api/patient-portal/doctors').then((res) => res.json()),
+      fetch('/api/patient-portal/consultation-access').then((res) => res.json()),
+    ])
+      .then(([doctorData, accessData]) => {
+        setDoctors(doctorData.doctors || []);
+        setCanBook(Boolean(accessData.allowed));
+        setAccessMessage(accessData.message || '');
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -19,8 +27,17 @@ export default function PatientDoctorsPage() {
     <div className="mx-auto max-w-6xl space-y-4 p-4 lg:p-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-950">Doctors</h1>
-        <p className="text-sm text-slate-600">Browse all available doctors and book a consultation with any provider.</p>
+        <p className="text-sm text-slate-600">Browse approved doctors. Booking requires an active subscription or pay-as-you-go credit.</p>
       </div>
+      {!canBook && accessMessage ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {accessMessage}{' '}
+          <Link href="/patient-portal/subscriptions" className="font-semibold underline">
+            Subscribe
+          </Link>
+          {' '}or use pay-as-you-go before booking.
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="flex min-h-[240px] items-center justify-center">
@@ -68,13 +85,24 @@ export default function PatientDoctorsPage() {
                 <Eye className="h-4 w-4" />
                 View details
               </Link>
-              <Link
-                href={`/patient-portal/appointments/new?doctorId=${doctor._id}`}
-                className="mt-2 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
-              >
-                <CalendarPlus className="h-4 w-4" />
-                Book appointment
-              </Link>
+              {canBook ? (
+                <Link
+                  href={`/patient-portal/appointments/new?doctorId=${doctor._id}`}
+                  className="mt-2 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700"
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                  Book appointment
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-2 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-slate-200 px-3 text-sm font-semibold text-slate-500"
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                  Payment required
+                </button>
+              )}
             </article>
           ))}
         </div>
