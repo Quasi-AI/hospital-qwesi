@@ -8,6 +8,15 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+const providerRoles = ['doctor', 'staff', 'nurse', 'pharmacy'];
+
+function roleHome(role?: string | null) {
+  if (role === 'patient') return '/patient-portal';
+  if (role === 'pharmacy') return '/pharmacy';
+  if (role === 'hospital') return '/hospital-portal';
+  return '/dashboard';
+}
+
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -27,19 +36,23 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       if (!pathname.startsWith('/patient-portal')) {
         router.push('/patient-portal');
       }
+    } else if (session.user?.role === 'pharmacy' && pathname === '/dashboard') {
+      router.push('/pharmacy');
+    } else if (session.user?.role === 'hospital' && pathname === '/dashboard') {
+      router.push('/hospital-portal');
     } else if (
-      ['doctor', 'staff'].includes(session.user?.role || '') &&
-      (!session.user?.hasImage || !session.user?.hasLicenseCertificate) &&
+      providerRoles.includes(session.user?.role || '') &&
+      (!session.user?.hasImage || !session.user?.hasLicenseCertificate || !session.user?.hasLicenseNumber) &&
       pathname !== '/profile'
     ) {
-      router.push('/profile?verificationRequired=1');
+      router.push(`/profile?verificationRequired=1&returnTo=${encodeURIComponent(roleHome(session.user?.role))}`);
     } else if (
-      ['doctor', 'staff'].includes(session.user?.role || '') &&
+      providerRoles.includes(session.user?.role || '') &&
       session.user?.approvalStatus &&
       session.user.approvalStatus !== 'approved' &&
       pathname !== '/profile'
     ) {
-      router.push('/profile?approvalRequired=1');
+      router.push(`/profile?approvalRequired=1&returnTo=${encodeURIComponent(roleHome(session.user?.role))}`);
     }
   }, [session, status, router, pathname]);
 

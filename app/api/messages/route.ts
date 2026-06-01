@@ -26,7 +26,7 @@ async function recipientParticipant(entityType: 'user' | 'patient', entityId: st
   }
 
   const user = await User.findById(entityId).select('name email role image').lean();
-  if (!user || !['doctor', 'staff'].includes(user.role)) return null;
+  if (!user || !['admin', 'doctor', 'staff'].includes(user.role)) return null;
   return {
     entityType,
     entityId: user._id,
@@ -39,11 +39,24 @@ async function recipientParticipant(entityType: 'user' | 'patient', entityId: st
 
 function pairAllowed(senderRole: string, recipientRole: string) {
   if (senderRole === 'admin') return true;
+  if (senderRole === 'patient' && recipientRole === 'admin') return true;
   const key = [senderRole, recipientRole].sort().join(':');
   return ['doctor:doctor', 'doctor:staff', 'doctor:patient'].includes(key);
 }
 
-export async function GET() {
+function supportThreadFilter(currentEntityId: unknown) {
+  return {
+    'participants.entityId': currentEntityId,
+    participants: {
+      $elemMatch: {
+        entityId: { $ne: currentEntityId },
+        $or: [{ role: 'admin' }, { email: 'info@qwesi.org' }],
+      },
+    },
+  };
+}
+
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -53,7 +66,14 @@ export async function GET() {
     const current = await currentMessagingParticipant(session);
     if (!current) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
 
-    const threads = await DirectMessageThread.find({ 'participants.entityId': current.entityId })
+    const { searchParams } = new URL(request.url);
+    const scope = searchParams.get('scope');
+    const query =
+      scope === 'support' && current.role === 'patient'
+        ? supportThreadFilter(current.entityId)
+        : { 'participants.entityId': current.entityId };
+
+    const threads = await DirectMessageThread.find(query)
       .sort({ lastMessageAt: -1 })
       .limit(100)
       .lean();

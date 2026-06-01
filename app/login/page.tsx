@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { 
@@ -9,12 +10,14 @@ import {
   Lock, 
   User, 
   Stethoscope,
+  Building2,
   AlertCircle,
   CheckCircle,
   Copy,
   Crown,
   UserCheck,
-  Heart
+  Heart,
+  Pill
 } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -36,6 +39,8 @@ export default function LoginPage() {
     { role: 'Patient', email: 'patient@aidoc.com', password: 'password123', icon: Heart, color: 'bg-teal-50 text-teal-700 border-teal-100' },
     { role: 'Doctor', email: 'doctor@aidoc.com', password: 'password123', icon: Stethoscope, color: 'bg-blue-100 text-blue-800 border-blue-200' },
     { role: 'Staff', email: 'staff@aidoc.com', password: 'password123', icon: UserCheck, color: 'bg-green-100 text-green-800 border-green-200' },
+    { role: 'Hospital', email: 'hospital@aidoc.com', password: 'password123', icon: Building2, color: 'bg-cyan-50 text-cyan-800 border-cyan-200' },
+    { role: 'Pharmacy', email: 'pharmacy@aidoc.com', password: 'password123', icon: Pill, color: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
   ];
 
   useEffect(() => {
@@ -43,7 +48,7 @@ export default function LoginPage() {
     const checkSession = async () => {
       const session = await getSession();
       if (session) {
-        router.push('/dashboard');
+        router.push(getRoleHome(session.user?.role));
       }
     };
     checkSession();
@@ -118,6 +123,12 @@ export default function LoginPage() {
         if (session?.user?.role === 'patient') {
           setSuccess('Login successful! Redirecting to patient portal...');
           router.push('/patient-portal');
+        } else if (session?.user?.role === 'pharmacy') {
+          setSuccess('Login successful! Redirecting to pharmacy dashboard...');
+          router.push('/pharmacy');
+        } else if (session?.user?.role === 'hospital') {
+          setSuccess('Login successful! Redirecting to hospital dashboard...');
+          router.push('/hospital-portal');
         } else {
           setSuccess('Login successful! Redirecting to dashboard...');
           router.push('/dashboard');
@@ -258,6 +269,16 @@ export default function LoginPage() {
                   <span>{t('login.signIn')}</span>
                 )}
               </button>
+              <div className="rounded-lg border-2 border-amber-200 bg-amber-50 p-3 text-center">
+                <p className="text-sm font-semibold text-amber-950">Need a doctor, nurse, staff, hospital, or pharmacy account?</p>
+                <p className="mt-1 text-xs text-amber-800">Create an account here and wait for admin approval.</p>
+                <Link
+                  href="/signup"
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-amber-500 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+                >
+                  Sign up for approval
+                </Link>
+              </div>
             </form>
           </div>
 
@@ -318,4 +339,11 @@ export default function LoginPage() {
       </div>
     </div>
   );
+}
+
+function getRoleHome(role?: string | null) {
+  if (role === 'patient') return '/patient-portal';
+  if (role === 'pharmacy') return '/pharmacy';
+  if (role === 'hospital') return '/hospital-portal';
+  return '/dashboard';
 }

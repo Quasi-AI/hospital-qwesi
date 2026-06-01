@@ -4,6 +4,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import AIModel from '@/models/AIModel';
+import Patient from '@/models/Patient';
+import PatientAssistantChat from '@/models/PatientAssistantChat';
 
 const HEALTH_KEYWORDS = [
   'pain',
@@ -73,6 +75,13 @@ type DoctorCandidate = {
   bio?: string;
 };
 
+const WELCOME_MESSAGE = {
+  id: 'welcome',
+  role: 'assistant',
+  content:
+    'Hi, I am your Qwesi health assistant. Ask me about symptoms, medicines, appointments, or which type of doctor may fit your concern.',
+};
+
 function isHealthRelated(text: string) {
   const lower = text.toLowerCase();
   return HEALTH_KEYWORDS.some((keyword) => lower.includes(keyword));
@@ -124,6 +133,37 @@ function fallbackResponse(message: string, doctors: DoctorCandidate[]) {
         : 'Available for general clinical review.',
     })),
   };
+}
+
+async function currentPatient(email: string) {
+  return Patient.findOne({ email }).select('_id').lean();
+}
+
+async function saveExchange(
+  patientId: unknown,
+  userMessage: string,
+  assistantMessage: { reply: string; recommendedDoctors?: unknown[] }
+) {
+  await PatientAssistantChat.findOneAndUpdate(
+    { patientId },
+    {
+      $push: {
+        messages: {
+          $each: [
+            { role: 'user', content: userMessage, createdAt: new Date() },
+            {
+              role: 'assistant',
+              content: assistantMessage.reply,
+              doctors: Array.isArray(assistantMessage.recommendedDoctors) ? assistantMessage.recommendedDoctors : [],
+              createdAt: new Date(),
+            },
+          ],
+          $slice: -100,
+        },
+      },
+    },
+    { upsert: true, new: true, runValidators: true }
+  );
 }
 
 async function askConfiguredModel(message: string, doctors: DoctorCandidate[]) {
@@ -197,6 +237,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized - Patient access only' }, { status: 401 });
     }
 
+    await dbConnect();
+    const patient = await currentPatient(session.user.email);
+    if (!patient) {
+      return NextResponse.json({ error: 'Patient profile not found' }, { status: 404 });
+    }
+
     const { message } = await request.json();
     const text = String(message || '').trim().slice(0, 2000);
     if (text.length < 2) {
@@ -204,13 +250,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (!isHealthRelated(text)) {
-      return NextResponse.json({
+      const assistantResponse = {
         reply: 'I can only help with health and care questions in the patient portal. Please ask about symptoms, medicines, appointments, or which type of doctor may fit your concern.',
         recommendedDoctors: [],
-      });
+      };
+      await saveExchange(patient._id, text, assistantResponse);
+      return NextResponse.json(assistantResponse);
     }
 
-    await dbConnect();
     const doctors = await User.find({
       role: 'doctor',
       approvalStatus: 'approved',
@@ -230,9 +277,67 @@ export async function POST(request: NextRequest) {
     }));
 
     const aiResponse = await askConfiguredModel(text, doctorCandidates);
-    return NextResponse.json(aiResponse || fallbackResponse(text, doctorCandidates));
+    const assistantResponse = aiResponse || fallbackResponse(text, doctorCandidates);
+    await saveExchange(patient._id, text, assistantResponse);
+    return NextResponse.json(assistantResponse);
   } catch (error: any) {
     console.error('Patient assistant error:', error);
     return NextResponse.json({ error: error.message || 'Assistant failed to respond' }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email || session.user.role !== 'patient') {
+      return NextResponse.json({ error: 'Unauthorized - Patient access only' }, { status: 401 });
+    }
+
+    await dbConnect();
+    const patient = await currentPatient(session.user.email);
+    if (!patient) {
+      return NextResponse.json({ error: 'Patient profile not found' }, { status: 404 });
+    }
+
+    const chat = await PatientAssistantChat.findOne({ patientId: patient._id }).lean();
+    const messages = chat?.messages?.length
+      ? chat.messages.map((message: any) => ({
+          id: String(message._id || message.createdAt?.getTime?.() || Math.random()),
+          role: message.role,
+          content: message.content,
+          doctors: message.doctors || [],
+        }))
+      : [WELCOME_MESSAGE];
+
+    return NextResponse.json({ messages });
+  } catch (error: any) {
+    console.error('Patient assistant history error:', error);
+    return NextResponse.json({ error: error.message || 'Failed to load assistant history' }, { status: 500 });
+  }
+}
+
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email || session.user.role !== 'patient') {
+      return NextResponse.json({ error: 'Unauthorized - Patient access only' }, { status: 401 });
+    }
+
+    await dbConnect();
+    const patient = await currentPatient(session.user.email);
+    if (!patient) {
+      return NextResponse.json({ error: 'Patient profile not found' }, { status: 404 });
+    }
+
+    await PatientAssistantChat.findOneAndUpdate(
+      { patientId: patient._id },
+      { $set: { messages: [] } },
+      { upsert: true, new: true }
+    );
+
+    return NextResponse.json({ messages: [WELCOME_MESSAGE] });
+  } catch (error: any) {
+    console.error('Patient assistant clear error:', error);
+    return NextResponse.json({ error: error.message || 'Failed to clear assistant history' }, { status: 500 });
   }
 }

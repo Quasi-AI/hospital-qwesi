@@ -71,11 +71,20 @@ function NewAdmissionPageContent() {
   }, [formData.wardId, useNewWard]);
 
   const fetchHospitals = async () => {
-    const res = await fetch('/api/inpatient/hospitals?isActive=true');
-    if (res.ok) {
-      const data = await res.json();
-      setHospitals(data);
-      setFormData(prev => prev.hospitalId || data.length === 0 ? prev : { ...prev, hospitalId: data[0]._id });
+    try {
+      const res = await fetch('/api/inpatient/hospitals?isActive=true', { cache: 'no-store' });
+      const data = await res.json().catch(() => []);
+      if (!res.ok) {
+        setError(data?.error || 'Failed to load hospitals.');
+        setHospitals([]);
+        return;
+      }
+      const list = Array.isArray(data) ? data : Array.isArray(data?.hospitals) ? data.hospitals : [];
+      setHospitals(list);
+      setFormData(prev => prev.hospitalId || list.length === 0 ? prev : { ...prev, hospitalId: list[0]._id });
+    } catch {
+      setError('Failed to load hospitals.');
+      setHospitals([]);
     }
   };
   const fetchWards = async (hospitalId: string) => {

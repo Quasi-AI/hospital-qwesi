@@ -189,6 +189,7 @@ export default function ProfilePage() {
             image: '',
             hasImage: Boolean(formData.image),
             hasLicenseCertificate: Boolean(formData.licenseCertificate),
+            hasLicenseNumber: Boolean(formData.licenseNumber.trim()),
             approvalStatus: updatedApprovalStatus,
           }
         });
@@ -251,7 +252,20 @@ export default function ProfilePage() {
     }
   };
 
-  const isProvider = ['doctor', 'staff'].includes(session?.user?.role || '');
+  const isProvider = ['doctor', 'staff', 'nurse', 'pharmacy'].includes(session?.user?.role || '');
+  const providerLabel = session?.user?.role === 'pharmacy' ? 'Pharmacist' : session?.user?.role === 'nurse' ? 'Nurse' : 'Provider';
+  const profileHome =
+    session?.user?.role === 'pharmacy'
+      ? '/pharmacy'
+      : session?.user?.role === 'hospital'
+        ? '/hospital-portal'
+        : session?.user?.role === 'patient'
+          ? '/patient-portal'
+          : '/dashboard';
+  const returnTo =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('returnTo') || profileHome
+      : profileHome;
   const approvalLabel = formData.approvalStatus.replace(/_/g, ' ');
   const approvalClasses =
     formData.approvalStatus === 'approved'
@@ -269,11 +283,11 @@ export default function ProfilePage() {
           {/* Back Button */}
           <div className="mb-6">
             <Link
-              href="/dashboard"
+              href={returnTo}
               className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>{t('profile.backToDashboard')}</span>
+              <span>Back to dashboard</span>
             </Link>
           </div>
 
@@ -288,9 +302,9 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {verificationRequired && isProvider && (!formData.image || !formData.licenseCertificate) && (
+          {verificationRequired && isProvider && (!formData.image || !formData.licenseNumber || !formData.licenseCertificate) && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              Please upload your profile photo and license certificate before continuing. Your account will go to approval after submission.
+              Please upload your profile photo, license number, and license certificate before continuing. Your account will go to approval after submission.
             </div>
           )}
 
@@ -323,7 +337,7 @@ export default function ProfilePage() {
                       {formData.image ? (
                         <img
                           src={formData.image}
-                          alt={formData.name || 'Doctor profile'}
+                          alt={formData.name || `${providerLabel} profile`}
                           className="h-20 w-20 rounded-lg object-cover ring-1 ring-gray-200"
                         />
                       ) : (
@@ -333,7 +347,7 @@ export default function ProfilePage() {
                       )}
                       <div className="min-w-0 flex-1">
                         <input
-                          id="doctorImage"
+                          id="providerImage"
                           type="file"
                           accept="image/png,image/jpeg,image/webp"
                           onChange={handleImageChange}

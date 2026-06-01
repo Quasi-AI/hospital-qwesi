@@ -34,6 +34,10 @@ export interface IPatient {
     source?: 'patient' | 'staff';
   }[];
   password?: string; // For patient login
+  approvalStatus?: 'pending_verification' | 'approved' | 'rejected';
+  approvedBy?: string;
+  approvedAt?: Date;
+  rejectionReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -149,6 +153,22 @@ const patientSchema = new mongoose.Schema<IPatient>(
     password: {
       type: String,
       required: false,
+    },
+    approvalStatus: {
+      type: String,
+      enum: ['pending_verification', 'approved', 'rejected'],
+      default: 'approved',
+    },
+    approvedBy: {
+      type: String,
+      trim: true,
+    },
+    approvedAt: {
+      type: Date,
+    },
+    rejectionReason: {
+      type: String,
+      trim: true,
     },
   },
   {

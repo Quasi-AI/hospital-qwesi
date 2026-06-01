@@ -11,6 +11,63 @@ import Report from '../models/Report';
 import dbConnect from '../lib/mongodb';
 import bcrypt from 'bcryptjs';
 
+const DEMO_PASSWORD = 'Aidoc@2026!';
+
+const demoProviderProfile = {
+  hasImage: true,
+  image: 'demo-profile-photo',
+  licenseNumber: 'DEMO-LICENSE-2026',
+  licenseCertificate: {
+    fileName: 'demo-license.pdf',
+    fileType: 'application/pdf',
+    data: 'demo-license-certificate',
+    uploadedAt: new Date(),
+  },
+  approvalStatus: 'approved' as const,
+  approvalMethod: 'manual' as const,
+  approvedBy: 'seed',
+  approvedAt: new Date(),
+  licenseVerification: {
+    status: 'verified' as const,
+    method: 'manual' as const,
+    checkedAt: new Date(),
+    message: 'Seeded demo account.',
+    reference: 'seed-demo',
+  },
+};
+
+async function upsertDemoUser({
+  email,
+  name,
+  role,
+  provider = false,
+}: {
+  email: string;
+  name: string;
+  role: 'admin' | 'doctor' | 'staff' | 'nurse' | 'hospital' | 'pharmacy';
+  provider?: boolean;
+}) {
+  const hashedPassword = await bcrypt.hash(DEMO_PASSWORD, 12);
+  const update: Record<string, unknown> = {
+    email,
+    name,
+    role,
+    password: hashedPassword,
+    approvalStatus: 'approved',
+  };
+
+  if (provider) {
+    Object.assign(update, demoProviderProfile);
+  }
+
+  await User.findOneAndUpdate(
+    { email },
+    { $set: update },
+    { upsert: true, returnDocument: 'after', runValidators: true }
+  );
+  console.log(`Seeded ${role} demo user: ${email}`);
+}
+
 async function seedDatabase() {
   try {
     await dbConnect();
@@ -23,50 +80,12 @@ async function seedDatabase() {
     await Report.deleteMany({});
     console.log('Cleared existing data');
 
-    // Create demo doctor user with hashed password
-    const existingDoctor = await User.findOne({ email: 'doctor@aidoc.com' });
-    if (!existingDoctor) {
-      const hashedPassword = await bcrypt.hash('password123', 12);
-      const doctor = new User({
-        email: 'doctor@aidoc.com',
-        name: 'Dr. Demo User',
-        role: 'doctor',
-        password: hashedPassword,
-      });
-      await doctor.save();
-      console.log('Created demo doctor user with hashed password');
-    } else if (!existingDoctor.password) {
-      // Update existing user without password
-      const hashedPassword = await bcrypt.hash('password123', 12);
-      existingDoctor.password = hashedPassword;
-      await existingDoctor.save();
-      console.log('Updated demo doctor user with hashed password');
-    }
-
-    // Create admin user with hashed password
-    const existingAdmin = await User.findOne({ email: 'admin@aidoc.com' });
-    if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash('password123', 12);
-      const admin = new User({
-        email: 'admin@aidoc.com',
-        name: 'Admin User',
-        role: 'admin',
-        password: hashedPassword,
-      });
-      await admin.save();
-      console.log('Created admin user with hashed password');
-    } else if (!existingAdmin.password) {
-      // Update existing user without password
-      const hashedPassword = await bcrypt.hash('password123', 12);
-      existingAdmin.password = hashedPassword;
-      await existingAdmin.save();
-      console.log('Updated admin user with hashed password');
-    }
-    if (existingAdmin && existingAdmin.role !== 'admin') {
-      existingAdmin.role = 'admin';
-      await existingAdmin.save();
-      console.log('Corrected admin user role to admin (was mis-set in DB)');
-    }
+    await upsertDemoUser({ email: 'admin@aidoc.com', name: 'Admin User', role: 'admin' });
+    await upsertDemoUser({ email: 'doctor@aidoc.com', name: 'Dr. Demo User', role: 'doctor', provider: true });
+    await upsertDemoUser({ email: 'staff@aidoc.com', name: 'Demo Staff', role: 'staff', provider: true });
+    await upsertDemoUser({ email: 'nurse@aidoc.com', name: 'Demo Nurse', role: 'nurse', provider: true });
+    await upsertDemoUser({ email: 'hospital@aidoc.com', name: 'Demo Hospital', role: 'hospital' });
+    await upsertDemoUser({ email: 'pharmacy@aidoc.com', name: 'Demo Pharmacy', role: 'pharmacy' });
 
     // Create requested admin account
     const requestedAdminEmail = (process.env.ADMIN_EMAIL || 'info@qwesi.org').toLowerCase().trim();
@@ -87,25 +106,6 @@ async function seedDatabase() {
       existingRequestedAdmin.password = hashedRequestedAdminPassword;
       await existingRequestedAdmin.save();
       console.log(`Updated requested admin user: ${requestedAdminEmail}`);
-    }
-
-    // Create staff user (matches login demo credentials)
-    const existingStaff = await User.findOne({ email: 'staff@aidoc.com' });
-    if (!existingStaff) {
-      const hashedStaffPassword = await bcrypt.hash('password123', 12);
-      const staff = new User({
-        email: 'staff@aidoc.com',
-        name: 'Demo Staff',
-        role: 'staff',
-        password: hashedStaffPassword,
-      });
-      await staff.save();
-      console.log('Created demo staff user with hashed password');
-    } else if (!existingStaff.password) {
-      const hashedStaffPassword = await bcrypt.hash('password123', 12);
-      existingStaff.password = hashedStaffPassword;
-      await existingStaff.save();
-      console.log('Updated demo staff user with hashed password');
     }
 
     // Create sample patients
@@ -182,7 +182,7 @@ async function seedDatabase() {
     console.log(`Created ${createdPatients.length} patients`);
 
     // Demo patient portal login (Patient model with bcrypt password; same pattern as staff/admin)
-    const hashedPatientPortalPassword = await bcrypt.hash('password123', 12);
+    const hashedPatientPortalPassword = await bcrypt.hash(DEMO_PASSWORD, 12);
     const demoPortalPatient = new Patient({
       name: 'Demo Patient',
       email: 'patient@aidoc.com',
@@ -309,6 +309,7 @@ async function seedDatabase() {
     console.log(`Created ${createdReports.length} reports`);
 
     console.log('Database seeded successfully!');
+    console.log(`Demo password for aidoc.com accounts: ${DEMO_PASSWORD}`);
     process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error);

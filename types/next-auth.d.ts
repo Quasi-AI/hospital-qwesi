@@ -5,6 +5,7 @@ declare module 'next-auth' {
     role?: string;
     hasImage?: boolean;
     hasLicenseCertificate?: boolean;
+    hasLicenseNumber?: boolean;
     approvalStatus?: string;
   }
   
@@ -17,6 +18,7 @@ declare module 'next-auth' {
       image?: string;
       hasImage?: boolean;
       hasLicenseCertificate?: boolean;
+      hasLicenseNumber?: boolean;
       approvalStatus?: string;
       patientId?: string;
     };
@@ -30,6 +32,7 @@ declare module 'next-auth/jwt' {
     image?: string;
     hasImage?: boolean;
     hasLicenseCertificate?: boolean;
+    hasLicenseNumber?: boolean;
     approvalStatus?: string;
     patientId?: string;
   }

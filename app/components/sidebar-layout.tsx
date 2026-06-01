@@ -62,6 +62,7 @@ import {
   Wifi,
   MonitorPlay,
   ImageDown,
+  RefreshCw,
   Video,
   Phone,
   MessageCircle,
@@ -69,6 +70,7 @@ import {
   Droplets,
   Heart,
   Globe,
+  Hospital,
   LayoutGrid,
   Languages,
   Wallet
@@ -111,7 +113,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const mobileProfileMenuRef = useRef<HTMLDivElement>(null);
 
-  const isAdmin = session?.user?.role === 'admin';
+  const currentRole = session?.user?.role || 'doctor';
+  const isAdmin = currentRole === 'admin';
 
   const fetchUnreadNotifications = useCallback(async () => {
     try {
@@ -147,21 +150,23 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   };
 
   const navigation: NavigationItem[] = [
-    { id: 'dashboard', label: t('navigation.dashboard'), icon: Home, href: '/dashboard', roles: ['admin', 'doctor', 'staff'] },
+    { id: 'dashboard', label: t('navigation.dashboard'), icon: Home, href: '/dashboard', roles: ['admin', 'doctor', 'staff', 'nurse'] },
+    { id: 'hospital-portal', label: 'Hospital Portal', icon: Building2, href: '/hospital-portal', roles: ['admin', 'hospital'] },
+    { id: 'hospital-network', label: 'Hospital Network', icon: Hospital, href: '/hospital-network', roles: ['admin', 'hospital'] },
     { id: 'doctors', label: t('navigation.doctors'), icon: UserPlus, href: '/doctors', roles: ['admin'] },
     { id: 'staff', label: t('navigation.staff'), icon: UserCheck, href: '/staff', roles: ['admin'] },
-    { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'appointment-slots', label: t('navigation.appointmentSlots'), icon: LayoutGrid, href: '/appointments/slots', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'clinical-notes', label: 'Notes', icon: ClipboardList, href: '/clinical-notes', roles: ['admin', 'doctor', 'staff'] },
+    { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital'] },
+    { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital'] },
+    { id: 'appointment-slots', label: t('navigation.appointmentSlots'), icon: LayoutGrid, href: '/appointments/slots', roles: ['admin', 'doctor', 'staff', 'nurse'] },
+    { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['admin', 'doctor', 'staff', 'nurse'] },
+    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital', 'pharmacy'] },
+    { id: 'clinical-notes', label: 'Notes', icon: ClipboardList, href: '/clinical-notes', roles: ['admin', 'doctor', 'staff', 'nurse'] },
     { 
       id: 'laboratory', 
       label: t('navigation.laboratory'), 
       icon: FlaskConical, 
       href: '/lab', 
-      roles: ['admin', 'doctor', 'staff'],
+      roles: ['admin', 'doctor', 'staff', 'nurse'],
       children: [
         { id: 'lab-tests', label: t('lab.tests'), icon: TestTube, href: '/lab', roles: ['admin', 'doctor', 'staff'] },
         { id: 'lab-new-order', label: t('lab.newTestOrder'), icon: Plus, href: '/lab/new', roles: ['admin', 'doctor', 'staff'] },
@@ -176,12 +181,12 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       label: t('navigation.inpatient'), 
       icon: Building2, 
       href: '/inpatient/admissions', 
-      roles: ['admin', 'doctor', 'staff'],
+      roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital'],
       children: [
-        { id: 'admissions', label: t('inpatient.admissions'), icon: HeartPulse, href: '/inpatient/admissions', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'new-admission', label: t('inpatient.newAdmission'), icon: UserPlus, href: '/inpatient/admissions/new', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'wards', label: t('inpatient.wards'), icon: Building2, href: '/inpatient/wards', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'beds', label: t('inpatient.beds'), icon: Bed, href: '/inpatient/beds', roles: ['admin', 'doctor', 'staff'] }
+        { id: 'admissions', label: t('inpatient.admissions'), icon: HeartPulse, href: '/inpatient/admissions', roles: ['admin', 'doctor', 'staff', 'hospital'] },
+        { id: 'new-admission', label: t('inpatient.newAdmission'), icon: UserPlus, href: '/inpatient/admissions/new', roles: ['admin', 'doctor', 'staff', 'hospital'] },
+        { id: 'wards', label: t('inpatient.wards'), icon: Building2, href: '/inpatient/wards', roles: ['admin', 'doctor', 'staff', 'hospital'] },
+        { id: 'beds', label: t('inpatient.beds'), icon: Bed, href: '/inpatient/beds', roles: ['admin', 'doctor', 'staff', 'hospital'] }
       ]
     },
     { 
@@ -189,7 +194,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       label: t('navigation.radiology'), 
       icon: Radio, 
       href: '/radiology', 
-      roles: ['admin', 'doctor', 'staff'],
+      roles: ['admin', 'doctor', 'staff', 'nurse'],
       children: [
         { id: 'radiology-studies', label: t('radiology.studies'), icon: Image, href: '/radiology', roles: ['admin', 'doctor', 'staff'] },
         { id: 'radiology-new', label: t('radiology.newStudy'), icon: Plus, href: '/radiology/new', roles: ['admin', 'doctor', 'staff'] },
@@ -202,12 +207,21 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       label: t('navigation.pharmacy'), 
       icon: Pill, 
       href: '/pharmacy', 
-      roles: ['admin', 'doctor', 'staff'],
+      roles: ['admin', 'doctor', 'staff', 'nurse', 'pharmacy'],
       children: [
-        { id: 'pharmacy-medicines', label: t('pharmacy.medicines'), icon: Pill, href: '/pharmacy', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'pharmacy-new', label: t('pharmacy.addMedicine'), icon: Plus, href: '/pharmacy/medicines/new', roles: ['admin', 'staff'] },
-        { id: 'pharmacy-dispensing', label: t('pharmacy.dispensing'), icon: Package, href: '/pharmacy/dispensing', exact: true, roles: ['admin', 'doctor', 'staff'] },
-        { id: 'pharmacy-dispensing-list', label: t('pharmacy.dispensingList'), icon: ClipboardList, href: '/pharmacy/dispensing/list', exact: true, roles: ['admin', 'doctor', 'staff'] }
+        { id: 'pharmacy-dashboard', label: 'Directory', icon: Home, href: '/pharmacy', exact: true, roles: ['admin', 'doctor', 'staff', 'nurse', 'pharmacy'] },
+        { id: 'pharmacy-prescription-queue', label: 'Prescription Queue', icon: ClipboardList, href: '/pharmacy/prescription-queue', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-clinical-verification', label: 'Clinical Verification', icon: Shield, href: '/pharmacy/clinical-verification', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-orders', label: 'Orders', icon: ShoppingCart, href: '/pharmacy/orders', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-inventory', label: 'Inventory', icon: Package, href: '/pharmacy/inventory', roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-substitutions', label: 'Substitutions', icon: RefreshCw, href: '/pharmacy/substitutions', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-chronic-refills', label: 'Chronic Refills', icon: Clock, href: '/pharmacy/chronic-refills', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-deliveries', label: 'Deliveries', icon: Truck, href: '/pharmacy/deliveries', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-messages', label: 'Messages', icon: MessageCircle, href: '/pharmacy/messages', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-billing-wallet', label: 'Billing & Wallet', icon: Wallet, href: '/pharmacy/billing-wallet', exact: true, roles: ['admin', 'pharmacy'] },
+        { id: 'pharmacy-reports', label: 'Reports', icon: BarChart3, href: '/pharmacy/reports', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
+        { id: 'pharmacy-compliance-logs', label: 'Compliance Logs', icon: FileText, href: '/pharmacy/compliance-logs', exact: true, roles: ['admin', 'pharmacy'] },
+        { id: 'pharmacy-settings', label: 'Settings', icon: Settings, href: '/pharmacy/settings', exact: true, roles: ['admin', 'pharmacy'] }
       ]
     },
     { 
@@ -324,12 +338,11 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     { id: 'ai-health-analytics', label: t('navigation.aiHealthAnalytics'), icon: TrendingUp, href: '/ai-health-analytics', roles: ['admin', 'doctor', 'staff'] },
     { id: 'ai-assistant', label: t('navigation.aiAssistant'), icon: Stethoscope, href: '/ai-assistant', roles: ['admin', 'doctor', 'staff'] }
   ].filter(item => {
-    const userRole = session?.user?.role || 'doctor';
     // Filter parent items
-    if (!item.roles.includes(userRole)) return false;
+    if (!item.roles.includes(currentRole)) return false;
     // Filter children if they exist
     if (item.children) {
-      item.children = item.children.filter(child => child.roles.includes(userRole));
+      item.children = item.children.filter(child => child.roles.includes(currentRole));
       // If no children remain and parent has no direct href functionality, we might want to hide it
       // But for billing, we want to show it even if user can't access service-items
     }
@@ -658,31 +671,99 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
             {t('ai.quickActions.title')}
           </h3>
           <div className="space-y-1">
-            <Link
-              href="/patients/new"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <Plus className="h-4 w-4 text-blue-600" />
-              <span>{t('ai.quickActions.newPatient')}</span>
-            </Link>
-            <Link
-              href="/appointments/new"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <Plus className="h-4 w-4 text-green-600" />
-              <span>{t('ai.quickActions.newAppointment')}</span>
-            </Link>
-            {isAdmin && (
-              <Link
-                href="/doctors/new"
-                className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <UserPlus className="h-4 w-4 text-purple-600" />
-                <span>{t('ai.quickActions.newDoctor')}</span>
-              </Link>
+            {currentRole === 'pharmacy' ? (
+              <>
+                <Link
+                  href="/pharmacy/medicines/new"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Plus className="h-4 w-4 text-emerald-600" />
+                  <span>Add Medicine</span>
+                </Link>
+                <Link
+                  href="/pharmacy/dispensing"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <ClipboardList className="h-4 w-4 text-blue-600" />
+                  <span>Dispensing</span>
+                </Link>
+                <Link
+                  href="/pharmacy/inventory"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Package className="h-4 w-4 text-amber-600" />
+                  <span>Inventory</span>
+                </Link>
+              </>
+            ) : currentRole === 'hospital' ? (
+              <>
+                <Link
+                  href="/patients/new"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Plus className="h-4 w-4 text-blue-600" />
+                  <span>{t('ai.quickActions.newPatient')}</span>
+                </Link>
+                <Link
+                  href="/inpatient/admissions/new"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <HeartPulse className="h-4 w-4 text-red-600" />
+                  <span>New Admission</span>
+                </Link>
+                <Link
+                  href="/inpatient/beds"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Bed className="h-4 w-4 text-purple-600" />
+                  <span>Beds</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/patients/new"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Plus className="h-4 w-4 text-blue-600" />
+                  <span>{t('ai.quickActions.newPatient')}</span>
+                </Link>
+                <Link
+                  href="/appointments/new"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Plus className="h-4 w-4 text-green-600" />
+                  <span>{t('ai.quickActions.newAppointment')}</span>
+                </Link>
+                {isAdmin && (
+                  <>
+                    <Link
+                      href="/doctors/new"
+                      className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <UserPlus className="h-4 w-4 text-purple-600" />
+                      <span>{t('ai.quickActions.newDoctor')}</span>
+                    </Link>
+                    <Link
+                      href="/pharmacy"
+                      className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <Pill className="h-4 w-4 text-emerald-600" />
+                      <span>Pharmacy</span>
+                    </Link>
+                  </>
+                )}
+              </>
             )}
           </div>
         </div>

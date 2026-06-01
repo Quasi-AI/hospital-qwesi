@@ -1,438 +1,425 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useTranslations } from '../hooks/useTranslations';
-import { 
-  Calendar,
-  FileText,
-  Pill,
-  Clock,
+import { useSession } from 'next-auth/react';
+import {
   ArrowRight,
-  Activity,
-  Heart,
-  Bot,
-  Send
+  Calendar,
+  ClipboardList,
+  Download,
+  FileText,
+  FlaskConical,
+  HeartPulse,
+  Home,
+  MessageCircle,
+  Pill,
+  Plus,
+  ShieldCheck,
+  Stethoscope,
+  Users,
+  Video,
+  WalletCards,
 } from 'lucide-react';
 
-interface DashboardStats {
-  upcomingAppointments: number;
-  totalReports: number;
-  activePrescriptions: number;
-  pendingResults: number;
-}
+type DashboardStat = {
+  name: string;
+  value: string;
+};
 
-interface Appointment {
-  _id: string;
-  doctorName: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  appointmentType: string;
+type ActivityItem = {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  time: string;
+  status?: string;
+};
+
+type AppointmentItem = {
+  id: string;
+  patient: string;
+  time: string;
+  date?: string;
+  type: string;
   status: string;
+};
+
+type DashboardPayload = {
+  profile?: { name?: string };
+  stats?: DashboardStat[];
+  recentActivities?: ActivityItem[];
+  upcomingAppointments?: AppointmentItem[];
+  operationalStats?: {
+    care?: { completedAppointments?: number; completedLabTests?: number };
+    laboratory?: { pending?: number };
+    pharmacy?: { pendingPrescriptions?: number };
+    referrals?: { active?: number; latest?: any[] };
+    family?: { members?: number; latest?: any[] };
+    homeCare?: { active?: number; latest?: any[] };
+    wallet?: { planName?: string; status?: string; currency?: string; balance?: number };
+  };
+};
+
+const statMeta: Record<string, { label: string; href: string; icon: React.ElementType; tone: string }> = {
+  upcomingAppointments: { label: 'Upcoming Appointments', href: '/patient-portal/appointments', icon: Calendar, tone: 'bg-emerald-50 text-emerald-700' },
+  pendingLabTests: { label: 'Tests Pending', href: '/patient-portal/reports', icon: FlaskConical, tone: 'bg-violet-50 text-violet-700' },
+  activePrescriptions: { label: 'Prescriptions', href: '/patient-portal/prescriptions', icon: Pill, tone: 'bg-orange-50 text-orange-700' },
+  referrals: { label: 'Referrals', href: '/patient-portal/referrals', icon: ClipboardList, tone: 'bg-blue-50 text-blue-700' },
+  reportsGenerated: { label: 'Reports', href: '/patient-portal/reports', icon: FileText, tone: 'bg-cyan-50 text-cyan-700' },
+};
+
+function StatCard({ stat }: { stat: DashboardStat }) {
+  const meta = statMeta[stat.name] || { label: stat.name, href: '/patient-portal', icon: HeartPulse, tone: 'bg-slate-50 text-slate-700' };
+  const Icon = meta.icon;
+  return (
+    <Link href={meta.href} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold text-slate-600">{meta.label}</p>
+          <p className="mt-2 text-3xl font-bold text-slate-950">{stat.value}</p>
+        </div>
+        <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${meta.tone}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      <p className="mt-2 text-right text-xs font-medium text-emerald-700">View all</p>
+    </Link>
+  );
 }
 
-interface Report {
-  _id: string;
-  reportType: string;
-  reportDate: string;
-  status: string;
-  doctorName: string;
+function Panel({ title, href, children }: { title: string; href?: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+        <h2 className="text-sm font-bold text-slate-950">{title}</h2>
+        {href && <Link href={href} className="text-xs font-semibold text-emerald-700 hover:text-emerald-900">View all</Link>}
+      </div>
+      <div className="p-4">{children}</div>
+    </section>
+  );
 }
 
-interface AssistantMessage {
-  role: 'user' | 'assistant';
-  text: string;
-  doctors?: Array<{
-    id: string;
-    name: string;
-    specialization: string;
-    reason: string;
-  }>;
+function Avatar({ label, tone = 'bg-emerald-600' }: { label: string; tone?: string }) {
+  return (
+    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${tone} text-sm font-bold text-white`}>
+      {label.split(' ').map((part) => part[0]).join('').slice(0, 2)}
+    </div>
+  );
+}
+
+function StatusPill({ children, tone = 'emerald' }: { children: React.ReactNode; tone?: 'emerald' | 'blue' | 'amber' | 'violet' }) {
+  const classes = {
+    emerald: 'bg-emerald-50 text-emerald-700',
+    blue: 'bg-blue-50 text-blue-700',
+    amber: 'bg-amber-50 text-amber-700',
+    violet: 'bg-violet-50 text-violet-700',
+  };
+  return <span className={`rounded-md px-2 py-1 text-[11px] font-semibold capitalize ${classes[tone]}`}>{children}</span>;
+}
+
+function EmptyInline({ text, href, action }: { text: string; href: string; action: string }) {
+  return (
+    <div className="rounded-md border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+      <p>{text}</p>
+      <Link href={href} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
+        {action} <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  );
 }
 
 export default function PatientPortalDashboard() {
   const { data: session } = useSession();
-  const { t } = useTranslations();
-  const [stats, setStats] = useState<DashboardStats>({
-    upcomingAppointments: 0,
-    totalReports: 0,
-    activePrescriptions: 0,
-    pendingResults: 0
-  });
-  const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
-  const [recentReports, setRecentReports] = useState<Report[]>([]);
-  const [assistantMessages, setAssistantMessages] = useState<AssistantMessage[]>([
-    {
-      role: 'assistant',
-      text: 'Tell me what symptom or health concern you want help with, and I can suggest safe next steps and the most relevant approved doctor.',
-    },
-  ]);
-  const [assistantInput, setAssistantInput] = useState('');
-  const [assistantLoading, setAssistantLoading] = useState(false);
+  const [payload, setPayload] = useState<DashboardPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (!session?.user?.email) return;
-      
+    let active = true;
+    async function loadDashboard() {
       try {
-        // Fetch appointments
-        const appointmentsRes = await fetch(`/api/patient-portal/appointments`);
-        const appointmentsData = await appointmentsRes.json();
-        
-        // Fetch reports
-        const reportsRes = await fetch(`/api/patient-portal/reports`);
-        const reportsData = await reportsRes.json();
-
-        const appointments = appointmentsData.appointments || [];
-        const reports = reportsData.reports || [];
-
-        // Calculate stats
-        const now = new Date();
-        const upcomingAppointments = appointments.filter((apt: Appointment) => 
-          new Date(apt.appointmentDate) >= now && apt.status !== 'cancelled'
-        ).length;
-
-        const pendingResults = reports.filter((r: Report) => 
-          r.status === 'pending' || r.status === 'in-progress'
-        ).length;
-
-        setStats({
-          upcomingAppointments,
-          totalReports: reports.length,
-          activePrescriptions: reports.filter((r: Report) => r.reportType === 'treatment').length,
-          pendingResults
-        });
-
-        // Get recent items
-        setRecentAppointments(appointments.slice(0, 3));
-        setRecentReports(reports.slice(0, 3));
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        setLoading(true);
+        const response = await fetch('/api/dashboard', { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data?.error || 'Failed to load dashboard');
+        if (active) {
+          setPayload(data);
+          setError('');
+        }
+      } catch (err) {
+        if (active) setError(err instanceof Error ? err.message : 'Failed to load dashboard');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
+    }
+    loadDashboard();
+    return () => {
+      active = false;
     };
+  }, []);
 
-    fetchDashboardData();
-  }, [session]);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-      case 'completed':
-      case 'reviewed':
-        return 'bg-green-100 text-green-700';
-      case 'scheduled':
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-700';
-      case 'cancelled':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getAppointmentTypeColor = (type: string) => {
-    switch (type) {
-      case 'consultation': return 'bg-blue-500';
-      case 'follow-up': case 'followUp': return 'bg-purple-500';
-      case 'home-nurse-visit': return 'bg-teal-500';
-      case 'checkup': return 'bg-green-500';
-      case 'emergency': return 'bg-red-500';
-      case 'surgery': return 'bg-orange-500';
-      case 'therapy': return 'bg-teal-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const sendAssistantMessage = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const text = assistantInput.trim();
-    if (!text || assistantLoading) return;
-
-    setAssistantInput('');
-    setAssistantMessages((current) => [...current, { role: 'user', text }]);
-    setAssistantLoading(true);
-    try {
-      const response = await fetch('/api/patient-portal/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
-      const data = await response.json().catch(() => ({}));
-      setAssistantMessages((current) => [
-        ...current,
-        {
-          role: 'assistant',
-          text: data.reply || data.error || 'I could not answer that right now.',
-          doctors: data.recommendedDoctors || [],
-        },
-      ]);
-    } catch {
-      setAssistantMessages((current) => [
-        ...current,
-        { role: 'assistant', text: 'I could not answer that right now. Please try again.' },
-      ]);
-    } finally {
-      setAssistantLoading(false);
-    }
-  };
+  const patientName = payload?.profile?.name || session?.user?.name || 'Patient';
+  const stats = payload?.stats || [];
+  const activities = payload?.recentActivities || [];
+  const appointments = payload?.upcomingAppointments || [];
+  const reports = activities.filter((activity) => activity.type === 'report' || activity.type === 'lab').slice(0, 4);
+  const careTeam = useMemo(() => Array.from(new Set(appointments.map((appointment) => appointment.patient).filter(Boolean))).slice(0, 4), [appointments]);
+  const referrals = payload?.operationalStats?.referrals?.latest || [];
+  const family = payload?.operationalStats?.family?.latest || [];
+  const homeCareTasks = payload?.operationalStats?.homeCare?.latest || [];
+  const wallet = payload?.operationalStats?.wallet;
 
   if (loading) {
-    return (
-      <div className="flex min-h-[320px] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-b-2 border-teal-600" />
-          <p className="mt-2 text-sm text-gray-600">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
+    return <div className="rounded-lg border border-emerald-100 bg-white p-4 text-sm text-emerald-800">Loading your dashboard...</div>;
   }
 
   return (
     <div className="space-y-4">
-      {/* Welcome Header */}
-      <div className="rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 p-4 text-white shadow-md">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="mb-1 text-xl font-bold">
-              {t('patientPortal.dashboard.welcome')}, {session?.user?.name?.split(' ')[0]}!
-            </h1>
-            <p className="text-sm text-teal-100">
-              {t('patientPortal.dashboard.subtitle')}
-            </p>
-          </div>
-          <div className="hidden md:block shrink-0">
-            <Heart className="h-12 w-12 text-white/20" />
-          </div>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-950">Welcome back, {patientName.split(' ')[0]}!</h1>
+          <p className="text-sm text-slate-600">Here is an overview of your health and care.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/patient-portal/appointments/new" className="inline-flex h-10 items-center gap-2 rounded-md bg-emerald-600 px-3 text-sm font-semibold text-white hover:bg-emerald-700">
+            <Calendar className="h-4 w-4" />
+            Book Appointment
+          </Link>
+          <Link href="/patient-portal/assistant" className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            <MessageCircle className="h-4 w-4" />
+            Ask AI
+          </Link>
         </div>
       </div>
 
-      <div className="rounded-lg border border-teal-100 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-          <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900">
-            <Bot className="h-5 w-5 text-teal-600" />
-            Health assistant
-          </h2>
-          <span className="rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
-            Health only
-          </span>
-        </div>
-        <div className="max-h-80 space-y-3 overflow-y-auto p-4">
-          {assistantMessages.map((item, index) => (
-            <div key={index} className={`flex ${item.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-                  item.role === 'user'
-                    ? 'bg-teal-600 text-white'
-                    : 'border border-gray-100 bg-gray-50 text-gray-800'
-                }`}
-              >
-                <p>{item.text}</p>
-                {item.doctors?.length ? (
-                  <div className="mt-3 space-y-2">
-                    {item.doctors.map((doctor) => (
-                      <Link
-                        key={doctor.id}
-                        href={`/patient-portal/doctors/${doctor.id}`}
-                        className="block rounded-md border border-teal-100 bg-white p-2 text-gray-800 hover:border-teal-300"
-                      >
-                        <span className="block font-semibold">{doctor.name}</span>
-                        <span className="block text-xs text-teal-700">{doctor.specialization}</span>
-                        <span className="mt-1 block text-xs text-gray-500">{doctor.reason}</span>
-                      </Link>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          ))}
-          {assistantLoading ? (
-            <div className="flex justify-start">
-              <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-600">
-                Thinking...
-              </div>
-            </div>
-          ) : null}
-        </div>
-        <form onSubmit={sendAssistantMessage} className="flex gap-2 border-t border-gray-100 p-3">
-          <input
-            value={assistantInput}
-            onChange={(event) => setAssistantInput(event.target.value)}
-            placeholder="Describe a symptom or health concern..."
-            className="h-10 flex-1 rounded-md border border-gray-200 px-3 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
-          />
-          <button
-            type="submit"
-            disabled={assistantLoading || !assistantInput.trim()}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-teal-600 px-3 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
-          >
-            <Send className="h-4 w-4" />
-            Ask
-          </button>
-        </form>
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {stats.map((stat) => <StatCard key={stat.name} stat={stat} />)}
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Link href="/patient-portal/appointments" className="rounded-lg border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-gray-500 sm:text-sm">{t('patientPortal.dashboard.upcomingAppointments')}</p>
-              <p className="mt-0.5 text-xl font-bold text-gray-900">{stats.upcomingAppointments}</p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-              <Calendar className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </Link>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <Panel title="Upcoming Appointments" href="/patient-portal/appointments">
+              {appointments.length === 0 ? (
+                <EmptyInline text="No upcoming appointments yet." href="/patient-portal/appointments/new" action="Book appointment" />
+              ) : (
+                <div className="space-y-3">
+                  {appointments.map((appointment, index) => (
+                    <Link key={appointment.id} href="/patient-portal/appointments" className="flex items-center justify-between gap-3 rounded-md border border-slate-100 p-3 hover:bg-slate-50">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Avatar label={appointment.patient} tone={index % 2 ? 'bg-cyan-600' : 'bg-slate-800'} />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-950">{appointment.patient}</p>
+                          <p className="truncate text-xs text-slate-500">{appointment.type}</p>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right text-xs text-slate-500">
+                        <p>{appointment.time}</p>
+                        <StatusPill tone={appointment.status === 'confirmed' ? 'emerald' : 'blue'}>{appointment.status}</StatusPill>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Panel>
 
-        <Link href="/patient-portal/reports" className="rounded-lg border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-gray-500 sm:text-sm">{t('patientPortal.dashboard.medicalReports')}</p>
-              <p className="mt-0.5 text-xl font-bold text-gray-900">{stats.totalReports}</p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
-              <FileText className="h-5 w-5 text-purple-600" />
-            </div>
+            <Panel title="Recent Medical Reports" href="/patient-portal/reports">
+              {reports.length === 0 ? (
+                <EmptyInline text="No reports or lab results available yet." href="/patient-portal/reports" action="Open reports" />
+              ) : (
+                <div className="space-y-3">
+                  {reports.map((report, index) => (
+                    <Link key={`${report.type}-${report.id}`} href="/patient-portal/reports" className="flex items-center justify-between gap-3 rounded-md border border-slate-100 p-3 hover:bg-slate-50">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${index % 2 ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                          <FileText className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-950">{report.title}</p>
+                          <p className="truncate text-xs text-slate-500">{report.description}</p>
+                        </div>
+                      </div>
+                      <Download className="h-4 w-4 text-slate-400" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Panel>
           </div>
-        </Link>
 
-        <Link href="/patient-portal/prescriptions" className="rounded-lg border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-gray-500 sm:text-sm">{t('patientPortal.dashboard.prescriptions')}</p>
-              <p className="mt-0.5 text-xl font-bold text-gray-900">{stats.activePrescriptions}</p>
+          <section className="overflow-hidden rounded-lg border border-emerald-100 bg-gradient-to-r from-emerald-50 via-cyan-50 to-white p-5 shadow-sm">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700 shadow-sm">
+                  <ShieldCheck className="h-10 w-10" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-emerald-950">Your health, our priority.</h2>
+                  <p className="mt-1 max-w-xl text-sm text-slate-600">Book appointments, consult doctors, get medicines delivered, and manage your health in one place.</p>
+                </div>
+              </div>
+              <Link href="/patient-portal/appointments/new" className="inline-flex h-10 items-center justify-center rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700">
+                Book Appointment
+              </Link>
             </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-100">
-              <Pill className="h-5 w-5 text-green-600" />
-            </div>
-          </div>
-        </Link>
+          </section>
 
-        <div className="rounded-lg border border-gray-100 bg-white p-3 shadow-sm">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-gray-500 sm:text-sm">{t('patientPortal.dashboard.pendingResults')}</p>
-              <p className="mt-0.5 text-xl font-bold text-gray-900">{stats.pendingResults}</p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-100">
-              <Clock className="h-5 w-5 text-orange-600" />
-            </div>
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <Panel title="Lab & Diagnostics" href="/patient-portal/reports">
+              <div className="space-y-3 text-sm">
+                <Row icon={FlaskConical} title="Pending tests" detail={`${payload?.operationalStats?.laboratory?.pending || 0} open`} meta="View Results" tone="amber" href="/patient-portal/reports" />
+                <Row icon={FileText} title="Completed tests" detail={`${payload?.operationalStats?.care?.completedLabTests || 0} completed`} meta="Reports" tone="emerald" href="/patient-portal/reports" />
+              </div>
+            </Panel>
+            <Panel title="Referrals" href="/patient-portal/referrals">
+              {referrals.length === 0 ? (
+                <EmptyInline text="No active referrals." href="/patient-portal/doctors" action="Find a doctor" />
+              ) : (
+                <div className="space-y-3">
+                  {referrals.slice(0, 2).map((referral: any) => (
+                    <Row key={referral._id} icon={Stethoscope} title={referral.title} detail={referral.referredTo} meta={referral.status} tone="amber" href="/patient-portal/referrals" />
+                  ))}
+                </div>
+              )}
+            </Panel>
+            <Panel title="Prescriptions" href="/patient-portal/prescriptions">
+              <div className="space-y-3 text-sm">
+                <Row icon={Pill} title="Active prescriptions" detail={`${payload?.operationalStats?.pharmacy?.pendingPrescriptions || 0} pending or ready`} meta="Open" tone="emerald" href="/patient-portal/prescriptions" />
+              </div>
+            </Panel>
           </div>
         </div>
-      </div>
 
-      {/* Recent Activity Grid */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Upcoming Appointments */}
-        <div className="rounded-lg border border-gray-100 bg-white shadow-sm">
-          <div className="flex flex-col gap-1.5 border-b border-gray-100 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
-              <Calendar className="h-4 w-4 text-teal-600" />
-              {t('patientPortal.dashboard.recentAppointments')}
-            </h2>
-            <Link href="/patient-portal/appointments" className="flex items-center gap-0.5 text-xs font-medium text-teal-600 hover:text-teal-700 sm:text-sm">
-              {t('patientPortal.dashboard.viewAll')}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-          <div className="p-3">
-            {recentAppointments.length > 0 ? (
-              <div className="space-y-2">
-                {recentAppointments.map((apt) => (
-                  <div key={apt._id} className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-2 transition-colors hover:bg-gray-100 sm:flex-nowrap">
-                    <div className={`h-10 w-0.5 shrink-0 rounded-full ${getAppointmentTypeColor(apt.appointmentType)}`} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-900">{apt.doctorName}</p>
-                      <p className="text-xs text-gray-500 sm:text-sm">
-                        {formatDate(apt.appointmentDate)} at {apt.appointmentTime}
-                      </p>
-                    </div>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium sm:text-xs ${getStatusColor(apt.status)}`}>
-                      {apt.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
+        <aside className="space-y-4">
+          <Panel title="My Care Team" href="/patient-portal/care-team">
+            {careTeam.length === 0 ? (
+              <EmptyInline text="Your care team will appear after appointments or referrals." href="/patient-portal/doctors" action="Browse doctors" />
             ) : (
-              <div className="py-6 text-center text-gray-500">
-                <Calendar className="mx-auto mb-1.5 h-10 w-10 text-gray-300" />
-                <p className="text-sm">{t('patientPortal.dashboard.noAppointments')}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Reports */}
-        <div className="rounded-lg border border-gray-100 bg-white shadow-sm">
-          <div className="flex flex-col gap-1.5 border-b border-gray-100 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
-              <FileText className="h-4 w-4 text-teal-600" />
-              {t('patientPortal.dashboard.recentReports')}
-            </h2>
-            <Link href="/patient-portal/reports" className="flex items-center gap-0.5 text-xs font-medium text-teal-600 hover:text-teal-700 sm:text-sm">
-              {t('patientPortal.dashboard.viewAll')}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-          <div className="p-3">
-            {recentReports.length > 0 ? (
-              <div className="space-y-2">
-                {recentReports.map((report) => (
-                  <Link 
-                    key={report._id} 
-                    href={`/patient-portal/reports/${report._id}`}
-                    className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-2 transition-colors hover:bg-gray-100 sm:flex-nowrap"
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-purple-100">
-                      <FileText className="h-4 w-4 text-purple-600" />
-                    </div>
+              <div className="space-y-3">
+                {careTeam.map((name, index) => (
+                  <Link key={name} href="/patient-portal/care-team" className="flex items-center gap-3">
+                    <Avatar label={name} tone={index % 2 ? 'bg-cyan-600' : 'bg-slate-800'} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium capitalize text-gray-900">{report.reportType} Report</p>
-                      <p className="text-xs text-gray-500 sm:text-sm">
-                        {formatDate(report.reportDate)} • {report.doctorName}
-                      </p>
+                      <p className="truncate text-sm font-semibold text-slate-950">{name}</p>
+                      <p className="truncate text-xs text-slate-500">Connected appointment</p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium sm:text-xs ${getStatusColor(report.status)}`}>
-                      {report.status}
-                    </span>
+                    <MessageCircle className="h-4 w-4 text-slate-400" />
                   </Link>
                 ))}
               </div>
+            )}
+          </Panel>
+
+          <Panel title="Next Actions">
+            {homeCareTasks.length === 0 && appointments.length === 0 ? (
+              <EmptyInline text="No next actions are due." href="/patient-portal/appointments/new" action="Book care" />
             ) : (
-              <div className="py-6 text-center text-gray-500">
-                <FileText className="mx-auto mb-1.5 h-10 w-10 text-gray-300" />
-                <p className="text-sm">{t('patientPortal.dashboard.noReports')}</p>
+              <div className="space-y-2">
+                {[...homeCareTasks.map((task: any) => ({ title: task.title, detail: task.status, href: '/patient-portal/home-care' })), ...appointments.map((appointment) => ({ title: `Follow up with ${appointment.patient}`, detail: appointment.time, href: '/patient-portal/appointments' }))].slice(0, 3).map((item) => (
+                  <Link key={`${item.title}-${item.detail}`} href={item.href} className="flex items-center justify-between gap-3 rounded-md bg-amber-50 p-3 text-sm hover:bg-amber-100">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-950">{item.title}</p>
+                      <p className="text-xs text-slate-500">{item.detail}</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400" />
+                  </Link>
+                ))}
               </div>
             )}
-          </div>
-        </div>
+          </Panel>
+
+          <Panel title="Health Wallet">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-md bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">Balance</p>
+                <p className="text-sm font-bold text-slate-950">{wallet?.currency || 'GHS'} {Number(wallet?.balance || 0).toFixed(2)}</p>
+              </div>
+              <div className="rounded-md bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">Plan</p>
+                <p className="truncate text-sm font-bold text-slate-950">{wallet?.planName || 'No active plan'}</p>
+              </div>
+            </div>
+            <Link href="/patient-portal/subscriptions" className="mt-3 flex h-9 items-center justify-center gap-2 rounded-md border border-blue-300 text-sm font-semibold text-blue-700 hover:bg-blue-50">
+              <WalletCards className="h-4 w-4" />
+              View Wallet
+            </Link>
+          </Panel>
+        </aside>
       </div>
 
-      {/* Health Tips */}
-      <div className="rounded-lg border border-teal-100 bg-gradient-to-r from-teal-50 to-cyan-50 p-4">
-        <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-teal-800 sm:text-base">
-          <Activity className="h-4 w-4 shrink-0" />
-          {t('patientPortal.dashboard.healthTip')}
-        </h3>
-        <p className="text-sm text-teal-700">
-          {t('patientPortal.dashboard.healthTipContent')}
-        </p>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <Panel title="Family Members" href="/patient-portal/family">
+          {family.length === 0 ? (
+            <EmptyInline text="No family members linked yet." href="/patient-portal/family" action="Open family" />
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+              {family.map((member: any) => (
+                <Link key={member._id} href="/patient-portal/family" className="flex items-center gap-3 rounded-md border border-slate-100 p-3">
+                  <Avatar label={member.name} tone="bg-slate-700" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-950">{member.name}</p>
+                    <p className="truncate text-xs text-slate-500">{member.relationship}</p>
+                  </div>
+                </Link>
+              ))}
+              <Link href="/patient-portal/family" className="flex min-h-16 items-center justify-center gap-2 rounded-md border border-dashed border-emerald-300 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">
+                <Plus className="h-4 w-4" />
+                Add Family Member
+              </Link>
+            </div>
+          )}
+        </Panel>
+
+        <Panel title="Quick Actions">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
+            {[
+              ['Book Doctor', Calendar, '/patient-portal/appointments/new'],
+              ['Video Call', Video, '/patient-portal/telemedicine'],
+              ['Home Nurse', HeartPulse, '/patient-portal/home-care'],
+              ['Upload Report', FileText, '/patient-portal/medical-records'],
+            ].map(([label, Icon, href]) => (
+              <Link key={label as string} href={href as string} className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-md border border-slate-200 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                <Icon className="h-5 w-5 text-emerald-700" />
+                {label as string}
+              </Link>
+            ))}
+          </div>
+        </Panel>
       </div>
     </div>
+  );
+}
+
+function Row({
+  icon: Icon,
+  title,
+  detail,
+  meta,
+  tone,
+  href,
+}: {
+  icon: React.ElementType;
+  title: string;
+  detail: string;
+  meta: string;
+  tone: 'emerald' | 'amber';
+  href: string;
+}) {
+  return (
+    <Link href={href} className="flex items-center justify-between gap-3 rounded-md border border-slate-100 p-3 hover:bg-slate-50">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone === 'emerald' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-950">{title}</p>
+          <p className="truncate text-xs text-slate-500">{detail}</p>
+        </div>
+      </div>
+      <p className={`shrink-0 text-xs font-semibold capitalize ${tone === 'emerald' ? 'text-emerald-700' : 'text-amber-700'}`}>{meta}</p>
+    </Link>
   );
 }

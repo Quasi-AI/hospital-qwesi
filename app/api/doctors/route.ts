@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const allowedRoles = ['admin', 'doctor', 'staff'];
+    const allowedRoles = ['admin', 'doctor', 'staff', 'nurse', 'hospital'];
     if (!allowedRoles.includes(session.user.role || '')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase(),
       password: hashedPassword,
       role: role || 'doctor',
-      approvalStatus: ['doctor', 'staff'].includes(role || 'doctor') ? 'pending_profile' : 'approved',
+      approvalStatus: ['doctor', 'staff', 'nurse'].includes(role || 'doctor') ? 'pending_profile' : 'approved',
       licenseVerification: {
         status: 'not_started',
         method: 'manual',

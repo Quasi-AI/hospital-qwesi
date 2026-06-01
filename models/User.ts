@@ -5,7 +5,7 @@ export interface IUser {
   email: string;
   name: string;
   password?: string;
-  role: 'doctor' | 'admin' | 'staff' | 'patient';
+  role: 'doctor' | 'admin' | 'staff' | 'nurse' | 'patient' | 'pharmacy' | 'hospital';
   image?: string;
   emailVerified?: Date;
   hasImage?: boolean;
@@ -62,7 +62,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['doctor', 'admin', 'staff', 'patient'],
+      enum: ['doctor', 'admin', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'],
       default: 'doctor',
     },
     image: {

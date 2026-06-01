@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
@@ -6,7 +6,7 @@ import Appointment from '@/models/Appointment';
 import Patient from '@/models/Patient';
 import User from '@/models/User';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -14,8 +14,31 @@ export async function GET() {
     }
 
     await dbConnect();
+    const { searchParams } = new URL(request.url);
+    const scope = searchParams.get('scope');
 
     if (session.user.role === 'patient') {
+      if (scope === 'support') {
+        const supportUsers = await User.find({
+          $or: [{ role: 'admin' }, { email: 'info@qwesi.org' }],
+        })
+          .select('name email role image')
+          .sort({ email: 1, name: 1 })
+          .lean();
+
+        return NextResponse.json({
+          recipients: supportUsers.map((user: any) => ({
+            entityType: 'user',
+            entityId: String(user._id),
+            role: user.role,
+            name: user.email === 'info@qwesi.org' ? 'Qwesi Support' : user.name,
+            email: user.email,
+            image: user.image || '',
+            specialization: 'Support',
+          })),
+        });
+      }
+
       const patient = await Patient.findOne({ email: session.user.email }).select('assignedDoctor').lean();
       const appointments = await Appointment.find({
         patientEmail: session.user.email,

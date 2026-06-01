@@ -115,7 +115,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const isProvider = ['doctor', 'staff'].includes(existingCurrentUser.role);
+    const isProvider = ['doctor', 'staff', 'nurse', 'pharmacy'].includes(existingCurrentUser.role);
     const nextImage = image !== undefined ? String(image || '').trim() : existingCurrentUser.image || '';
     const nextLicenseNumber =
       licenseNumber !== undefined ? String(licenseNumber || '').trim() : existingCurrentUser.licenseNumber || '';
@@ -169,7 +169,7 @@ export async function PUT(request: NextRequest) {
         const verification = await verifyProviderLicense({
           name: name.trim(),
           email: email.toLowerCase().trim(),
-          role: existingCurrentUser.role as 'doctor' | 'staff',
+          role: existingCurrentUser.role as 'doctor' | 'staff' | 'nurse' | 'pharmacy',
           licenseNumber: nextLicenseNumber,
           licenseCertificate: {
             fileName: updateData.licenseCertificate?.fileName || existingCurrentUser.licenseCertificate?.fileName,
@@ -213,7 +213,8 @@ export async function PUT(request: NextRequest) {
         role: updatedUser.role,
         image: updatedUser.image || '',
         hasImage: Boolean(updatedUser.image || updatedUser.hasImage),
-        hasLicenseCertificate: Boolean(updatedUser.licenseCertificate?.data),
+        hasLicenseCertificate: Boolean(updatedUser.licenseCertificate?.data || updatedUser.licenseCertificate?.fileName),
+        hasLicenseNumber: Boolean(updatedUser.licenseNumber?.trim()),
         approvalStatus: getEffectiveProviderApprovalStatus(updatedUser as any),
         licenseNumber: updatedUser.licenseNumber || '',
         licenseCertificate: updatedUser.licenseCertificate || null,

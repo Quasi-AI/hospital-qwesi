@@ -26,8 +26,8 @@ export async function PATCH(
 
     await dbConnect();
     const user = await User.findById(id);
-    if (!user || !['doctor', 'staff'].includes(user.role)) {
-      return NextResponse.json({ error: 'Doctor or staff member not found' }, { status: 404 });
+    if (!user || !['doctor', 'staff', 'nurse', 'pharmacy'].includes(user.role)) {
+      return NextResponse.json({ error: 'Provider not found' }, { status: 404 });
     }
 
     if (action === 'approve') {
@@ -86,7 +86,7 @@ export async function PATCH(
       const result = await verifyProviderLicense({
         name: user.name,
         email: user.email,
-        role: user.role as 'doctor' | 'staff',
+        role: user.role as 'doctor' | 'staff' | 'nurse' | 'pharmacy',
         licenseNumber: user.licenseNumber,
         licenseCertificate: user.licenseCertificate,
       });

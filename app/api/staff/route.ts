@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Otherwise return all staff members
-    const staff = await User.find({ role: 'staff' })
+    const staff = await User.find({ role: { $in: ['staff', 'nurse'] } })
       .select('-password -image -licenseCertificate.data')
       .sort({ createdAt: -1 })
       .lean();
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase(),
       password: hashedPassword,
       role: role || 'staff',
-      approvalStatus: 'pending_profile',
+      approvalStatus: ['staff', 'nurse'].includes(role || 'staff') ? 'pending_profile' : 'approved',
       licenseVerification: {
         status: 'not_started',
         method: 'manual',

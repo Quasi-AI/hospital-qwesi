@@ -7,12 +7,12 @@ import { signOut, useSession } from 'next-auth/react';
 import { useTranslations } from '../hooks/useTranslations';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { 
-  Home,
   Calendar,
   FileText,
   ClipboardList,
   Pill,
   CreditCard,
+  Home,
   User,
   LogOut,
   Menu,
@@ -23,12 +23,25 @@ import {
   Video,
   Activity,
   MessageCircle,
-  Bell
+  Bell,
+  Users,
+  FlaskConical,
+  Settings,
+  HelpCircle,
+  Bot
 } from 'lucide-react';
 
 interface PatientPortalLayoutProps {
   children: React.ReactNode;
 }
+
+type PatientNavItem = {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  href: string;
+  exact?: boolean;
+};
 
 export default function PatientPortalLayout({ children }: PatientPortalLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,19 +64,23 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     }
   }, [status, session, router]);
 
-  const navigation = [
-    { id: 'dashboard', label: t('patientPortal.navigation.dashboard'), icon: Home, href: '/patient-portal' },
-    { id: 'appointments', label: t('patientPortal.navigation.appointments'), icon: Calendar, href: '/patient-portal/appointments' },
-    { id: 'telemedicine', label: t('patientPortal.navigation.telemedicine') || 'Video Consultations', icon: Video, href: '/patient-portal/telemedicine' },
-    { id: 'doctors', label: 'Doctors', icon: Stethoscope, href: '/patient-portal/doctors' },
-    { id: 'vitals', label: 'Vitals', icon: Activity, href: '/patient-portal/vitals' },
+  const navigation: PatientNavItem[] = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/patient-portal', exact: true },
+    { id: 'assistant', label: 'AI Health Assistant', icon: Bot, href: '/patient-portal/assistant' },
+    { id: 'appointments', label: 'Book Appointment', icon: Calendar, href: '/patient-portal/appointments/new', exact: true },
+    { id: 'doctors', label: 'My Doctors', icon: Stethoscope, href: '/patient-portal/doctors' },
+    { id: 'care-team', label: 'My Care Team', icon: Users, href: '/patient-portal/care-team' },
+    { id: 'telemedicine', label: 'Video Consultations', icon: Video, href: '/patient-portal/telemedicine' },
+    { id: 'diagnostics', label: 'Lab & Diagnostics', icon: FlaskConical, href: '/patient-portal/reports' },
+    { id: 'prescriptions', label: 'Prescriptions', icon: Pill, href: '/patient-portal/prescriptions' },
+    { id: 'medical-records', label: 'Medical Records', icon: FileText, href: '/patient-portal/medical-records' },
+    { id: 'referrals', label: 'Referrals', icon: Activity, href: '/patient-portal/referrals' },
+    { id: 'home-care', label: 'Home Care', icon: Heart, href: '/patient-portal/home-care' },
     { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/patient-portal/messages' },
+    { id: 'family', label: 'Family Members', icon: Users, href: '/patient-portal/family' },
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard, href: '/patient-portal/subscriptions' },
-    { id: 'reminders', label: 'Reminders', icon: Bell, href: '/patient-portal/reminders' },
-    { id: 'reports', label: t('patientPortal.navigation.reports'), icon: FileText, href: '/patient-portal/reports' },
-    { id: 'ai-insights', label: t('patientPortal.navigation.aiInsights'), icon: Stethoscope, href: '/patient-portal/ai-insights' },
-    { id: 'prescriptions', label: t('patientPortal.navigation.prescriptions'), icon: Pill, href: '/patient-portal/prescriptions' },
-    { id: 'medical-records', label: t('patientPortal.navigation.medicalRecords'), icon: ClipboardList, href: '/patient-portal/medical-records' },
+    { id: 'settings', label: 'Settings', icon: Settings, href: '/patient-portal/profile' },
+    { id: 'help', label: 'Help & Support', icon: HelpCircle, href: '/patient-portal/help' },
   ];
 
   // Close profile menus when clicking outside
@@ -83,9 +100,12 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     };
   }, []);
 
-  const isActiveRoute = (href: string) => {
+  const isActiveRoute = (href: string, exact?: boolean) => {
     if (href === '/patient-portal') {
       return pathname === '/patient-portal';
+    }
+    if (exact) {
+      return pathname === href;
     }
     return pathname.startsWith(href);
   };
@@ -110,7 +130,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -125,41 +145,42 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-gradient-to-r from-teal-600 to-cyan-600 px-4">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-4">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20">
-              <Heart className="h-4 w-4 text-white" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
+              <Heart className="h-5 w-5 text-emerald-600" />
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-base font-bold text-white">
-                {t('patientPortal.title')}
+              <h1 className="truncate text-xl font-bold text-slate-950">
+                Qwesi
               </h1>
+              <p className="text-xs text-slate-500">Virtual Hospital</p>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 rounded-md text-white/80 hover:text-white"
+            className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600"
           >
             <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2.5 py-3">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-3">
           {navigation.map((item) => (
             <Link
               key={item.id}
               href={item.href}
               className={`
                 flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all
-                ${isActiveRoute(item.href)
-                  ? 'bg-teal-100 text-teal-700 shadow-sm'
-                  : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700'
+                ${isActiveRoute(item.href, item.exact)
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-700'
                 }
               `}
               onClick={() => setSidebarOpen(false)}
             >
-              <item.icon className={`h-4 w-4 shrink-0 ${isActiveRoute(item.href) ? 'text-teal-600' : 'text-gray-500'}`} />
+              <item.icon className={`h-4 w-4 shrink-0 ${isActiveRoute(item.href, item.exact) ? 'text-white' : 'text-gray-500'}`} />
               <span className="truncate">{item.label}</span>
             </Link>
           ))}
@@ -283,7 +304,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl px-3 py-4 sm:px-5 lg:px-6">
+          <div className="mx-auto max-w-[1480px] px-3 py-4 sm:px-5 lg:px-6">
             {children}
           </div>
         </main>

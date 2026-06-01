@@ -31,7 +31,13 @@ function formatThreadTime(value?: string | Date) {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
-export function DirectMessages({ compact = false }: { compact?: boolean }) {
+export function DirectMessages({
+  compact = false,
+  recipientScope,
+}: {
+  compact?: boolean;
+  recipientScope?: 'support';
+}) {
   const { data: session } = useSession();
   const [threads, setThreads] = useState<any[]>([]);
   const [recipients, setRecipients] = useState<Participant[]>([]);
@@ -69,10 +75,11 @@ export function DirectMessages({ compact = false }: { compact?: boolean }) {
 
   const load = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
+    const scopeQuery = recipientScope ? `?scope=${recipientScope}` : '';
     try {
       const [threadsRes, recipientsRes] = await Promise.all([
-        fetch('/api/messages', { cache: 'no-store' }),
-        fetch('/api/messages/recipients', { cache: 'no-store' }),
+        fetch(`/api/messages${scopeQuery}`, { cache: 'no-store' }),
+        fetch(`/api/messages/recipients${scopeQuery}`, { cache: 'no-store' }),
       ]);
       if (threadsRes.ok) {
         const data = await threadsRes.json();
@@ -83,7 +90,7 @@ export function DirectMessages({ compact = false }: { compact?: boolean }) {
     } finally {
       if (!options?.silent) setLoading(false);
     }
-  }, []);
+  }, [recipientScope]);
 
   useEffect(() => {
     load();
@@ -230,7 +237,7 @@ export function DirectMessages({ compact = false }: { compact?: boolean }) {
             onChange={(event) => setRecipientKeyValue(event.target.value)}
             className="h-9 w-44 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:w-60"
           >
-            <option value="">Choose recipient</option>
+            <option value="">{recipientScope === 'support' ? 'Choose support' : 'Choose recipient'}</option>
             {recipients.map((recipient) => (
               <option key={participantKey(recipient)} value={participantKey(recipient)}>
                 {recipient.name} - {recipient.role}
