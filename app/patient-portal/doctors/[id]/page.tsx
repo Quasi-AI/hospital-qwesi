@@ -8,9 +8,11 @@ import {
   Award,
   BriefcaseMedical,
   CalendarPlus,
+  Languages,
   Mail,
   MapPin,
   Phone,
+  Star,
   Stethoscope,
 } from 'lucide-react';
 
@@ -23,7 +25,10 @@ type Doctor = {
   department?: string;
   licenseNumber?: string;
   qualifications?: string[];
+  languages?: string[];
   yearsOfExperience?: number;
+  rating?: number;
+  ratingCount?: number;
   bio?: string;
   phone?: string;
   address?: string;
@@ -138,6 +143,12 @@ export default function PatientDoctorDetailPage() {
                   {doctor.yearsOfExperience} years experience
                 </p>
               ) : null}
+              {doctor.rating != null ? (
+                <p className="flex items-center gap-2 font-medium text-amber-700">
+                  <Star className="h-4 w-4 text-amber-500" />
+                  {doctor.rating.toFixed(1)} / 5{doctor.ratingCount ? ` (${doctor.ratingCount})` : ''}
+                </p>
+              ) : null}
               {doctor.licenseNumber ? (
                 <p className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-slate-400" />
@@ -157,6 +168,21 @@ export default function PatientDoctorDetailPage() {
                       {item}
                     </span>
                   ))}
+                </div>
+              ) : null}
+              {doctor.languages?.length ? (
+                <div className="pt-1">
+                  <p className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+                    <Languages className="h-4 w-4 text-slate-400" />
+                    Languages
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {doctor.languages.map((item) => (
+                      <span key={item} className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               ) : null}
             </section>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Stethoscope, Mail, BriefcaseMedical, CalendarPlus, Eye } from 'lucide-react';
+import { Stethoscope, Mail, BriefcaseMedical, CalendarPlus, Eye, Languages, Star } from 'lucide-react';
 
 export default function PatientDoctorsPage() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -77,6 +77,18 @@ export default function PatientDoctorsPage() {
                   </p>
                 ) : null}
                 {doctor.qualifications?.length ? <p>{doctor.qualifications.join(', ')}</p> : null}
+                {doctor.languages?.length ? (
+                  <p className="flex items-center gap-2">
+                    <Languages className="h-4 w-4 text-slate-400" />
+                    {doctor.languages.join(', ')}
+                  </p>
+                ) : null}
+                {doctor.rating != null ? (
+                  <p className="flex items-center gap-2 font-medium text-amber-700">
+                    <Star className="h-4 w-4 text-amber-500" />
+                    {Number(doctor.rating).toFixed(1)} / 5{doctor.ratingCount ? ` (${doctor.ratingCount})` : ''}
+                  </p>
+                ) : null}
               </div>
               <Link
                 href={`/patient-portal/doctors/${doctor._id}`}

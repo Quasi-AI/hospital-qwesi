@@ -13,7 +13,8 @@ import {
   ArrowLeft,
   Camera,
   FileText,
-  ShieldCheck
+  ShieldCheck,
+  Languages
 } from 'lucide-react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -30,6 +31,7 @@ export default function ProfilePage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [newLanguage, setNewLanguage] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -40,6 +42,7 @@ export default function ProfilePage() {
     licenseCertificate: '',
     licenseCertificateFileName: '',
     licenseCertificateFileType: '',
+    languages: [] as string[],
     approvalStatus: 'approved',
     licenseVerificationMessage: '',
     currentPassword: '',
@@ -82,6 +85,7 @@ export default function ProfilePage() {
             licenseCertificate: data.user.licenseCertificate?.data || '',
             licenseCertificateFileName: data.user.licenseCertificate?.fileName || '',
             licenseCertificateFileType: data.user.licenseCertificate?.fileType || '',
+            languages: data.user.languages || [],
             approvalStatus: data.user.approvalStatus || 'approved',
             licenseVerificationMessage: data.user.licenseVerification?.message || '',
           }));
@@ -166,6 +170,7 @@ export default function ProfilePage() {
           licenseCertificate: formData.licenseCertificate,
           licenseCertificateFileName: formData.licenseCertificateFileName,
           licenseCertificateFileType: formData.licenseCertificateFileType,
+          languages: formData.languages,
         }),
       });
 
@@ -190,6 +195,7 @@ export default function ProfilePage() {
             hasImage: Boolean(formData.image),
             hasLicenseCertificate: Boolean(formData.licenseCertificate),
             hasLicenseNumber: Boolean(formData.licenseNumber.trim()),
+            languages: formData.languages,
             approvalStatus: updatedApprovalStatus,
           }
         });
@@ -405,6 +411,77 @@ export default function ProfilePage() {
                       Approval status: {approvalLabel}
                       {formData.licenseVerificationMessage && (
                         <p className="mt-1 text-xs normal-case">{formData.licenseVerificationMessage}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Languages spoken
+                      </label>
+                      <div className="mb-2 flex gap-2">
+                        <div className="relative flex-1">
+                          <Languages className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                          <input
+                            type="text"
+                            value={newLanguage}
+                            onChange={(event) => setNewLanguage(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter') {
+                                event.preventDefault();
+                                if (newLanguage.trim()) {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    languages: [...prev.languages, newLanguage.trim()],
+                                  }));
+                                  setNewLanguage('');
+                                }
+                              }
+                            }}
+                            placeholder="English, Twi, Ga..."
+                            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (newLanguage.trim()) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                languages: [...prev.languages, newLanguage.trim()],
+                              }));
+                              setNewLanguage('');
+                            }
+                          }}
+                          className="rounded-lg bg-gray-100 px-3 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                        >
+                          Add
+                        </button>
+                      </div>
+                      {formData.languages.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {formData.languages.map((language, index) => (
+                            <span
+                              key={`${language}-${index}`}
+                              className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-800"
+                            >
+                              {language}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    languages: prev.languages.filter((_, i) => i !== index),
+                                  }))
+                                }
+                                className="ml-2 text-blue-600 hover:text-blue-800"
+                              >
+                                x
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-500">Add languages patients can use when choosing a provider.</p>
                       )}
                     </div>
                   </>

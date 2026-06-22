@@ -181,12 +181,12 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       label: t('navigation.inpatient'), 
       icon: Building2, 
       href: '/inpatient/admissions', 
-      roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital'],
+      roles: ['admin', 'staff', 'nurse', 'hospital'],
       children: [
-        { id: 'admissions', label: t('inpatient.admissions'), icon: HeartPulse, href: '/inpatient/admissions', roles: ['admin', 'doctor', 'staff', 'hospital'] },
-        { id: 'new-admission', label: t('inpatient.newAdmission'), icon: UserPlus, href: '/inpatient/admissions/new', roles: ['admin', 'doctor', 'staff', 'hospital'] },
-        { id: 'wards', label: t('inpatient.wards'), icon: Building2, href: '/inpatient/wards', roles: ['admin', 'doctor', 'staff', 'hospital'] },
-        { id: 'beds', label: t('inpatient.beds'), icon: Bed, href: '/inpatient/beds', roles: ['admin', 'doctor', 'staff', 'hospital'] }
+        { id: 'admissions', label: t('inpatient.admissions'), icon: HeartPulse, href: '/inpatient/admissions', roles: ['admin', 'staff', 'hospital'] },
+        { id: 'new-admission', label: t('inpatient.newAdmission'), icon: UserPlus, href: '/inpatient/admissions/new', roles: ['admin', 'staff', 'hospital'] },
+        { id: 'wards', label: t('inpatient.wards'), icon: Building2, href: '/inpatient/wards', roles: ['admin', 'staff', 'hospital'] },
+        { id: 'beds', label: t('inpatient.beds'), icon: Bed, href: '/inpatient/beds', roles: ['admin', 'staff', 'hospital'] }
       ]
     },
     { 
@@ -254,10 +254,10 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       label: t('navigation.emergency'), 
       icon: Siren, 
       href: '/emergency', 
-      roles: ['admin', 'doctor', 'staff'],
+      roles: ['admin', 'staff'],
       children: [
-        { id: 'emergency-cases', label: t('emergency.title'), icon: AlertTriangle, href: '/emergency', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'emergency-new', label: t('emergency.newCase'), icon: Ambulance, href: '/emergency/new', roles: ['admin', 'doctor', 'staff'] }
+        { id: 'emergency-cases', label: t('emergency.title'), icon: AlertTriangle, href: '/emergency', roles: ['admin', 'staff'] },
+        { id: 'emergency-new', label: t('emergency.newCase'), icon: Ambulance, href: '/emergency/new', roles: ['admin', 'staff'] }
       ]
     },
     { 
@@ -278,10 +278,10 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       label: t('navigation.ambulance'), 
       icon: Ambulance, 
       href: '/ambulance', 
-      roles: ['admin', 'doctor', 'staff'],
+      roles: ['admin', 'staff'],
       children: [
-        { id: 'ambulance-bookings', label: t('ambulance.title'), icon: Ambulance, href: '/ambulance', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'ambulance-new', label: t('ambulance.newBooking'), icon: Plus, href: '/ambulance/bookings/new', roles: ['admin', 'doctor', 'staff'] },
+        { id: 'ambulance-bookings', label: t('ambulance.title'), icon: Ambulance, href: '/ambulance', roles: ['admin', 'staff'] },
+        { id: 'ambulance-new', label: t('ambulance.newBooking'), icon: Plus, href: '/ambulance/bookings/new', roles: ['admin', 'staff'] },
         { id: 'ambulance-fleet', label: t('ambulance.fleetManagement'), icon: Truck, href: '/ambulance/fleet', roles: ['admin', 'staff'] }
       ]
     },
@@ -290,13 +290,13 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       label: t('navigation.bloodBank') || 'Blood Bank', 
       icon: Droplets, 
       href: '/blood-bank', 
-      roles: ['admin', 'doctor', 'staff'],
+      roles: ['admin', 'staff'],
       children: [
-        { id: 'blood-bank-dashboard', label: t('bloodBank.dashboard') || 'Dashboard', icon: Droplets, href: '/blood-bank', roles: ['admin', 'doctor', 'staff'] },
+        { id: 'blood-bank-dashboard', label: t('bloodBank.dashboard') || 'Dashboard', icon: Droplets, href: '/blood-bank', roles: ['admin', 'staff'] },
         { id: 'blood-bank-inventory', label: t('bloodBank.inventory') || 'Inventory', icon: Package, href: '/blood-bank/inventory', roles: ['admin', 'staff'] },
         { id: 'blood-bank-donors', label: t('bloodBank.donors') || 'Donors', icon: Heart, href: '/blood-bank/donors', roles: ['admin', 'staff'] },
-        { id: 'blood-bank-transfusions', label: t('bloodBank.transfusions') || 'Transfusions', icon: Activity, href: '/blood-bank/transfusions', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'blood-bank-new-request', label: t('bloodBank.newRequest') || 'New Request', icon: Plus, href: '/blood-bank/transfusions/new', roles: ['admin', 'doctor', 'staff'] }
+        { id: 'blood-bank-transfusions', label: t('bloodBank.transfusions') || 'Transfusions', icon: Activity, href: '/blood-bank/transfusions', roles: ['admin', 'staff'] },
+        { id: 'blood-bank-new-request', label: t('bloodBank.newRequest') || 'New Request', icon: Plus, href: '/blood-bank/transfusions/new', roles: ['admin', 'staff'] }
       ]
     },
     { 

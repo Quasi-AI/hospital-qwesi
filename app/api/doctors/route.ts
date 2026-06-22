@@ -105,7 +105,10 @@ export async function POST(request: NextRequest) {
       department,
       licenseNumber,
       qualifications,
+      languages,
       yearsOfExperience,
+      rating,
+      ratingCount,
       bio,
       address,
       dateOfBirth,
@@ -153,7 +156,10 @@ export async function POST(request: NextRequest) {
     if (department) userData.department = department;
     if (licenseNumber) userData.licenseNumber = licenseNumber;
     if (qualifications && Array.isArray(qualifications)) userData.qualifications = qualifications;
+    if (languages && Array.isArray(languages)) userData.languages = languages;
     if (yearsOfExperience) userData.yearsOfExperience = parseInt(yearsOfExperience) || 0;
+    if (rating !== undefined && rating !== '') userData.rating = Math.min(5, Math.max(0, Number(rating) || 0));
+    if (ratingCount !== undefined && ratingCount !== '') userData.ratingCount = Math.max(0, parseInt(ratingCount, 10) || 0);
     if (bio) userData.bio = bio;
     if (address) userData.address = address;
     if (dateOfBirth) userData.dateOfBirth = new Date(dateOfBirth);
@@ -212,7 +218,10 @@ export async function PUT(request: NextRequest) {
       department,
       licenseNumber,
       qualifications,
+      languages,
       yearsOfExperience,
+      rating,
+      ratingCount,
       bio,
       address,
       dateOfBirth,
@@ -235,7 +244,10 @@ export async function PUT(request: NextRequest) {
     if (department !== undefined) updateData.department = department;
     if (licenseNumber !== undefined) updateData.licenseNumber = licenseNumber;
     if (qualifications !== undefined) updateData.qualifications = qualifications;
+    if (languages !== undefined) updateData.languages = Array.isArray(languages) ? languages : [];
     if (yearsOfExperience !== undefined) updateData.yearsOfExperience = parseInt(yearsOfExperience) || 0;
+    if (rating !== undefined) updateData.rating = rating === '' ? undefined : Math.min(5, Math.max(0, Number(rating) || 0));
+    if (ratingCount !== undefined) updateData.ratingCount = ratingCount === '' ? 0 : Math.max(0, parseInt(ratingCount, 10) || 0);
     if (bio !== undefined) updateData.bio = bio;
     if (address !== undefined) updateData.address = address;
     if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;

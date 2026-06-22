@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         licenseNumber: { $exists: true, $ne: '' },
         'licenseCertificate.data': { $exists: true, $ne: '' },
       })
-        .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone address gender')
+        .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience rating ratingCount bio phone address gender')
         .lean();
 
       if (!doctor) {
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       licenseNumber: { $exists: true, $ne: '' },
       'licenseCertificate.data': { $exists: true, $ne: '' },
     })
-      .select('name email image specialization department licenseNumber qualifications yearsOfExperience bio phone')
+      .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience rating ratingCount bio phone')
       .sort({ name: 1 })
       .lean();
 

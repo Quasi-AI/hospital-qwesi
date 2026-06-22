@@ -23,6 +23,8 @@ import {
   FileText,
   CheckCircle,
   XCircle,
+  Languages,
+  Star,
 } from 'lucide-react';
 import ProtectedRoute from '../../protected-route';
 import SidebarLayout from '../../components/sidebar-layout';
@@ -42,7 +44,10 @@ interface DoctorRecord {
   licenseVerification?: { status?: string; method?: string; message?: string; checkedAt?: string };
   rejectionReason?: string;
   qualifications?: string[];
+  languages?: string[];
   yearsOfExperience?: number;
+  rating?: number;
+  ratingCount?: number;
   bio?: string;
   address?: string;
   dateOfBirth?: string;
@@ -392,6 +397,20 @@ export default function DoctorDetailPage() {
                             : t('doctors.notAvailable')}
                         </dd>
                       </div>
+                      <div className="flex gap-2">
+                        <dt className="w-36 shrink-0 text-gray-500">Rating</dt>
+                        <dd className="flex items-center gap-1 text-gray-900">
+                          {doctor.rating != null ? (
+                            <>
+                              <Star className="h-3.5 w-3.5 text-amber-500" />
+                              {doctor.rating.toFixed(1)} / 5
+                              {doctor.ratingCount ? <span className="text-gray-500">({doctor.ratingCount})</span> : null}
+                            </>
+                          ) : (
+                            t('doctors.notAvailable')
+                          )}
+                        </dd>
+                      </div>
                       <div>
                         <dt className="mb-1 text-gray-500">{t('doctors.detail.qualifications')}</dt>
                         <dd>
@@ -404,6 +423,28 @@ export default function DoctorDetailPage() {
                                 >
                                   <Award className="h-3 w-3" />
                                   {q}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-gray-500">{t('doctors.notAvailable')}</span>
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="mb-1 flex items-center gap-1 text-gray-500">
+                          <Languages className="h-3.5 w-3.5" />
+                          Languages
+                        </dt>
+                        <dd>
+                          {doctor.languages && doctor.languages.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {doctor.languages.map((language, i) => (
+                                <span
+                                  key={`${language}-${i}`}
+                                  className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+                                >
+                                  {language}
                                 </span>
                               ))}
                             </div>

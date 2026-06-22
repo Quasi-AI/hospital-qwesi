@@ -193,6 +193,48 @@ export default function AIAssistantPage() {
     }
   };
 
+  const buildLocalAssistantResponse = (
+    queryInfo: { type: 'patient' | 'appointment' | 'prescription' | 'general'; patientName?: string },
+    contextData: string
+  ) => {
+    const trimmedContext = contextData.trim();
+    if (trimmedContext) {
+      const compactContext =
+        trimmedContext.length > 2600
+          ? `${trimmedContext.slice(0, 2600)}\n\n...additional records were found. Open the patient chart for the full details.`
+          : trimmedContext;
+
+      return [
+        'I could not find an active AI model configuration, so I searched the platform records directly.',
+        '',
+        compactContext,
+        '',
+        'Please review the source chart before making clinical decisions. For emergency symptoms, direct the patient to urgent or emergency care immediately.',
+      ].join('\n');
+    }
+
+    if (queryInfo.type === 'patient') {
+      return queryInfo.patientName
+        ? `I could not find patient records for ${queryInfo.patientName}. Check the spelling or search by patient ID, email, or phone number.`
+        : 'I could not find matching patient records. Try asking with a patient name, patient ID, email, or phone number.';
+    }
+
+    if (queryInfo.type === 'appointment') {
+      return 'I could not find appointment records matching that request. Try asking for appointments by patient name or open the appointments page for filtering.';
+    }
+
+    if (queryInfo.type === 'prescription') {
+      return 'I could not find prescription records for that request. Try including the patient name or patient ID.';
+    }
+
+    return [
+      'No active AI model is configured, so I cannot generate a full clinical AI answer yet.',
+      'I can still help search patient, appointment, and prescription records from this assistant.',
+      'For clinical safety: chest pain, severe bleeding, trouble breathing, stroke symptoms, seizures, fainting, confusion, or suicidal thoughts need urgent emergency care.',
+      'Configure an active model in AI Settings to enable full AI responses.',
+    ].join('\n');
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() || isLoading) return;
@@ -339,11 +381,22 @@ export default function AIAssistantPage() {
       
       // Build enhanced prompt with context
       const enhancedPrompt = `${t('ai.assistant.aiPrompt')} "${currentInput}". ${t('ai.assistant.aiPromptInstruction')}${contextData ? `\n\nUse the following information from the database to answer the question:${contextData}` : ''}\n\nPlease provide a helpful and accurate response based on the available information.`;
+
+      if (!activeModel) {
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          content: buildLocalAssistantResponse(queryInfo, contextData),
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiResponse]);
+        return;
+      }
       
       // Call the real AI service
       const result = await aiService.generateText({
         prompt: enhancedPrompt,
-        modelId: activeModel?.id || '1',
+        modelId: activeModel.id,
         maxTokens: 800,
         temperature: 0.7
       });

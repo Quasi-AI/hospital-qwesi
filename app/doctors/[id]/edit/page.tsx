@@ -15,7 +15,9 @@ import {
   Calendar,
   MapPin,
   User,
-  AlertCircle
+  AlertCircle,
+  Languages,
+  Star
 } from 'lucide-react';
 import ProtectedRoute from '../../../protected-route';
 import SidebarLayout from '../../../components/sidebar-layout';
@@ -28,6 +30,7 @@ function EditDoctorForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newQualification, setNewQualification] = useState('');
+  const [newLanguage, setNewLanguage] = useState('');
 
   const SCHEDULE_DAYS = [
     'monday',
@@ -59,7 +62,10 @@ function EditDoctorForm() {
     department: '',
     licenseNumber: '',
     qualifications: [] as string[],
+    languages: [] as string[],
     yearsOfExperience: '',
+    rating: '',
+    ratingCount: '',
     bio: '',
     address: '',
     dateOfBirth: '',
@@ -145,7 +151,10 @@ function EditDoctorForm() {
           department: doctor.department || '',
           licenseNumber: doctor.licenseNumber || '',
           qualifications: doctor.qualifications || [],
+          languages: doctor.languages || [],
           yearsOfExperience: doctor.yearsOfExperience?.toString() || '',
+          rating: doctor.rating?.toString() || '',
+          ratingCount: doctor.ratingCount?.toString() || '',
           bio: doctor.bio || '',
           address: doctor.address || '',
           dateOfBirth: doctor.dateOfBirth ? new Date(doctor.dateOfBirth).toISOString().split('T')[0] : '',
@@ -492,6 +501,109 @@ function EditDoctorForm() {
                         </div>
                       )}
                     </div>
+
+                    <div className="md:col-span-2">
+                      <label htmlFor="languages" className="mb-1 block text-sm font-medium text-gray-700">
+                        Languages spoken
+                      </label>
+                      <div className="mb-2 flex gap-2">
+                        <div className="relative flex-1">
+                          <Languages className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                          <input
+                            type="text"
+                            value={newLanguage}
+                            onChange={(e) => setNewLanguage(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newLanguage.trim()) {
+                                  setFormData({
+                                    ...formData,
+                                    languages: [...formData.languages, newLanguage.trim()]
+                                  });
+                                  setNewLanguage('');
+                                }
+                              }
+                            }}
+                            placeholder="English, Twi, Ga..."
+                            className="w-full rounded-md border border-gray-300 py-1.5 pl-9 pr-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (newLanguage.trim()) {
+                              setFormData({
+                                ...formData,
+                                languages: [...formData.languages, newLanguage.trim()]
+                              });
+                              setNewLanguage('');
+                            }
+                          }}
+                          className="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200"
+                        >
+                          Add
+                        </button>
+                      </div>
+                      {formData.languages.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {formData.languages.map((language, index) => (
+                            <span
+                              key={`${language}-${index}`}
+                              className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs text-emerald-800"
+                            >
+                              {language}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    languages: formData.languages.filter((_, i) => i !== index)
+                                  });
+                                }}
+                                className="ml-2 text-emerald-600 hover:text-emerald-800"
+                              >
+                                x
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {formData.role === 'doctor' && (
+                      <div className="grid gap-2 md:col-span-2 md:grid-cols-2">
+                        <label htmlFor="rating" className="mb-1 block text-sm font-medium text-gray-700">
+                          Doctor rating
+                          <div className="relative mt-1">
+                            <Star className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <input
+                              type="number"
+                              id="rating"
+                              min="0"
+                              max="5"
+                              step="0.1"
+                              value={formData.rating}
+                              onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+                              placeholder="4.8"
+                              className="w-full rounded-md border border-gray-300 py-1.5 pl-9 pr-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        </label>
+                        <label htmlFor="ratingCount" className="mb-1 block text-sm font-medium text-gray-700">
+                          Rating count
+                          <input
+                            type="number"
+                            id="ratingCount"
+                            min="0"
+                            value={formData.ratingCount}
+                            onChange={(e) => setFormData({ ...formData, ratingCount: e.target.value })}
+                            placeholder="12"
+                            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          />
+                        </label>
+                      </div>
+                    )}
 
                     <div className="md:col-span-2">
                       <label htmlFor="bio" className="mb-1 block text-sm font-medium text-gray-700">

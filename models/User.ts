@@ -37,6 +37,16 @@ export interface IUser {
   yearsOfExperience?: number;
   rating?: number;
   ratingCount?: number;
+  agreement?: {
+    version?: string;
+    termsAccepted?: boolean;
+    privacyAccepted?: boolean;
+    healthConsentAccepted?: boolean;
+    telemedicineConsentAccepted?: boolean;
+    signedName?: string;
+    signedAt?: Date;
+    userAgent?: string;
+  };
   bio?: string;
   address?: string;
   dateOfBirth?: Date;
@@ -156,6 +166,16 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Number,
       min: 0,
       default: 0,
+    },
+    agreement: {
+      version: { type: String, trim: true },
+      termsAccepted: { type: Boolean, default: false },
+      privacyAccepted: { type: Boolean, default: false },
+      healthConsentAccepted: { type: Boolean, default: false },
+      telemedicineConsentAccepted: { type: Boolean, default: false },
+      signedName: { type: String, trim: true },
+      signedAt: { type: Date },
+      userAgent: { type: String, trim: true },
     },
     bio: {
       type: String,

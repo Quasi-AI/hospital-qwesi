@@ -23,6 +23,7 @@ import {
   Users,
   Video,
   WalletCards,
+  XCircle,
 } from 'lucide-react';
 import SidebarLayout from './sidebar-layout';
 import DashboardTopToolbar from './DashboardTopToolbar';
@@ -433,7 +434,7 @@ function QuickActions({ role }: { role: string }) {
           ['Inventory', '/pharmacy/inventory', Pill],
         ]
       : []),
-  ];
+  ].filter(([label]) => !(role === 'doctor' && label === 'Refer Patient'));
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-4">
@@ -446,6 +447,153 @@ function QuickActions({ role }: { role: string }) {
           </Link>
         ))}
       </div>
+    </section>
+  );
+}
+
+type PharmacyProvider = {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  approvalStatus?: string;
+  licenseNumber?: string;
+  medicineCount?: number;
+  licenseCertificate?: { fileName?: string; data?: string };
+};
+
+function approvalBadgeClass(status?: string) {
+  if (!status || status === 'approved') return 'bg-green-50 text-green-700 ring-green-200';
+  if (status === 'rejected') return 'bg-red-50 text-red-700 ring-red-200';
+  return 'bg-amber-50 text-amber-800 ring-amber-200';
+}
+
+function PharmacyApprovalPanel() {
+  const [providers, setProviders] = useState<PharmacyProvider[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+
+  const loadProviders = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/pharmacy/providers', { cache: 'no-store' });
+      const data = await response.json().catch(() => []);
+      if (!response.ok) throw new Error(data.error || 'Failed to load pharmacy providers');
+      setProviders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to load pharmacy providers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProviders();
+  }, []);
+
+  const updateApproval = async (provider: PharmacyProvider, action: 'approve' | 'reject') => {
+    const reason = action === 'reject' ? prompt(`Reason for rejecting ${provider.name}`) || '' : '';
+    setMessage('');
+    try {
+      const response = await fetch(`/api/users/${provider._id}/approval`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, reason }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Failed to update approval status');
+      setMessage(`${provider.name} ${action === 'approve' ? 'approved' : 'rejected'}.`);
+      loadProviders();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to update approval status');
+    }
+  };
+
+  const pending = providers.filter((provider) => provider.approvalStatus !== 'approved');
+
+  return (
+    <section className="rounded-lg border border-gray-200 bg-white p-4">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-950">Pharmacy Approvals</h2>
+          <p className="mt-0.5 text-xs text-gray-500">Review pharmacy accounts waiting for profile completion, manual approval, or rejection.</p>
+        </div>
+        <Link href="/profile?returnTo=/pharmacy" className="text-xs font-medium text-blue-700 hover:text-blue-900">
+          Provider profile requirements
+        </Link>
+      </div>
+      {message ? (
+        <div className="mb-3 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+          {message}
+        </div>
+      ) : null}
+      {loading ? (
+        <div className="flex h-24 items-center justify-center">
+          <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+        </div>
+      ) : pending.length === 0 ? (
+        <div className="rounded-md border border-dashed border-gray-200 p-4 text-sm text-gray-500">
+          No pharmacy approvals are pending.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Pharmacy</th>
+                <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Status</th>
+                <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Profile</th>
+                <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wide text-gray-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 bg-white">
+              {pending.map((provider) => (
+                <tr key={provider._id}>
+                  <td className="px-3 py-2">
+                    <p className="font-medium text-gray-950">{provider.name}</p>
+                    <p className="text-xs text-gray-500">{provider.email}</p>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ${approvalBadgeClass(provider.approvalStatus)}`}>
+                      {(provider.approvalStatus || 'pending').replace(/_/g, ' ')}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-xs text-gray-600">
+                    <p>License: {provider.licenseNumber || 'missing'}</p>
+                    <p>Certificate: {provider.licenseCertificate?.fileName || provider.licenseCertificate?.data ? 'uploaded' : 'missing'}</p>
+                    <p>Medicines: {provider.medicineCount ?? 0}</p>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex justify-end gap-2">
+                      {provider.approvalStatus !== 'approved' ? (
+                        <button
+                          type="button"
+                          onClick={() => updateApproval(provider, 'approve')}
+                          className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-700"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Approve
+                        </button>
+                      ) : null}
+                      {provider.approvalStatus !== 'rejected' ? (
+                        <button
+                          type="button"
+                          onClick={() => updateApproval(provider, 'reject')}
+                          className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
+                        >
+                          <XCircle className="h-3.5 w-3.5" />
+                          Reject
+                        </button>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }
@@ -597,6 +745,7 @@ function DashboardSurface({ bare = false, forcedRole }: { bare?: boolean; forced
         <>
           <Alerts alerts={payload.criticalAlerts || []} />
           <StatGrid stats={payload.stats || []} />
+          {role === 'pharmacy' && session?.user?.role === 'admin' ? <PharmacyApprovalPanel /> : null}
           <OperationalCards data={payload.operationalStats} />
           <HospitalNetworkManager enabled={showHospitalManager} canAdd={session?.user?.role === 'admin'} />
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">

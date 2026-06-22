@@ -7,6 +7,7 @@ declare module 'next-auth' {
     hasLicenseCertificate?: boolean;
     hasLicenseNumber?: boolean;
     approvalStatus?: string;
+    languages?: string[];
   }
   
   interface Session {
@@ -20,6 +21,7 @@ declare module 'next-auth' {
       hasLicenseCertificate?: boolean;
       hasLicenseNumber?: boolean;
       approvalStatus?: string;
+      languages?: string[];
       patientId?: string;
     };
   }
@@ -34,6 +36,7 @@ declare module 'next-auth/jwt' {
     hasLicenseCertificate?: boolean;
     hasLicenseNumber?: boolean;
     approvalStatus?: string;
+    languages?: string[];
     patientId?: string;
   }
 }

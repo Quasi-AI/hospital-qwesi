@@ -5,6 +5,7 @@ import Patient from '@/models/Patient';
 import User from '@/models/User';
 
 type SignupRole = 'patient' | 'doctor' | 'nurse' | 'pharmacy';
+const AGREEMENT_VERSION = 'health-platform-agreement-2026-06';
 
 function cleanText(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
@@ -25,6 +26,8 @@ export async function POST(request: NextRequest) {
     const email = cleanText(body.email).toLowerCase();
     const password = cleanText(body.password);
     const phone = cleanText(body.phone);
+    const agreement = body.agreement || {};
+    const signedName = cleanText(agreement.signedName);
 
     if (!['patient', 'doctor', 'nurse', 'pharmacy'].includes(role)) {
       return NextResponse.json({ error: 'Select patient, doctor, nurse, or pharmacy.' }, { status: 400 });
@@ -38,6 +41,29 @@ export async function POST(request: NextRequest) {
     if (password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters long.' }, { status: 400 });
     }
+    if (
+      !agreement.termsAccepted ||
+      !agreement.privacyAccepted ||
+      !agreement.healthConsentAccepted ||
+      !agreement.telemedicineConsentAccepted ||
+      !signedName
+    ) {
+      return NextResponse.json(
+        { error: 'Please review and sign the privacy, terms, healthcare consent, and telemedicine agreement.' },
+        { status: 400 }
+      );
+    }
+
+    const signedAgreement = {
+      version: AGREEMENT_VERSION,
+      termsAccepted: true,
+      privacyAccepted: true,
+      healthConsentAccepted: true,
+      telemedicineConsentAccepted: true,
+      signedName,
+      signedAt: new Date(),
+      userAgent: request.headers.get('user-agent') || '',
+    };
 
     await dbConnect();
 
@@ -71,6 +97,7 @@ export async function POST(request: NextRequest) {
         currentMedications: [],
         password: hashedPassword,
         approvalStatus: 'pending_verification',
+        agreement: signedAgreement,
       });
 
       await User.create({
@@ -79,6 +106,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         role: 'patient',
         approvalStatus: 'pending_verification',
+        agreement: signedAgreement,
       });
 
       return NextResponse.json({
@@ -99,6 +127,7 @@ export async function POST(request: NextRequest) {
       licenseNumber: cleanText(body.licenseNumber) || undefined,
       yearsOfExperience: body.yearsOfExperience ? Number(body.yearsOfExperience) : undefined,
       approvalStatus: 'pending_profile',
+      agreement: signedAgreement,
       licenseVerification: {
         status: 'not_started',
         method: 'manual',

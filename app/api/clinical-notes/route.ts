@@ -8,7 +8,7 @@ import Patient from '@/models/Patient';
 import User from '@/models/User';
 
 function canUseClinicalNotes(role?: string | null) {
-  return ['admin', 'doctor', 'staff'].includes(role || '');
+  return ['admin', 'doctor', 'staff', 'nurse'].includes(role || '');
 }
 
 function noteVisibilityQuery(session: any, patientId?: string | null) {
@@ -91,7 +91,14 @@ export async function POST(request: NextRequest) {
       noteType: body.noteType || 'full-soap',
       providerId: session.user.id,
       providerName: currentUser?.name || session.user.name || session.user.email,
-      providerRole: session.user.role === 'doctor' ? 'doctor' : session.user.role === 'admin' ? 'admin' : 'staff',
+      providerRole:
+        session.user.role === 'doctor'
+          ? 'doctor'
+          : session.user.role === 'nurse'
+            ? 'nurse'
+            : session.user.role === 'admin'
+              ? 'admin'
+              : 'staff',
       chiefComplaint: body.chiefComplaint,
       subjective: body.subjective || '',
       objective: body.objective || '',
@@ -114,5 +121,40 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Clinical note create error:', error);
     return NextResponse.json({ error: 'Failed to create clinical note' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email || !canUseClinicalNotes(session.user.role)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const id = request.nextUrl.searchParams.get('id') || '';
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Valid note id is required' }, { status: 400 });
+    }
+
+    await dbConnect();
+    const note = await ClinicalNote.findById(id);
+    if (!note) {
+      return NextResponse.json({ error: 'Clinical note not found' }, { status: 404 });
+    }
+
+    const canDelete =
+      ['admin', 'staff'].includes(session.user.role || '') ||
+      String(note.providerId) === String(session.user.id) ||
+      String(note.createdBy) === String(session.user.id);
+
+    if (!canDelete) {
+      return NextResponse.json({ error: 'You can only delete notes you created' }, { status: 403 });
+    }
+
+    await note.deleteOne();
+    return NextResponse.json({ message: 'Clinical note deleted' });
+  } catch (error) {
+    console.error('Clinical note delete error:', error);
+    return NextResponse.json({ error: 'Failed to delete clinical note' }, { status: 500 });
   }
 }

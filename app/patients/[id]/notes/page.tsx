@@ -11,6 +11,7 @@ import {
   Save,
   Share2,
   Stethoscope,
+  Trash2,
 } from 'lucide-react';
 import ProtectedRoute from '@/app/protected-route';
 import SidebarLayout from '@/app/components/sidebar-layout';
@@ -177,6 +178,21 @@ export default function PatientClinicalNotesPage() {
     doc.save(`${note.noteNumber}.pdf`);
   };
 
+  const deleteNote = async (note: any) => {
+    if (!confirm(`Delete ${note.noteNumber}? This action cannot be undone.`)) return;
+    setMessage('');
+    const res = await fetch(`/api/clinical-notes?id=${encodeURIComponent(note._id)}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      setNotes((current) => current.filter((item) => item._id !== note._id));
+      setMessage('Clinical note deleted.');
+    } else {
+      const error = await res.json().catch(() => ({}));
+      setMessage(error.error || 'Failed to delete clinical note.');
+    }
+  };
+
   return (
     <ProtectedRoute>
       <SidebarLayout title="Clinical Notes" description="SOAP documentation for this patient" dense wide>
@@ -340,10 +356,16 @@ export default function PatientClinicalNotesPage() {
                           <p className="text-sm font-semibold text-slate-950">{note.noteNumber} - {note.chiefComplaint}</p>
                           <p className="mt-1 text-xs text-slate-500">{formatDate(note.encounterDate)} by {note.providerName} - {note.triageLevel}</p>
                         </div>
-                        <button onClick={() => downloadPdf(note)} className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50">
-                          <Download className="h-4 w-4" />
-                          Download PDF
-                        </button>
+                        <div className="flex flex-wrap gap-2">
+                          <button onClick={() => downloadPdf(note)} className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50">
+                            <Download className="h-4 w-4" />
+                            Download PDF
+                          </button>
+                          <button onClick={() => deleteNote(note)} className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </button>
+                        </div>
                       </div>
                       <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
                         <p><span className="font-semibold">Assessment:</span> {note.assessment || 'Not documented'}</p>

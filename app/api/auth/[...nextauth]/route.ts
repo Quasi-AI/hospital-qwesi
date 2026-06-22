@@ -69,6 +69,7 @@ export const authOptions: AuthOptions = {
                   hasLicenseCertificate: Boolean(user.licenseCertificate?.data || user.licenseCertificate?.fileName),
                   hasLicenseNumber: Boolean(user.licenseNumber?.trim()),
                   approvalStatus,
+                  languages: user.languages || [],
                   patientId: linkedPatient?.patientId,
                 };
             }
@@ -131,6 +132,7 @@ export const authOptions: AuthOptions = {
         token.hasLicenseCertificate = Boolean(user.hasLicenseCertificate);
         token.hasLicenseNumber = Boolean(user.hasLicenseNumber);
         token.approvalStatus = user.approvalStatus || 'approved';
+        token.languages = Array.isArray(user.languages) ? user.languages : [];
         if (user.patientId) {
           token.patientId = user.patientId;
         }
@@ -143,6 +145,7 @@ export const authOptions: AuthOptions = {
         token.hasLicenseCertificate = Boolean(session.user.hasLicenseCertificate ?? token.hasLicenseCertificate);
         token.hasLicenseNumber = Boolean(session.user.hasLicenseNumber ?? token.hasLicenseNumber);
         token.approvalStatus = session.user.approvalStatus ?? token.approvalStatus;
+        token.languages = Array.isArray(session.user.languages) ? session.user.languages : token.languages;
       }
       return token;
     },
@@ -155,6 +158,7 @@ export const authOptions: AuthOptions = {
         session.user.hasLicenseCertificate = Boolean(token.hasLicenseCertificate);
         session.user.hasLicenseNumber = Boolean(token.hasLicenseNumber);
         session.user.approvalStatus = token.approvalStatus as string;
+        session.user.languages = Array.isArray(token.languages) ? token.languages as string[] : [];
         if (token.patientId) {
           session.user.patientId = token.patientId as string;
         }

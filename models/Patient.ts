@@ -38,6 +38,16 @@ export interface IPatient {
   approvedBy?: string;
   approvedAt?: Date;
   rejectionReason?: string;
+  agreement?: {
+    version?: string;
+    termsAccepted?: boolean;
+    privacyAccepted?: boolean;
+    healthConsentAccepted?: boolean;
+    telemedicineConsentAccepted?: boolean;
+    signedName?: string;
+    signedAt?: Date;
+    userAgent?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -169,6 +179,16 @@ const patientSchema = new mongoose.Schema<IPatient>(
     rejectionReason: {
       type: String,
       trim: true,
+    },
+    agreement: {
+      version: { type: String, trim: true },
+      termsAccepted: { type: Boolean, default: false },
+      privacyAccepted: { type: Boolean, default: false },
+      healthConsentAccepted: { type: Boolean, default: false },
+      telemedicineConsentAccepted: { type: Boolean, default: false },
+      signedName: { type: String, trim: true },
+      signedAt: { type: Date },
+      userAgent: { type: String, trim: true },
     },
   },
   {

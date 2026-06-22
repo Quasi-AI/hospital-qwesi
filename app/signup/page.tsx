@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, Heart, Lock, Pill, Stethoscope, User, UserCheck } from 'lucide-react';
+import { CheckCircle2, FileText, Heart, Lock, Pill, ShieldCheck, Stethoscope, User, UserCheck } from 'lucide-react';
 
 type SignupRole = 'patient' | 'doctor' | 'nurse' | 'pharmacy';
 
@@ -20,6 +20,11 @@ export default function SignupApprovalPage() {
     licenseNumber: '',
     yearsOfExperience: '',
     address: '',
+    agreementTerms: false,
+    agreementPrivacy: false,
+    agreementHealth: false,
+    agreementTelemedicine: false,
+    signedName: '',
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -37,7 +42,17 @@ export default function SignupApprovalPage() {
       const response = await fetch('/api/signup/approval', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, role }),
+        body: JSON.stringify({
+          ...form,
+          role,
+          agreement: {
+            termsAccepted: form.agreementTerms,
+            privacyAccepted: form.agreementPrivacy,
+            healthConsentAccepted: form.agreementHealth,
+            telemedicineConsentAccepted: form.agreementTelemedicine,
+            signedName: form.signedName,
+          },
+        }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || 'Signup failed');
@@ -54,6 +69,11 @@ export default function SignupApprovalPage() {
         licenseNumber: '',
         yearsOfExperience: '',
         address: '',
+        agreementTerms: false,
+        agreementPrivacy: false,
+        agreementHealth: false,
+        agreementTelemedicine: false,
+        signedName: '',
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
@@ -128,6 +148,93 @@ export default function SignupApprovalPage() {
             )}
           </div>
 
+          <section className="mt-5 rounded-lg border border-blue-100 bg-blue-50/60 p-4">
+            <div className="mb-3 flex items-start gap-2">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+              <div>
+                <h2 className="text-sm font-semibold text-blue-950">Patient and provider agreement</h2>
+                <p className="mt-1 text-xs leading-relaxed text-blue-900">
+                  Review these healthcare privacy and service terms before submitting your request. Your typed name below is stored as your electronic signature.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <AgreementBlock
+                title="Data privacy"
+                items={[
+                  'Qwesi may collect identity, contact, clinical, appointment, prescription, billing, and support information needed to provide care.',
+                  'Health records are handled as confidential medical information and are shared only with authorized care team members, pharmacies, labs, payment processors, and regulators where required.',
+                  'You are responsible for keeping your login details private and reporting unauthorized access quickly.',
+                ]}
+              />
+              <AgreementBlock
+                title="Terms and conditions"
+                items={[
+                  'The platform supports healthcare coordination but does not replace emergency services or in-person clinical judgment.',
+                  'You agree to provide accurate information and understand that false or incomplete information can affect care decisions.',
+                  'Access can be paused or rejected if profile, license, identity, or safety requirements are not met.',
+                ]}
+              />
+              <AgreementBlock
+                title="Healthcare consent"
+                items={[
+                  'You consent to care coordination, clinical documentation, appointment management, medication support, home-care requests, and follow-up communication through the platform.',
+                  'For urgent symptoms such as chest pain, severe bleeding, trouble breathing, stroke signs, seizures, or loss of consciousness, seek emergency care immediately.',
+                  'Providers must use the platform according to professional standards, licensing requirements, and patient confidentiality obligations.',
+                ]}
+              />
+              <AgreementBlock
+                title="Telemedicine and pharmacy"
+                items={[
+                  'Virtual care can have limits, including network issues, incomplete examinations, or the need for referral to an in-person facility.',
+                  'Prescriptions and medicine dispensing may require pharmacist review, identity checks, stock availability, and local regulatory compliance.',
+                  'Messages, video visits, and pharmacy workflows may be stored as part of the health record for continuity of care.',
+                ]}
+              />
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <AgreementCheck
+                checked={form.agreementPrivacy}
+                onChange={(checked) => setForm((current) => ({ ...current, agreementPrivacy: checked }))}
+                label="I accept the data privacy notice and consent to confidential processing of my healthcare information."
+              />
+              <AgreementCheck
+                checked={form.agreementTerms}
+                onChange={(checked) => setForm((current) => ({ ...current, agreementTerms: checked }))}
+                label="I accept the platform terms and conditions."
+              />
+              <AgreementCheck
+                checked={form.agreementHealth}
+                onChange={(checked) => setForm((current) => ({ ...current, agreementHealth: checked }))}
+                label="I understand the healthcare consent information, emergency warning signs, and my responsibility to provide accurate information."
+              />
+              <AgreementCheck
+                checked={form.agreementTelemedicine}
+                onChange={(checked) => setForm((current) => ({ ...current, agreementTelemedicine: checked }))}
+                label="I accept the telemedicine, pharmacy, and care coordination consent."
+              />
+            </div>
+
+            <label className="mt-4 block">
+              <span className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-700">
+                <FileText className="h-4 w-4 text-blue-700" />
+                Electronic signature
+              </span>
+              <input
+                value={form.signedName}
+                onChange={(event) => update('signedName', event.target.value)}
+                required
+                placeholder="Type your full legal name"
+                className="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="mt-1 text-xs text-gray-600">
+                By typing your name, you sign this agreement electronically for your {role === 'pharmacy' ? 'pharmacy' : role} account request.
+              </p>
+            </label>
+          </section>
+
           {error && <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
           {message && (
             <div className="mt-4 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
@@ -138,13 +245,62 @@ export default function SignupApprovalPage() {
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/login" className="text-sm font-medium text-blue-700 hover:text-blue-900">Back to login</Link>
-            <button disabled={loading} className="inline-flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
+            <button
+              disabled={
+                loading ||
+                !form.agreementTerms ||
+                !form.agreementPrivacy ||
+                !form.agreementHealth ||
+                !form.agreementTelemedicine ||
+                !form.signedName.trim()
+              }
+              className="inline-flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+            >
               {loading ? 'Submitting...' : 'Submit for Approval'}
             </button>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+
+function AgreementBlock({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-md border border-blue-100 bg-white p-3">
+      <h3 className="text-sm font-semibold text-gray-950">{title}</h3>
+      <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-gray-600">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2">
+            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function AgreementCheck({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+}) {
+  return (
+    <label className="flex items-start gap-2 text-sm text-gray-700">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        required
+        className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+      />
+      <span>{label}</span>
+    </label>
   );
 }
 

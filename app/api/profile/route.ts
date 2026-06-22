@@ -49,6 +49,7 @@ export async function PUT(request: NextRequest) {
       licenseCertificate,
       licenseCertificateFileName,
       licenseCertificateFileType,
+      languages,
     } = await request.json();
 
     if (!name || !email) {
@@ -84,6 +85,13 @@ export async function PUT(request: NextRequest) {
         );
       }
     }
+
+    const nextLanguages = Array.isArray(languages)
+      ? languages
+          .map((language: unknown) => String(language || '').trim())
+          .filter(Boolean)
+          .slice(0, 12)
+      : undefined;
 
     await dbConnect();
 
@@ -134,6 +142,7 @@ export async function PUT(request: NextRequest) {
       email: email.toLowerCase().trim(),
       ...(image !== undefined ? { image: nextImage, hasImage: Boolean(nextImage) } : {}),
       ...(licenseNumber !== undefined ? { licenseNumber: nextLicenseNumber } : {}),
+      ...(nextLanguages !== undefined ? { languages: nextLanguages } : {}),
     };
 
     if (licenseCertificate !== undefined) {
@@ -219,6 +228,7 @@ export async function PUT(request: NextRequest) {
         licenseNumber: updatedUser.licenseNumber || '',
         licenseCertificate: updatedUser.licenseCertificate || null,
         licenseVerification: updatedUser.licenseVerification || null,
+        languages: updatedUser.languages || [],
       }
     });
 
