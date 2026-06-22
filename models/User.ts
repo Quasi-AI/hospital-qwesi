@@ -33,7 +33,10 @@ export interface IUser {
     reference?: string;
   };
   qualifications?: string[];
+  languages?: string[];
   yearsOfExperience?: number;
+  rating?: number;
+  ratingCount?: number;
   bio?: string;
   address?: string;
   dateOfBirth?: Date;
@@ -136,9 +139,23 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       trim: true,
     }],
+    languages: [{
+      type: String,
+      trim: true,
+    }],
     yearsOfExperience: {
       type: Number,
       min: 0,
+    },
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
+    ratingCount: {
+      type: Number,
+      min: 0,
+      default: 0,
     },
     bio: {
       type: String,
