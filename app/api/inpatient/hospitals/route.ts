@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
     const region = searchParams.get('region');
     const city = searchParams.get('city');
     const type = searchParams.get('type');
+    const mine = searchParams.get('mine');
 
     const query: Record<string, unknown> = {};
     if (isActive !== null && isActive !== '') query.isActive = isActive === 'true';
@@ -43,6 +44,13 @@ export async function GET(request: NextRequest) {
         { city: { $regex: search, $options: 'i' } },
         { region: { $regex: search, $options: 'i' } },
         { district: { $regex: search, $options: 'i' } },
+      ];
+    }
+    if (mine === 'true') {
+      const email = String(session.user?.email || '').toLowerCase();
+      query.$or = [
+        { userId: session.user?.id },
+        ...(email ? [{ loginEmail: email }] : []),
       ];
     }
 

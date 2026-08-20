@@ -21,6 +21,17 @@ export interface IHospital extends Document {
   createdBy?: string;
   createdAt: Date;
   updatedAt: Date;
+  capacity?: {
+    emergencyStatus?: 'accepting' | 'limited' | 'full';
+    emergencyBedsAvailable?: number;
+    icuBedsAvailable?: number;
+    oxygenAvailable?: boolean;
+    maternityStatus?: 'accepting' | 'limited' | 'full' | 'not-offered';
+    traumaStatus?: 'accepting' | 'limited' | 'full' | 'not-offered';
+    notes?: string;
+    updatedAt?: Date;
+    updatedBy?: string;
+  };
 }
 
 const HospitalSchema: Schema = new Schema(
@@ -47,6 +58,20 @@ const HospitalSchema: Schema = new Schema(
     loginEmail: { type: String, trim: true, lowercase: true },
     isActive: { type: Boolean, default: true },
     createdBy: { type: String },
+    // Live capacity/status self-reported by the hospital (or its admin),
+    // consumed by the network dashboard and by the AI assistant to decide
+    // where to recommend patients go.
+    capacity: {
+      emergencyStatus: { type: String, enum: ['accepting', 'limited', 'full'], default: undefined },
+      emergencyBedsAvailable: { type: Number },
+      icuBedsAvailable: { type: Number },
+      oxygenAvailable: { type: Boolean },
+      maternityStatus: { type: String, enum: ['accepting', 'limited', 'full', 'not-offered'], default: undefined },
+      traumaStatus: { type: String, enum: ['accepting', 'limited', 'full', 'not-offered'], default: undefined },
+      notes: { type: String, trim: true },
+      updatedAt: { type: Date },
+      updatedBy: { type: String, trim: true },
+    },
   },
   { timestamps: true }
 );

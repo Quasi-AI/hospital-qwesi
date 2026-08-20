@@ -598,6 +598,154 @@ function PharmacyApprovalPanel() {
   );
 }
 
+function HospitalCapacityEditor({ enabled }: { enabled: boolean }) {
+  const [hospital, setHospital] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState(false);
+  const [form, setForm] = useState({
+    emergencyStatus: 'accepting',
+    emergencyBedsAvailable: '',
+    icuBedsAvailable: '',
+    oxygenAvailable: false,
+    maternityStatus: 'accepting',
+    traumaStatus: 'accepting',
+    notes: '',
+  });
+
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    async function loadMine() {
+      setLoading(true);
+      const response = await fetch('/api/inpatient/hospitals?mine=true', { cache: 'no-store' });
+      if (!active) return;
+      if (response.ok) {
+        const list = await response.json();
+        const mine = Array.isArray(list) ? list[0] : null;
+        setHospital(mine || null);
+        if (mine?.capacity) {
+          setForm({
+            emergencyStatus: mine.capacity.emergencyStatus || 'accepting',
+            emergencyBedsAvailable: mine.capacity.emergencyBedsAvailable ?? '',
+            icuBedsAvailable: mine.capacity.icuBedsAvailable ?? '',
+            oxygenAvailable: Boolean(mine.capacity.oxygenAvailable),
+            maternityStatus: mine.capacity.maternityStatus || 'accepting',
+            traumaStatus: mine.capacity.traumaStatus || 'accepting',
+            notes: mine.capacity.notes || '',
+          });
+        }
+      }
+      setLoading(false);
+    }
+    loadMine();
+    return () => {
+      active = false;
+    };
+  }, [enabled]);
+
+  if (!enabled || loading) return null;
+  if (!hospital) {
+    return (
+      <section className="rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="mb-2 text-sm font-semibold text-gray-950">Live Capacity Status</h2>
+        <EmptyState label="No hospital is linked to your account yet. Ask an admin to connect your hospital with your login email." />
+      </section>
+    );
+  }
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSaving(true);
+    setError('');
+    setSaved(false);
+    const response = await fetch(`/api/inpatient/hospitals/${hospital._id}/capacity`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        emergencyBedsAvailable: form.emergencyBedsAvailable === '' ? undefined : Number(form.emergencyBedsAvailable),
+        icuBedsAvailable: form.icuBedsAvailable === '' ? undefined : Number(form.icuBedsAvailable),
+      }),
+    });
+    const data = await response.json();
+    setSaving(false);
+    if (!response.ok) {
+      setError(data.error || 'Failed to update status');
+      return;
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const selectClass = 'h-9 rounded-md border border-gray-300 px-2 text-sm';
+
+  return (
+    <section className="rounded-lg border border-gray-200 bg-white p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-gray-950">Live Capacity Status — {hospital.name}</h2>
+        {hospital.capacity?.updatedAt && (
+          <span className="text-xs text-gray-500">
+            Last updated {new Date(hospital.capacity.updatedAt).toLocaleString()}
+          </span>
+        )}
+      </div>
+      {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700">{error}</div>}
+      {saved && <div className="mb-3 rounded-md border border-green-200 bg-green-50 p-2 text-sm text-green-700">Status updated.</div>}
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-700">
+          Emergency status
+          <select className={selectClass} value={form.emergencyStatus} onChange={(event) => setForm({ ...form, emergencyStatus: event.target.value })}>
+            <option value="accepting">Accepting</option>
+            <option value="limited">Limited</option>
+            <option value="full">Full</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-700">
+          Emergency beds available
+          <input type="number" min={0} className={selectClass} value={form.emergencyBedsAvailable} onChange={(event) => setForm({ ...form, emergencyBedsAvailable: event.target.value })} />
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-700">
+          ICU beds available
+          <input type="number" min={0} className={selectClass} value={form.icuBedsAvailable} onChange={(event) => setForm({ ...form, icuBedsAvailable: event.target.value })} />
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-700">
+          Maternity status
+          <select className={selectClass} value={form.maternityStatus} onChange={(event) => setForm({ ...form, maternityStatus: event.target.value })}>
+            <option value="accepting">Accepting</option>
+            <option value="limited">Limited</option>
+            <option value="full">Full</option>
+            <option value="not-offered">Not offered</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-700">
+          Trauma status
+          <select className={selectClass} value={form.traumaStatus} onChange={(event) => setForm({ ...form, traumaStatus: event.target.value })}>
+            <option value="accepting">Accepting</option>
+            <option value="limited">Limited</option>
+            <option value="full">Full</option>
+            <option value="not-offered">Not offered</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-2 self-end pb-1.5 text-xs font-medium text-gray-700">
+          <input type="checkbox" checked={form.oxygenAvailable} onChange={(event) => setForm({ ...form, oxygenAvailable: event.target.checked })} />
+          Oxygen available
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-700 md:col-span-3">
+          Notes (optional)
+          <input className="h-9 rounded-md border border-gray-300 px-3 text-sm" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} placeholder="e.g. diverting non-critical cases until 6pm" />
+        </label>
+        <div className="md:col-span-3">
+          <button type="submit" disabled={saving} className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+            {saving ? 'Saving...' : 'Update status'}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
 function HospitalNetworkManager({ enabled, canAdd }: { enabled: boolean; canAdd: boolean }) {
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [form, setForm] = useState({ name: '', region: '', city: '', phone: '', email: '' });
@@ -747,6 +895,7 @@ function DashboardSurface({ bare = false, forcedRole }: { bare?: boolean; forced
           <StatGrid stats={payload.stats || []} />
           {role === 'pharmacy' && session?.user?.role === 'admin' ? <PharmacyApprovalPanel /> : null}
           <OperationalCards data={payload.operationalStats} />
+          <HospitalCapacityEditor enabled={showHospitalManager} />
           <HospitalNetworkManager enabled={showHospitalManager} canAdd={session?.user?.role === 'admin'} />
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
             <ActivityList activities={payload.recentActivities || []} />
