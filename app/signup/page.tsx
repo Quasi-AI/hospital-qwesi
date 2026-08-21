@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, FileText, Heart, Lock, Pill, ShieldCheck, Stethoscope, User, UserCheck } from 'lucide-react';
 
 type SignupRole = 'patient' | 'doctor' | 'nurse' | 'pharmacy';
 
-export default function SignupApprovalPage() {
+function SignupApprovalForm() {
+  const searchParams = useSearchParams();
   const [role, setRole] = useState<SignupRole>('patient');
   const [form, setForm] = useState({
     name: '',
@@ -29,6 +31,21 @@ export default function SignupApprovalPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  // Support deep-linking from the WhatsApp assistant, e.g.
+  // /signup?role=patient&phone=%2B233595553746 — pre-fills the form so a
+  // patient coming from a WhatsApp chat doesn't have to retype their number.
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    const phoneParam = searchParams.get('phone');
+
+    if (roleParam === 'patient' || roleParam === 'doctor' || roleParam === 'nurse' || roleParam === 'pharmacy') {
+      setRole(roleParam);
+    }
+    if (phoneParam) {
+      setForm((current) => ({ ...current, phone: phoneParam }));
+    }
+  }, [searchParams]);
 
   const update = (field: string, value: string) => setForm((current) => ({ ...current, [field]: value }));
 
@@ -262,6 +279,14 @@ export default function SignupApprovalPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignupApprovalPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupApprovalForm />
+    </Suspense>
   );
 }
 
