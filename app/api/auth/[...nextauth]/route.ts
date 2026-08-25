@@ -57,7 +57,16 @@ export const authOptions: AuthOptions = {
                   ? await Patient.findOne({ email }).select('patientId approvalStatus').lean() as any
                   : null;
                 if (safeRole === 'patient' && linkedPatient?.approvalStatus && linkedPatient.approvalStatus !== 'approved') {
-                  return null;
+                  // Correct password, but the account isn't approved yet —
+                  // this is NOT a credentials problem. Returning null here
+                  // (like every other failure below) made the login page
+                  // show "Invalid email or password", which sent people
+                  // back to the signup form with the right password,
+                  // where they'd hit "an account with this email already
+                  // exists" — a confusing dead end. Throwing a distinct
+                  // error lets the login page tell them what's actually
+                  // going on.
+                  throw new Error('PENDING_APPROVAL');
                 }
                 return {
                   id: user._id.toString(),
@@ -96,7 +105,10 @@ export const authOptions: AuthOptions = {
               const isValidPassword = await bcrypt.compare(credentials.password, patient.password);
               if (isValidPassword) {
                 if (patient.approvalStatus && patient.approvalStatus !== 'approved') {
-                  return null;
+                  // See the matching comment above — same fix, for patients
+                  // who log in via the Patient record directly rather than
+                  // a linked User record.
+                  throw new Error('PENDING_APPROVAL');
                 }
                 return {
                   id: patient._id.toString(),
@@ -113,6 +125,12 @@ export const authOptions: AuthOptions = {
 
           return null;
         } catch (error) {
+          if (error instanceof Error && error.message === 'PENDING_APPROVAL') {
+            // Not an unexpected failure — re-throw so NextAuth surfaces
+            // this specific reason to the login page instead of it being
+            // swallowed into a generic null/"invalid credentials" below.
+            throw error;
+          }
           console.error('Auth error:', error);
           return null;
         }

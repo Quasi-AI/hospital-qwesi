@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !password) {
       return NextResponse.json({ error: 'Name, email, and password are required.' }, { status: 400 });
     }
-    if (!email.includes('@')) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
     }
     if (password.length < 6) {
@@ -84,6 +84,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Phone, date of birth, and gender are required for patients.' }, { status: 400 });
       }
 
+      // Patients are auto-approved on signup — unlike doctors/nurses/
+      // pharmacy staff, there's no license or credential to verify, so
+      // requiring an admin to manually approve every patient account just
+      // blocked people from logging in right after signing up (they'd see
+      // "invalid password" since the account wasn't approved yet, then hit
+      // "account already exists" if they tried to sign up again). An admin
+      // can still suspend/reject a specific patient account later via
+      // /api/patients/[id]/approval if genuinely needed.
       const patient = await Patient.create({
         patientId: await nextPatientId(),
         name,
@@ -96,7 +104,8 @@ export async function POST(request: NextRequest) {
         allergies: [],
         currentMedications: [],
         password: hashedPassword,
-        approvalStatus: 'pending_verification',
+        approvalStatus: 'approved',
+        approvedAt: new Date(),
         agreement: signedAgreement,
       });
 
@@ -105,12 +114,13 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         role: 'patient',
-        approvalStatus: 'pending_verification',
+        approvalStatus: 'approved',
+        approvedAt: new Date(),
         agreement: signedAgreement,
       });
 
       return NextResponse.json({
-        message: 'Patient signup submitted for approval.',
+        message: 'Account created! You can log in right away.',
         id: patient._id,
         role,
       }, { status: 201 });

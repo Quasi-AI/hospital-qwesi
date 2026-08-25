@@ -51,9 +51,15 @@ function SignupApprovalForm() {
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    setLoading(true);
     setError('');
     setMessage('');
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError('Enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const response = await fetch('/api/signup/approval', {
@@ -106,8 +112,12 @@ function SignupApprovalForm() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
             <Stethoscope className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-950">Sign Up for Approval</h1>
-          <p className="mt-1 text-sm text-gray-600">Patients, doctors, nurses, and pharmacies can request access here. Admin approval controls activation.</p>
+          <h1 className="text-2xl font-bold text-gray-950">{role === 'patient' ? 'Create Your Patient Account' : 'Sign Up for Approval'}</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            {role === 'patient'
+              ? 'Patient accounts are activated immediately — you can log in as soon as you sign up.'
+              : 'Doctors, nurses, and pharmacies can request access here. Admin approval controls activation.'}
+          </p>
         </div>
 
         <form onSubmit={submit} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -273,7 +283,7 @@ function SignupApprovalForm() {
               }
               className="inline-flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
             >
-              {loading ? 'Submitting...' : 'Submit for Approval'}
+              {loading ? 'Submitting...' : role === 'patient' ? 'Create Account' : 'Submit for Approval'}
             </button>
           </div>
         </form>

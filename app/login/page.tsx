@@ -102,7 +102,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (!formData.email.includes('@')) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       setError('Please enter a valid email address');
       setIsLoading(false);
       return;
@@ -116,7 +116,13 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        if (result.error === 'PENDING_APPROVAL') {
+          setError(
+            'Your account is still pending admin approval. You\u2019ll be able to log in as soon as it\u2019s approved — no need to sign up again.'
+          );
+        } else {
+          setError('Invalid email or password');
+        }
       } else {
         router.refresh();
         const session = await getSession();
@@ -269,6 +275,16 @@ export default function LoginPage() {
                   <span>{t('login.signIn')}</span>
                 )}
               </button>
+              <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-3 text-center">
+                <p className="text-sm font-semibold text-blue-950">New patient?</p>
+                <p className="mt-1 text-xs text-blue-800">Create your account and start chatting right away — no waiting.</p>
+                <Link
+                  href="/signup?role=patient"
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  Create patient account
+                </Link>
+              </div>
               <div className="rounded-lg border-2 border-amber-200 bg-amber-50 p-3 text-center">
                 <p className="text-sm font-semibold text-amber-950">Need a doctor, nurse, staff, hospital, or pharmacy account?</p>
                 <p className="mt-1 text-xs text-amber-800">Create an account here and wait for admin approval.</p>
