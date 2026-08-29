@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const patient = await Patient.findOne({ phone: { $regex: `${suffix}$` } })
-      .select('patientId name phone approvalStatus')
+      .select('patientId name email phone approvalStatus')
       .lean();
 
     if (!patient) {
@@ -59,6 +59,10 @@ export async function GET(request: NextRequest) {
       patient: {
         patientId: (patient as any).patientId,
         name: (patient as any).name,
+        // Included so the Qwesi WhatsApp/AI assistant can sync a
+        // registered patient's name/email back onto their chat profile —
+        // see patientRegistry.service.js on the Qwesi backend.
+        email: (patient as any).email,
         approvalStatus: (patient as any).approvalStatus,
       },
     });
