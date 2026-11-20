@@ -151,8 +151,8 @@ export default function SignupForm({ role }: { role: SignupRole }) {
       </aside>
 
       {/* Form */}
-      <main className="flex items-start justify-center px-4 py-8 sm:px-8 lg:items-center lg:py-12">
-        <div className="glass-strong w-full max-w-xl rounded-3xl p-6 sm:p-8">
+      <main className="flex items-stretch justify-center sm:items-start sm:px-8 sm:py-8 lg:items-center lg:py-12">
+        <div className="glass-strong w-full max-w-xl !rounded-none !border-0 px-5 pb-10 pt-6 !shadow-none sm:!rounded-3xl sm:!border sm:p-8 sm:!shadow-lg">
           <div className="mb-6 flex items-center justify-between gap-3">
             <Link href="/signup" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-900">
               <ArrowLeft className="h-4 w-4" /> All account types

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { signIn, getSession } from 'next-auth/react';
+import { signIn, getSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { 
   Eye, 
@@ -37,7 +37,6 @@ export default function LoginPage() {
   const router = useRouter();
 
   const demoUsers = [
-    { role: 'Admin', email: 'admin@aidoc.com', password: 'password123', icon: Crown, color: 'bg-purple-100 text-purple-800 border-purple-200' },
     { role: 'Patient', email: 'patient@aidoc.com', password: 'password123', icon: Heart, color: 'bg-teal-50 text-teal-700 border-teal-100' },
     { role: 'Doctor', email: 'doctor@aidoc.com', password: 'password123', icon: Stethoscope, color: 'bg-blue-100 text-blue-800 border-blue-200' },
     { role: 'Staff', email: 'staff@aidoc.com', password: 'password123', icon: UserCheck, color: 'bg-green-100 text-green-800 border-green-200' },
@@ -127,6 +126,12 @@ export default function LoginPage() {
       } else {
         router.refresh();
         const session = await getSession();
+        if (session?.user?.role === 'admin') {
+          // Administrators sign in through their own private page.
+          await signOut({ redirect: false });
+          setError('Invalid email or password');
+          return;
+        }
         if (session?.user?.role === 'patient') {
           setSuccess('Login successful! Redirecting...');
           router.push(safeNext('patient') || '/patient-portal');
@@ -169,8 +174,8 @@ export default function LoginPage() {
       </aside>
 
       {/* Form panel */}
-      <main className="flex items-center justify-center px-4 py-10 sm:px-8">
-        <div className={`glass-strong w-full rounded-3xl p-6 sm:p-8 ${isDemo ? 'max-w-3xl' : 'max-w-md'}`}>
+      <main className="flex items-stretch justify-center sm:items-center sm:px-8 sm:py-10">
+        <div className={`glass-strong w-full !rounded-none !border-0 px-5 pb-10 pt-8 !shadow-none sm:!rounded-3xl sm:!border sm:p-8 sm:!shadow-lg ${isDemo ? 'max-w-3xl' : 'max-w-md'}`}>
           <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
               <Stethoscope className="h-5 w-5" />
