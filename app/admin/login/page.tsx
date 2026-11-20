@@ -36,8 +36,10 @@ export default function AdminLoginPage() {
       }
       const session = await getSession();
       if (session?.user?.role !== 'admin') {
+        // The password was correct, but this account is not an administrator.
+        const found = session?.user?.role || 'unknown';
         await signOut({ redirect: false });
-        setError('Invalid email or password');
+        setError(`Signed in, but this account's role is "${found}", not "admin". Ask the site owner to set the role to admin.`);
         return;
       }
       router.replace('/dashboard');
