@@ -81,7 +81,7 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
 
   return (
     <div>
-      <div className="rounded-2xl border border-brand-100 bg-white p-3 shadow-sm sm:p-4">
+      <div className="glass rounded-2xl p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row">
           <label className="relative flex-1">
             <span className="sr-only">Search doctors</span>

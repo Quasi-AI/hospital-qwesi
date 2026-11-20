@@ -134,7 +134,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -151,8 +151,8 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         {/* Sidebar Header */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-4">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-              <Heart className="h-5 w-5 text-emerald-600" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50">
+              <Heart className="h-5 w-5 text-brand-600" />
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-xl font-bold text-slate-950">
@@ -178,8 +178,8 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
               className={`
                 flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all
                 ${isActiveRoute(item.href, item.exact)
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-700'
+                  ? 'bg-brand-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
                 }
               `}
               onClick={() => setSidebarOpen(false)}

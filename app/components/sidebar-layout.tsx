@@ -370,7 +370,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 flex">
+    <div className="h-screen overflow-hidden flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  compress: true,
+  poweredByHeader: false,
+  images: { formats: ['image/avif', 'image/webp'] },
   /* config options here */
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -17,6 +20,7 @@ const nextConfig: NextConfig = {
   // Additional Vercel-specific options
   experimental: {
     esmExternals: true,
+    optimizePackageImports: ['lucide-react', 'recharts'],
   },
   // Disable all build-time checks
   compiler: {

@@ -169,8 +169,8 @@ export default function LoginPage() {
       </aside>
 
       {/* Form panel */}
-      <main className="flex items-center justify-center bg-white px-4 py-10 sm:px-8">
-        <div className={`w-full ${isDemo ? 'max-w-3xl' : 'max-w-md'}`}>
+      <main className="flex items-center justify-center px-4 py-10 sm:px-8">
+        <div className={`glass-strong w-full rounded-3xl p-6 sm:p-8 ${isDemo ? 'max-w-3xl' : 'max-w-md'}`}>
           <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
               <Stethoscope className="h-5 w-5" />

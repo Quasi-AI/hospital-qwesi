@@ -27,7 +27,10 @@ import {
 } from 'lucide-react';
 import type { WebsiteContentData } from '@/lib/defaultWebsiteContent';
 import type { LandingSettingsSnapshot } from '@/lib/getLandingSettings';
-import { PublicHeader, PublicFooter, PublicChat } from './public-shell';
+import dynamic from 'next/dynamic';
+import { PublicHeader, PublicFooter } from './public-shell';
+
+const PublicChat = dynamic(() => import('./public-shell').then((m) => m.PublicChat), { ssr: false });
 import { DoctorCard, DoctorCardSkeleton, DoctorAvatar, doctorTitle, formatFee } from './doctor-card';
 import { usePublicDoctors } from './doctor-marketplace';
 
@@ -71,7 +74,7 @@ export function HospitalLanding({
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 selection:bg-brand-100 selection:text-brand-950">
+    <div className="min-h-screen text-gray-900 selection:bg-brand-100 selection:text-brand-950">
       {content.announcementText.trim() && (
         <div className="bg-accent-400 px-4 py-2 text-center text-sm font-medium text-brand-950">{content.announcementText}</div>
       )}
@@ -80,9 +83,9 @@ export function HospitalLanding({
       <section className="qw-hero-bg relative overflow-hidden text-white">
         <PublicHeader settings={settings} tone="dark" />
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:pb-28 lg:pt-20">
-          <div>
+          <div className="hero-in">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold text-brand-100 backdrop-blur sm:text-sm">
-              <span className="h-2 w-2 rounded-full bg-accent-300" /> {content.heroBadge}
+              <span className="pulse-ring h-2 w-2 rounded-full bg-accent-300" /> {content.heroBadge}
             </span>
             <h1 className="font-display mt-6 text-balance text-4xl font-semibold leading-[1.08] sm:text-5xl lg:text-6xl">
               {content.heroTitle}
@@ -91,7 +94,7 @@ export function HospitalLanding({
 
             <form
               onSubmit={search}
-              className="mt-8 flex max-w-xl flex-col gap-2 rounded-3xl bg-white p-2 shadow-2xl shadow-black/20 sm:flex-row sm:items-center sm:rounded-full"
+              className="glass-strong mt-8 flex max-w-xl flex-col gap-2 rounded-3xl p-2 shadow-2xl shadow-black/20 sm:flex-row sm:items-center sm:rounded-full"
             >
               <label className="relative flex-1">
                 <span className="sr-only">Specialty or condition</span>
@@ -124,7 +127,7 @@ export function HospitalLanding({
           {/* Live doctor preview */}
           <div className="relative mx-auto w-full max-w-md lg:max-w-none">
             <div className="absolute -inset-6 -z-0 rounded-[2.5rem] bg-brand-400/20 blur-3xl" aria-hidden />
-            <div className="relative space-y-3 rounded-[2rem] border border-white/15 bg-white/10 p-4 backdrop-blur-md sm:p-5">
+            <div className="glass-dark float-slow relative space-y-3 rounded-[2rem] p-4 sm:p-5">
               <div className="flex items-center justify-between px-1 text-sm text-white/80">
                 <span className="font-semibold">Available now</span>
                 {lowestFee != null && <span>from {formatFee(lowestFee)}</span>}
@@ -136,7 +139,7 @@ export function HospitalLanding({
                   <Link
                     key={d.id}
                     href={`/find-doctors/${d.id}`}
-                    className="flex items-center gap-4 rounded-2xl bg-white p-3.5 text-gray-900 shadow-lg transition hover:-translate-y-0.5"
+                    className="glass-strong flex items-center gap-4 rounded-2xl p-3.5 text-gray-900 transition hover:-translate-y-0.5"
                   >
                     <DoctorAvatar doctor={d} className="h-16 w-16" />
                     <div className="min-w-0 flex-1">
@@ -150,7 +153,7 @@ export function HospitalLanding({
                   </Link>
                 ))
               ) : (
-                <div className="rounded-2xl bg-white p-6 text-center text-gray-700">
+                <div className="glass-strong rounded-2xl p-6 text-center text-gray-700">
                   <Stethoscope className="mx-auto h-8 w-8 text-brand-500" />
                   <p className="mt-2 font-semibold">Doctors are joining now</p>
                   <p className="text-sm text-gray-500">Check back soon or sign up to be notified.</p>
@@ -166,7 +169,7 @@ export function HospitalLanding({
       </section>
 
       {/* ───────── Trust strip ───────── */}
-      <section className="border-b border-gray-100 bg-white" aria-label={content.trustPillarsTitle}>
+      <section className="glass-strong border-x-0 border-t-0 !rounded-none" aria-label={content.trustPillarsTitle}>
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:px-6 md:grid-cols-4 lg:px-8">
           {content.trustPillars.slice(0, 4).map((p, i) => {
             const Icon = TRUST_ICONS[i % TRUST_ICONS.length];
@@ -186,7 +189,7 @@ export function HospitalLanding({
       </section>
 
       {/* ───────── Featured doctors ───────── */}
-      <section id="doctors" className="scroll-mt-20 bg-sand py-16 sm:py-20">
+      <section id="doctors" className="cv-auto scroll-mt-20 bg-white/20 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
@@ -198,7 +201,7 @@ export function HospitalLanding({
               See all doctors <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="reveal-stagger mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {loading
               ? [0, 1, 2].map((i) => <DoctorCardSkeleton key={i} />)
               : featured.map((d) => <DoctorCard key={d.id} doctor={d} />)}
@@ -212,14 +215,14 @@ export function HospitalLanding({
       </section>
 
       {/* ───────── Specialties ───────── */}
-      <section id="specialties" className="scroll-mt-20 py-16 sm:py-20">
+      <section id="specialties" className="cv-auto scroll-mt-20 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <Eyebrow>{content.departmentsEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.departmentsTitle}</h2>
             <p className="mt-3 text-gray-600">{content.departmentsSubtitle}</p>
           </div>
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+          <div className="reveal-stagger mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
             {content.departments.map((d, i) => {
               const Icon = SPECIALTY_ICONS[i % SPECIALTY_ICONS.length];
               return (
@@ -243,18 +246,18 @@ export function HospitalLanding({
       </section>
 
       {/* ───────── How it works ───────── */}
-      <section id="how" className="scroll-mt-20 bg-brand-950 py-16 text-white sm:py-20">
+      <section id="how" className="qw-hero-bg scroll-mt-20 py-16 text-white sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <Eyebrow light>{content.careJourneyEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">{content.careJourneyTitle}</h2>
             <p className="mt-3 text-white/70">{content.careJourneySubtitle}</p>
           </div>
-          <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="reveal-stagger mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {content.careJourneySteps.slice(0, 4).map((step, i) => {
               const Icon = STEP_ICONS[i % STEP_ICONS.length];
               return (
-                <li key={step.title} className="relative rounded-3xl border border-white/10 bg-white/5 p-6">
+                <li key={step.title} className="glass-dark relative rounded-3xl p-6">
                   <span className="font-display absolute right-5 top-4 text-5xl font-semibold text-white/10">{i + 1}</span>
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-400 text-brand-950">
                     <Icon className="h-6 w-6" />
@@ -283,16 +286,16 @@ export function HospitalLanding({
             <Eyebrow>{content.highlightsEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.highlightsTitle}</h2>
             <p className="mt-4 text-gray-600">{content.highlightsSubtitle}</p>
-            <dl className="mt-8 grid grid-cols-2 gap-4">
+            <dl className="reveal-stagger mt-8 grid grid-cols-2 gap-4">
               {content.stats.slice(0, 4).map((s) => (
-                <div key={s.label} className="rounded-2xl bg-brand-50 p-4">
+                <div key={s.label} className="glass rounded-2xl p-4">
                   <dd className="font-display text-3xl font-semibold text-brand-800">{s.value}</dd>
                   <dt className="mt-1 text-sm text-gray-600">{s.label}</dt>
                 </div>
               ))}
             </dl>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="reveal-stagger grid gap-4 sm:grid-cols-2">
             {content.highlights.map((h) => (
               <div key={h.title} className="qw-card p-6">
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
@@ -308,7 +311,7 @@ export function HospitalLanding({
 
       {/* ───────── Doctors: join ───────── */}
       <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
-        <div className="qw-hero-bg mx-auto grid max-w-7xl items-center gap-8 overflow-hidden rounded-[2rem] p-8 text-white sm:p-12 lg:grid-cols-[1.4fr_1fr]">
+        <div className="reveal qw-hero-bg mx-auto grid max-w-7xl items-center gap-8 overflow-hidden rounded-[2rem] p-8 text-white sm:p-12 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <Eyebrow light>For doctors</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">Set your own fee. See patients from anywhere.</h2>
@@ -328,14 +331,14 @@ export function HospitalLanding({
       </section>
 
       {/* ───────── Plans ───────── */}
-      <section id="plans" className="scroll-mt-20 bg-sand py-16 sm:py-20">
+      <section id="plans" className="cv-auto scroll-mt-20 bg-white/20 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <Eyebrow>{content.subscriptionsEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.subscriptionsTitle}</h2>
             <p className="mt-3 text-gray-600">{content.subscriptionsSubtitle}</p>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="reveal-stagger mt-10 grid gap-5 md:grid-cols-3">
             {content.subscriptions.map((plan, i) => (
               <div
                 key={plan.name}
@@ -383,7 +386,7 @@ export function HospitalLanding({
             <Eyebrow>{content.testimonialsEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.testimonialsTitle}</h2>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="reveal-stagger mt-10 grid gap-5 md:grid-cols-3">
             {content.testimonials.slice(0, 3).map((t) => (
               <figure key={t.quote} className="qw-card flex h-full flex-col p-6">
                 <Quote className="h-7 w-7 text-accent-400" />
@@ -399,7 +402,7 @@ export function HospitalLanding({
       </section>
 
       {/* ───────── FAQ ───────── */}
-      <section id="faq" className="scroll-mt-20 bg-sand py-16 sm:py-20">
+      <section id="faq" className="cv-auto scroll-mt-20 bg-white/20 py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="text-center">
             <Eyebrow>{content.faqEyebrow}</Eyebrow>
@@ -429,9 +432,9 @@ export function HospitalLanding({
       </section>
 
       {/* ───────── Contact + CTA ───────── */}
-      <section id="contact" className="scroll-mt-20 py-16 sm:py-20">
+      <section id="contact" className="cv-auto scroll-mt-20 py-16 sm:py-20">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <div className="rounded-[2rem] bg-brand-50 p-8 sm:p-10">
+          <div className="glass rounded-[2rem] p-8 sm:p-10">
             <Eyebrow>{content.contactEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950">{content.contactTitle}</h2>
             <p className="mt-3 text-gray-700">{content.contactBody}</p>
