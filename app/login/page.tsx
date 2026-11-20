@@ -10,14 +10,16 @@ import {
   Lock, 
   User, 
   Stethoscope,
-  Building2,
   AlertCircle,
   CheckCircle,
   Copy,
   Crown,
   UserCheck,
   Heart,
-  Pill
+  Pill,
+  ShieldCheck,
+  CreditCard,
+  Video
 } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -39,7 +41,6 @@ export default function LoginPage() {
     { role: 'Patient', email: 'patient@aidoc.com', password: 'password123', icon: Heart, color: 'bg-teal-50 text-teal-700 border-teal-100' },
     { role: 'Doctor', email: 'doctor@aidoc.com', password: 'password123', icon: Stethoscope, color: 'bg-blue-100 text-blue-800 border-blue-200' },
     { role: 'Staff', email: 'staff@aidoc.com', password: 'password123', icon: UserCheck, color: 'bg-green-100 text-green-800 border-green-200' },
-    { role: 'Hospital', email: 'hospital@aidoc.com', password: 'password123', icon: Building2, color: 'bg-cyan-50 text-cyan-800 border-cyan-200' },
     { role: 'Pharmacy', email: 'pharmacy@aidoc.com', password: 'password123', icon: Pill, color: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
   ];
 
@@ -48,7 +49,7 @@ export default function LoginPage() {
     const checkSession = async () => {
       const session = await getSession();
       if (session) {
-        router.push(getRoleHome(session.user?.role));
+        router.push(safeNext(session.user?.role) || getRoleHome(session.user?.role));
       }
     };
     checkSession();
@@ -127,14 +128,11 @@ export default function LoginPage() {
         router.refresh();
         const session = await getSession();
         if (session?.user?.role === 'patient') {
-          setSuccess('Login successful! Redirecting to patient portal...');
-          router.push('/patient-portal');
+          setSuccess('Login successful! Redirecting...');
+          router.push(safeNext('patient') || '/patient-portal');
         } else if (session?.user?.role === 'pharmacy') {
           setSuccess('Login successful! Redirecting to pharmacy dashboard...');
           router.push('/pharmacy');
-        } else if (session?.user?.role === 'hospital') {
-          setSuccess('Login successful! Redirecting to hospital dashboard...');
-          router.push('/hospital-portal');
         } else {
           setSuccess('Login successful! Redirecting to dashboard...');
           router.push('/dashboard');
@@ -148,218 +146,204 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className={`w-full ${isDemo ? 'max-w-6xl' : 'max-w-md'} space-y-5`}>
-        {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600">
-            <Stethoscope className="h-7 w-7 text-white" />
-          </div>
-          <h2 className="mb-1 text-2xl font-bold text-gray-900">
-            {t('login.subtitle')}
-          </h2>
-          <p className="text-sm text-gray-600">
-            {t('login.description')}
-          </p>
+    <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
+      {/* Brand panel */}
+      <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex">
+        <Link href="/" className="flex items-center gap-2.5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+            <Stethoscope className="h-5 w-5" />
+          </span>
+          <span className="font-display text-2xl font-semibold">Qwesi</span>
+        </Link>
+        <div>
+          <h1 className="font-display text-4xl font-semibold leading-tight xl:text-5xl">
+            Your doctor is one <span className="text-accent-300">booking</span> away.
+          </h1>
+          <ul className="mt-8 space-y-4 text-lg text-white/80">
+            <li className="flex items-start gap-3"><ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-accent-300" /> Licence-verified doctors</li>
+            <li className="flex items-start gap-3"><CreditCard className="mt-1 h-5 w-5 shrink-0 text-accent-300" /> Fees shown up front, pay securely to book</li>
+            <li className="flex items-start gap-3"><Video className="mt-1 h-5 w-5 shrink-0 text-accent-300" /> Video, audio or chat from anywhere</li>
+          </ul>
         </div>
+        <p className="text-sm text-white/50">Virtual care is not for emergencies.</p>
+      </aside>
 
-        {/* Main Content - Horizontal Layout */}
-        <div className={`flex flex-col items-start justify-center gap-4 ${isDemo ? 'lg:flex-row' : ''}`}>
-          {/* Login Form */}
-          <div className={`rounded-lg border border-gray-100 bg-white p-5 shadow-lg ${isDemo ? 'max-w-md flex-1' : 'w-full'}`}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
-                  {t('login.email')}
-                </label>
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
-                    <User className="h-4 w-4 text-gray-400" />
+      {/* Form panel */}
+      <main className="flex items-center justify-center bg-white px-4 py-10 sm:px-8">
+        <div className={`w-full ${isDemo ? 'max-w-3xl' : 'max-w-md'}`}>
+          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
+              <Stethoscope className="h-5 w-5" />
+            </span>
+            <span className="font-display text-xl font-semibold text-brand-950">Qwesi</span>
+          </Link>
+
+          <div className={`flex flex-col gap-6 ${isDemo ? 'lg:flex-row' : ''}`}>
+            <div className="w-full flex-1">
+              <h2 className="font-display text-3xl font-semibold text-gray-900">{t('login.subtitle')}</h2>
+              <p className="mt-2 text-sm text-gray-600">{t('login.description')}</p>
+
+              <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+                <div>
+                  <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">{t('login.email')}</label>
+                  <div className="relative">
+                    <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="block h-12 w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-3 text-base transition focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      placeholder={t('login.email')}
+                      disabled={isLoading}
+                      suppressHydrationWarning
+                    />
                   </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                    placeholder={t('login.email')}
-                    disabled={isLoading}
-                    suppressHydrationWarning
-                  />
                 </div>
-              </div>
 
-              {/* Password Field */}
-              <div>
-                <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
-                  {t('login.password')}
-                </label>
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
-                    <Lock className="h-4 w-4 text-gray-400" />
+                <div>
+                  <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">{t('login.password')}</label>
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      required
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="block h-12 w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-11 text-base transition focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      placeholder={t('login.password')}
+                      disabled={isLoading}
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      disabled={isLoading}
+                      suppressHydrationWarning
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
+                    </button>
                   </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border border-gray-300 py-2 pl-9 pr-10 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                    placeholder={t('login.password')}
-                    disabled={isLoading}
-                    suppressHydrationWarning
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-2.5"
-                    disabled={isLoading}
-                    suppressHydrationWarning
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                    )}
-                  </button>
                 </div>
-              </div>
 
-              {/* Remember Me */}
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Remember me
-                </label>
-              </div>
-
-              {/* Error/Success Messages */}
-              {error && (
-                <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-2">
-                  <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
-                  <span className="text-sm text-red-700">{error}</span>
-                </div>
-              )}
-
-              {success && (
-                <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-2">
-                  <CheckCircle className="h-4 w-4 shrink-0 text-green-600" />
-                  <span className="text-sm text-green-700">{success}</span>
-                </div>
-              )}
-
-              {/* Login Button */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                suppressHydrationWarning
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
-                    <span>{t('login.signingIn')}</span>
+                {error && (
+                  <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3" role="alert">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+                    <span className="text-sm text-red-700">{error}</span>
                   </div>
-                ) : (
-                  <span>{t('login.signIn')}</span>
                 )}
-              </button>
-              <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-3 text-center">
-                <p className="text-sm font-semibold text-blue-950">New patient?</p>
-                <p className="mt-1 text-xs text-blue-800">Create your account and start chatting right away — no waiting.</p>
+                {success && (
+                  <div className="flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-3">
+                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                    <span className="text-sm text-green-700">{success}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex h-12 w-full items-center justify-center rounded-full bg-brand-600 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  suppressHydrationWarning
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
+                      {t('login.signingIn')}
+                    </span>
+                  ) : (
+                    t('login.signIn')
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-6 space-y-3">
                 <Link
                   href="/signup?role=patient"
-                  className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                  className="flex items-center justify-between rounded-2xl border border-brand-200 bg-brand-50 p-4 transition hover:border-brand-400"
                 >
-                  Create patient account
+                  <span>
+                    <span className="block text-sm font-semibold text-brand-900">New patient?</span>
+                    <span className="block text-xs text-brand-800/80">Create a free account to book a doctor.</span>
+                  </span>
+                  <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">Sign up</span>
                 </Link>
-              </div>
-              <div className="rounded-lg border-2 border-amber-200 bg-amber-50 p-3 text-center">
-                <p className="text-sm font-semibold text-amber-950">Need a doctor, nurse, staff, hospital, or pharmacy account?</p>
-                <p className="mt-1 text-xs text-amber-800">Create an account here and wait for admin approval.</p>
                 <Link
                   href="/signup"
-                  className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-amber-500 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+                  className="flex items-center justify-between rounded-2xl border border-accent-200 bg-accent-50 p-4 transition hover:border-accent-400"
                 >
-                  Sign up for approval
+                  <span>
+                    <span className="block text-sm font-semibold text-accent-700">Are you a doctor?</span>
+                    <span className="block text-xs text-accent-700/80">Join, set your own fee and start earning.</span>
+                  </span>
+                  <span className="rounded-full bg-accent-400 px-3 py-1.5 text-xs font-semibold text-brand-950">Join</span>
                 </Link>
               </div>
-            </form>
-          </div>
-
-          {/* Demo Credentials Section - Right Side */}
-          {isDemo && (
-            <div className={`rounded-lg border border-yellow-200 bg-yellow-50 p-4 ${isDemo ? 'max-w-md flex-1' : 'w-full'}`}>
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h3 className="flex items-center gap-1.5 text-base font-semibold text-yellow-900">
-                  <User className="h-4 w-4 shrink-0" />
-                  Demo Credentials
-                </h3>
-                <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-yellow-800 bg-yellow-200 sm:text-xs">
-                  DEMO MODE
-                </span>
-              </div>
-              <p className="mb-3 text-xs text-yellow-800 sm:text-sm">
-                Click on any user card below to auto-fill credentials, or copy them to clipboard.
-              </p>
-              <div className="grid grid-cols-1 gap-2">
-                {demoUsers.map((user, index) => {
-                  const Icon = user.icon;
-                  return (
-                    <div
-                      key={index}
-                      className={`cursor-pointer rounded-md border-2 p-3 transition-all hover:shadow-md ${user.color}`}
-                      onClick={() => handleDemoLogin(user.email, user.password)}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <div className="shrink-0 rounded-md bg-white p-1.5">
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold">{user.role}</p>
-                            <p className="truncate text-xs opacity-80 sm:text-sm">{user.email}</p>
-                            <p className="text-xs opacity-70">Password: {user.password}</p>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            copyCredentials(user.email, user.password);
-                          }}
-                          className="shrink-0 rounded-md p-1.5 transition-colors hover:bg-white"
-                          title="Copy credentials"
-                        >
-                          <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
-          )}
+
+            {isDemo && (
+              <div className="w-full flex-1 rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h3 className="flex items-center gap-1.5 text-base font-semibold text-yellow-900">
+                    <User className="h-4 w-4 shrink-0" /> Demo Credentials
+                  </h3>
+                  <span className="shrink-0 rounded bg-yellow-200 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-yellow-800">Demo mode</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {demoUsers.map((user, index) => {
+                    const Icon = user.icon;
+                    return (
+                      <div
+                        key={index}
+                        className={`cursor-pointer rounded-xl border p-3 transition hover:shadow-md ${user.color}`}
+                        onClick={() => handleDemoLogin(user.email, user.password)}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <div className="shrink-0 rounded-md bg-white p-1.5"><Icon className="h-4 w-4" /></div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold">{user.role}</p>
+                              <p className="truncate text-xs opacity-80">{user.email}</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); copyCredentials(user.email, user.password); }}
+                            className="shrink-0 rounded-md p-1.5 hover:bg-white"
+                            title="Copy credentials"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
+}
+
+/** Safe in-app redirect target passed as ?next=/patient-portal/... */
+function safeNext(role?: string | null) {
+  if (typeof window === 'undefined' || role !== 'patient') return null;
+  const next = new URLSearchParams(window.location.search).get('next') || '';
+  return next.startsWith('/patient-portal') && !next.startsWith('//') ? next : null;
 }
 
 function getRoleHome(role?: string | null) {
   if (role === 'patient') return '/patient-portal';
   if (role === 'pharmacy') return '/pharmacy';
-  if (role === 'hospital') return '/hospital-portal';
   return '/dashboard';
 }

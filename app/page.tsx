@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getMergedWebsiteContent();
   return {
-    title: 'Qwesi Care | Find Doctors & Herbalists Online',
-    description: 'Discover trusted doctors and herbalists, compare consultation fees, book appointments and connect through virtual consultations.',
+    title: c.metaTitle || c.heroTitle,
+    description: c.metaDescription || c.heroSubtitle,
   };
 }
 

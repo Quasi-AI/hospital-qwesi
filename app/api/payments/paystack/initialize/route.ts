@@ -6,6 +6,8 @@ import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
 import Patient from '@/models/Patient';
 import Invoice from '@/models/Invoice';
+import User from '@/models/User';
+import mongoose from 'mongoose';
 import PaystackTransaction from '@/models/PaystackTransaction';
 import { getPaystackConfigError, getPaystackSettings } from '@/lib/paystackSettings';
 import {
@@ -54,8 +56,32 @@ export async function POST(request: NextRequest) {
     let amount = 0;
     let currency: 'GHS' | 'USD' = 'GHS';
     let metadata: Record<string, unknown> = {};
+    let storedItemType: 'subscription' | 'payg' | 'invoice' | null = null;
+    let storedItemId: string | null = null;
 
-    if (itemType === 'subscription') {
+    if (itemType === 'doctor_consultation') {
+      // Patient pays the doctor's own consultation fee to book
+      if (session.user.role !== 'patient') {
+        return NextResponse.json({ error: 'Only patients can book consultations' }, { status: 403 });
+      }
+      if (!mongoose.Types.ObjectId.isValid(itemId)) {
+        return NextResponse.json({ error: 'Unknown doctor' }, { status: 400 });
+      }
+      const doctor = (await User.findOne({ _id: itemId, role: 'doctor', approvalStatus: 'approved' })
+        .select('name consultationFee')
+        .lean()) as { name: string; consultationFee?: number } | null;
+      if (!doctor) return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+      const fee = Number(doctor.consultationFee || 0);
+      if (fee <= 0) {
+        return NextResponse.json({ error: 'This doctor offers free consultations - no payment needed' }, { status: 400 });
+      }
+      itemName = `Consultation with Dr. ${doctor.name}`;
+      amount = fee;
+      currency = 'GHS';
+      storedItemType = 'payg';
+      storedItemId = 'doctor-virtual-consultation';
+      metadata = { paygId: 'doctor-virtual-consultation', serviceName: itemName, doctorId: itemId, doctorName: doctor.name };
+    } else if (itemType === 'subscription') {
       const plan = getQwesiSubscriptionPlan(itemId);
       if (!plan) return NextResponse.json({ error: 'Unknown subscription plan' }, { status: 400 });
       itemName = plan.name;
@@ -131,8 +157,8 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       userRole: session.user.role,
       email: session.user.email,
-      itemType,
-      itemId,
+      itemType: storedItemType || itemType,
+      itemId: storedItemId || itemId,
       itemName,
       amount,
       currency,

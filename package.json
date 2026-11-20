@@ -14,10 +14,7 @@
     "fix-admin": "tsx scripts/fix-admin-account.ts",
     "test:ai-results": "tsx scripts/test-ai-results.ts",
     "realtime": "tsx servers/realtime-server.ts",
-    "servers": "tsx servers/index.ts",
-    "servers:hl7": "tsx servers/hl7-server.ts",
-    "servers:astm": "tsx servers/astm-server.ts",
-    "dev:all": "concurrently \"npm run dev\" \"npm run realtime\" \"npm run servers\""
+    "dev:all": "concurrently \"npm run dev\" \"npm run realtime\""
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.10.0",
@@ -27,7 +24,6 @@
     "@types/ws": "^8.18.1",
     "bcryptjs": "^3.0.2",
     "cookies-next": "^6.1.0",
-    "dicom-parser": "^1.8.21",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.0.0",
     "libphonenumber-js": "^1.12.41",
@@ -42,6 +38,7 @@
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hot-toast": "^2.6.0",
+    "react-is": "^19.3.1",
     "recharts": "^3.7.0",
     "twilio": "^5.12.1",
     "ws": "^8.21.0"

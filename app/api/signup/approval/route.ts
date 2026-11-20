@@ -4,7 +4,7 @@ import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
 import User from '@/models/User';
 
-type SignupRole = 'patient' | 'doctor' | 'herbalist' | 'pharmacy';
+type SignupRole = 'patient' | 'doctor' | 'nurse' | 'pharmacy';
 const AGREEMENT_VERSION = 'health-platform-agreement-2026-06';
 
 function cleanText(value: unknown) {
@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
     const agreement = body.agreement || {};
     const signedName = cleanText(agreement.signedName);
 
-    if (!['patient', 'doctor', 'herbalist', 'pharmacy'].includes(role)) {
-      return NextResponse.json({ error: 'Select patient, doctor, herbalist, or pharmacy.' }, { status: 400 });
+    if (!['patient', 'doctor', 'nurse', 'pharmacy'].includes(role)) {
+      return NextResponse.json({ error: 'Select patient, doctor, nurse, or pharmacy.' }, { status: 400 });
     }
     if (!name || !email || !password) {
       return NextResponse.json({ error: 'Name, email, and password are required.' }, { status: 400 });
@@ -132,11 +132,11 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
       role,
       phone: phone || undefined,
-      department: cleanText(body.department) || (role === 'herbalist' ? 'Traditional & herbal care' : role === 'pharmacy' ? 'Pharmacy' : undefined),
+      department: cleanText(body.department) || (role === 'nurse' ? 'Nursing' : role === 'pharmacy' ? 'Pharmacy' : undefined),
       specialization: cleanText(body.specialization) || undefined,
       licenseNumber: cleanText(body.licenseNumber) || undefined,
       yearsOfExperience: body.yearsOfExperience ? Number(body.yearsOfExperience) : undefined,
-      consultationFee: ['doctor', 'herbalist'].includes(role) ? Math.max(0, Number(body.consultationFee) || 0) : undefined,
+      consultationFee: body.role === 'doctor' && body.consultationFee !== undefined && body.consultationFee !== '' ? Math.max(0, Number(body.consultationFee) || 0) : undefined,
       approvalStatus: 'pending_profile',
       agreement: signedAgreement,
       licenseVerification: {
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: `${role === 'doctor' ? 'Doctor' : role === 'herbalist' ? 'Herbalist' : 'Pharmacy'} signup submitted for approval.`,
+      message: `${role === 'doctor' ? 'Doctor' : role === 'nurse' ? 'Nurse' : 'Pharmacy'} signup submitted for approval.`,
       id: user._id,
       role,
     }, { status: 201 });

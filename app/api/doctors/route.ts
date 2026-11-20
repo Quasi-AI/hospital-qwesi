@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
       qualifications,
       languages,
       yearsOfExperience,
+      consultationFee,
       rating,
       ratingCount,
       bio,
@@ -158,6 +159,7 @@ export async function POST(request: NextRequest) {
     if (qualifications && Array.isArray(qualifications)) userData.qualifications = qualifications;
     if (languages && Array.isArray(languages)) userData.languages = languages;
     if (yearsOfExperience) userData.yearsOfExperience = parseInt(yearsOfExperience) || 0;
+    if (consultationFee !== undefined && consultationFee !== '') userData.consultationFee = Math.max(0, Number(consultationFee) || 0);
     if (rating !== undefined && rating !== '') userData.rating = Math.min(5, Math.max(0, Number(rating) || 0));
     if (ratingCount !== undefined && ratingCount !== '') userData.ratingCount = Math.max(0, parseInt(ratingCount, 10) || 0);
     if (bio) userData.bio = bio;
@@ -220,6 +222,7 @@ export async function PUT(request: NextRequest) {
       qualifications,
       languages,
       yearsOfExperience,
+      consultationFee,
       rating,
       ratingCount,
       bio,
@@ -246,6 +249,7 @@ export async function PUT(request: NextRequest) {
     if (qualifications !== undefined) updateData.qualifications = qualifications;
     if (languages !== undefined) updateData.languages = Array.isArray(languages) ? languages : [];
     if (yearsOfExperience !== undefined) updateData.yearsOfExperience = parseInt(yearsOfExperience) || 0;
+    if (consultationFee !== undefined) updateData.consultationFee = consultationFee === '' ? 0 : Math.max(0, Number(consultationFee) || 0);
     if (rating !== undefined) updateData.rating = rating === '' ? undefined : Math.min(5, Math.max(0, Number(rating) || 0));
     if (ratingCount !== undefined) updateData.ratingCount = ratingCount === '' ? 0 : Math.max(0, parseInt(ratingCount, 10) || 0);
     if (bio !== undefined) updateData.bio = bio;

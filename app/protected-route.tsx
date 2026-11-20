@@ -8,12 +8,11 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const providerRoles = ['doctor', 'herbalist', 'staff', 'nurse', 'pharmacy'];
+const providerRoles = ['doctor', 'staff', 'nurse', 'pharmacy'];
 
 function roleHome(role?: string | null) {
   if (role === 'patient') return '/patient-portal';
   if (role === 'pharmacy') return '/pharmacy';
-  if (role === 'hospital') return '/hospital-portal';
   return '/dashboard';
 }
 
@@ -38,8 +37,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
     } else if (session.user?.role === 'pharmacy' && pathname === '/dashboard') {
       router.push('/pharmacy');
-    } else if (session.user?.role === 'hospital' && pathname === '/dashboard') {
-      router.push('/hospital-portal');
     } else if (
       providerRoles.includes(session.user?.role || '') &&
       (!session.user?.hasImage || !session.user?.hasLicenseCertificate || !session.user?.hasLicenseNumber) &&

@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, FileText, Heart, Lock, Pill, ShieldCheck, Stethoscope, User, UserCheck } from 'lucide-react';
 
-type SignupRole = 'patient' | 'doctor' | 'herbalist' | 'pharmacy';
+type SignupRole = 'patient' | 'doctor' | 'nurse' | 'pharmacy';
 
 function SignupApprovalForm() {
   const searchParams = useSearchParams();
@@ -21,7 +21,7 @@ function SignupApprovalForm() {
     specialization: '',
     licenseNumber: '',
     yearsOfExperience: '',
-    consultationFee: '0',
+    consultationFee: '',
     address: '',
     agreementTerms: false,
     agreementPrivacy: false,
@@ -40,13 +40,16 @@ function SignupApprovalForm() {
     const roleParam = searchParams.get('role');
     const phoneParam = searchParams.get('phone');
 
-    if (roleParam === 'patient' || roleParam === 'doctor' || roleParam === 'herbalist' || roleParam === 'pharmacy') {
+    if (roleParam === 'patient' || roleParam === 'doctor' || roleParam === 'nurse' || roleParam === 'pharmacy') {
       setRole(roleParam);
     }
     if (phoneParam) {
       setForm((current) => ({ ...current, phone: phoneParam }));
     }
   }, [searchParams]);
+
+  const nextParam = searchParams.get('next') || '';
+  const loginHref = nextParam.startsWith('/patient-portal') ? `/login?next=${encodeURIComponent(nextParam)}` : '/login';
 
   const update = (field: string, value: string) => setForm((current) => ({ ...current, [field]: value }));
 
@@ -92,7 +95,7 @@ function SignupApprovalForm() {
         specialization: '',
         licenseNumber: '',
         yearsOfExperience: '',
-        consultationFee: '0',
+        consultationFee: '',
         address: '',
         agreementTerms: false,
         agreementPrivacy: false,
@@ -108,33 +111,33 @@ function SignupApprovalForm() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8">
+    <div className="qw-soft-bg min-h-screen px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
+          <Link href="/" className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-700 text-white shadow-md">
             <Stethoscope className="h-6 w-6" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-950">{role === 'patient' ? 'Create Your Patient Account' : 'Sign Up for Approval'}</h1>
+          </Link>
+          <h1 className="font-display text-3xl font-semibold text-brand-950">{role === 'patient' ? 'Create Your Patient Account' : 'Sign Up for Approval'}</h1>
           <p className="mt-1 text-sm text-gray-600">
             {role === 'patient'
               ? 'Patient accounts are activated immediately — you can log in as soon as you sign up.'
-              : 'Doctors, herbalists, and pharmacies can request access here. Provider approval controls activation.'}
+              : 'Doctors set their own consultation fee and get paid when patients book. Your licence is reviewed before your profile goes live.'}
           </p>
         </div>
 
-        <form onSubmit={submit} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <form onSubmit={submit} className="rounded-3xl border border-brand-100 bg-white p-5 shadow-xl shadow-brand-900/5 sm:p-8">
           <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
               ['patient', 'Patient', Heart],
               ['doctor', 'Doctor', Stethoscope],
-              ['herbalist', 'Herbalist', Heart],
+              ['nurse', 'Nurse', UserCheck],
               ['pharmacy', 'Pharmacy', Pill],
             ].map(([value, label, Icon]) => (
               <button
                 key={value as string}
                 type="button"
                 onClick={() => setRole(value as SignupRole)}
-                className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-lg border p-3 text-sm font-semibold ${
+                className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border p-3 text-sm font-semibold transition ${
                   role === value ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -169,12 +172,14 @@ function SignupApprovalForm() {
               </>
             ) : (
               <>
-                <Field label="Department" value={form.department} onChange={(value) => update('department', value)} placeholder={role === 'herbalist' ? 'Traditional & herbal care' : role === 'pharmacy' ? 'Pharmacy' : 'Clinical'} />
+                <Field label="Department" value={form.department} onChange={(value) => update('department', value)} placeholder={role === 'nurse' ? 'Nursing' : role === 'pharmacy' ? 'Pharmacy' : 'Clinical'} />
                 <Field label="Specialization" value={form.specialization} onChange={(value) => update('specialization', value)} placeholder={role === 'pharmacy' ? 'Community pharmacy' : 'Specialization'} />
                 <Field label="License number" value={form.licenseNumber} onChange={(value) => update('licenseNumber', value)} />
                 <Field label="Years of experience" value={form.yearsOfExperience} onChange={(value) => update('yearsOfExperience', value)} type="number" />
-                {['doctor', 'herbalist'].includes(role) && (
-                  <Field label="Consultation fee (GHS)" value={form.consultationFee} onChange={(value) => update('consultationFee', value)} type="number" />
+                {role === 'doctor' && (
+                  <div className="md:col-span-2">
+                    <Field label="Your consultation fee (GHS) — patients pay this to book you" value={form.consultationFee} onChange={(value) => update('consultationFee', value)} type="number" placeholder="e.g. 150" />
+                  </div>
                 )}
               </>
             )}
@@ -211,7 +216,7 @@ function SignupApprovalForm() {
               <AgreementBlock
                 title="Healthcare consent"
                 items={[
-                  'You consent to care coordination, clinical documentation, appointment management, medication support, home-care requests, and follow-up communication through the platform.',
+                  'You consent to care coordination, clinical documentation, appointment management, medication support, and follow-up communication through the platform.',
                   'For urgent symptoms such as chest pain, severe bleeding, trouble breathing, stroke signs, seizures, or loss of consciousness, seek emergency care immediately.',
                   'Providers must use the platform according to professional standards, licensing requirements, and patient confidentiality obligations.',
                 ]}
@@ -259,10 +264,10 @@ function SignupApprovalForm() {
                 onChange={(event) => update('signedName', event.target.value)}
                 required
                 placeholder="Type your full legal name"
-                className="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
               />
               <p className="mt-1 text-xs text-gray-600">
-                By typing your name, you sign this agreement electronically for your {role} account request.
+                By typing your name, you sign this agreement electronically for your {role === 'pharmacy' ? 'pharmacy' : role} account request.
               </p>
             </label>
           </section>
@@ -276,7 +281,7 @@ function SignupApprovalForm() {
           )}
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Link href="/login" className="text-sm font-medium text-blue-700 hover:text-blue-900">Back to login</Link>
+            <Link href={loginHref} className="text-sm font-medium text-brand-700 hover:text-brand-900">{message ? 'Continue to log in →' : 'Back to login'}</Link>
             <button
               disabled={
                 loading ||
@@ -286,7 +291,7 @@ function SignupApprovalForm() {
                 !form.agreementTelemedicine ||
                 !form.signedName.trim()
               }
-              className="inline-flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-brand-600 px-7 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700 disabled:opacity-60"
             >
               {loading ? 'Submitting...' : role === 'patient' ? 'Create Account' : 'Submit for Approval'}
             </button>
@@ -372,7 +377,7 @@ function Field({
           onChange={(event) => onChange(event.target.value)}
           required={required}
           placeholder={placeholder || label}
-          className={`h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 ${Icon ? 'pl-9' : ''}`}
+          className={`h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200 ${Icon ? 'pl-9' : ''}`}
         />
       </div>
     </label>

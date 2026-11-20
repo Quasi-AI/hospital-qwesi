@@ -1,9 +1,188 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Qwesi design tokens
+   Brand: deep teal-green  |  Accent: warm amber  |  Neutrals: soft sage-grey
+   Every Tailwind "blue / sky / cyan / teal / emerald" utility already used
+   across the app is re-pointed to the brand scale, so the whole product
+   (dashboard, patient portal, forms) picks up the new look automatically.
+------------------------------------------------------------------- */
+@theme {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+
+  /* Brand scale */
+  --color-brand-50: #effaf6;
+  --color-brand-100: #d6f3e8;
+  --color-brand-200: #afe6d2;
+  --color-brand-300: #7bd3b8;
+  --color-brand-400: #45b99b;
+  --color-brand-500: #1f9f81;
+  --color-brand-600: #13826a;
+  --color-brand-700: #0f6857;
+  --color-brand-800: #0f5346;
+  --color-brand-900: #0e443a;
+  --color-brand-950: #05271f;
+
+  /* Warm accent (prices, highlights, secondary CTAs) */
+  --color-accent-50: #fff8eb;
+  --color-accent-100: #ffeccb;
+  --color-accent-200: #ffd88f;
+  --color-accent-300: #ffc258;
+  --color-accent-400: #fbab2f;
+  --color-accent-500: #f28f0f;
+  --color-accent-600: #d36d08;
+  --color-accent-700: #af500b;
+
+  --color-ink: #0b1f1a;
+  --color-sand: #faf7f1;
+
+  /* Re-point legacy palettes to the brand scale */
+  --color-blue-50: #effaf6;
+  --color-blue-100: #d6f3e8;
+  --color-blue-200: #afe6d2;
+  --color-blue-300: #7bd3b8;
+  --color-blue-400: #45b99b;
+  --color-blue-500: #1f9f81;
+  --color-blue-600: #13826a;
+  --color-blue-700: #0f6857;
+  --color-blue-800: #0f5346;
+  --color-blue-900: #0e443a;
+  --color-blue-950: #05271f;
+
+  --color-sky-50: #effaf6;
+  --color-sky-100: #d6f3e8;
+  --color-sky-200: #afe6d2;
+  --color-sky-300: #7bd3b8;
+  --color-sky-400: #45b99b;
+  --color-sky-500: #1f9f81;
+  --color-sky-600: #13826a;
+  --color-sky-700: #0f6857;
+  --color-sky-800: #0f5346;
+  --color-sky-900: #0e443a;
+
+  --color-cyan-50: #effaf6;
+  --color-cyan-100: #d6f3e8;
+  --color-cyan-200: #afe6d2;
+  --color-cyan-300: #7bd3b8;
+  --color-cyan-400: #45b99b;
+  --color-cyan-500: #1f9f81;
+  --color-cyan-600: #13826a;
+  --color-cyan-700: #0f6857;
+  --color-cyan-800: #0f5346;
+  --color-cyan-900: #0e443a;
+
+  --color-teal-50: #effaf6;
+  --color-teal-100: #d6f3e8;
+  --color-teal-200: #afe6d2;
+  --color-teal-300: #7bd3b8;
+  --color-teal-400: #45b99b;
+  --color-teal-500: #1f9f81;
+  --color-teal-600: #13826a;
+  --color-teal-700: #0f6857;
+  --color-teal-800: #0f5346;
+  --color-teal-900: #0e443a;
+  --color-teal-950: #05271f;
+
+  --color-emerald-50: #effaf6;
+  --color-emerald-100: #d6f3e8;
+  --color-emerald-200: #afe6d2;
+  --color-emerald-300: #7bd3b8;
+  --color-emerald-400: #45b99b;
+  --color-emerald-500: #1f9f81;
+  --color-emerald-600: #13826a;
+  --color-emerald-700: #0f6857;
+  --color-emerald-800: #0f5346;
+  --color-emerald-900: #0e443a;
+  --color-emerald-950: #05271f;
+
+  /* Indigo/violet/purple become a calm slate-violet so multi-colour icons stay distinct */
+  --color-indigo-50: #f3f2fd;
+  --color-indigo-100: #e6e4fa;
+  --color-indigo-500: #6a62d6;
+  --color-indigo-600: #574fc4;
+  --color-indigo-700: #4640a3;
+
+  /* Neutrals: soft sage-grey instead of cold grey */
+  --color-gray-50: #f6f8f7;
+  --color-gray-100: #edf1ef;
+  --color-gray-200: #dfe6e3;
+  --color-gray-300: #c8d2ce;
+  --color-gray-400: #98a6a1;
+  --color-gray-500: #697a74;
+  --color-gray-600: #4e5e58;
+  --color-gray-700: #3a4742;
+  --color-gray-800: #26302c;
+  --color-gray-900: #15201c;
+  --color-gray-950: #0b1310;
+
+  --color-slate-50: #f6f8f7;
+  --color-slate-100: #edf1ef;
+  --color-slate-200: #dfe6e3;
+  --color-slate-300: #c8d2ce;
+  --color-slate-400: #98a6a1;
+  --color-slate-500: #697a74;
+  --color-slate-600: #4e5e58;
+  --color-slate-700: #3a4742;
+  --color-slate-800: #26302c;
+  --color-slate-900: #15201c;
+  --color-slate-950: #0b1310;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background-color: #f7faf9; /* bg-gray-50 - direct value to avoid CSS variable issues */
-  color: #171717;
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f6f8f7;
+  color: #15201c;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+/* Never let wide tables / code break the mobile layout */
+img, video, svg { max-width: 100%; }
+table { max-width: 100%; }
+
+/* Marketplace helpers */
+.qw-card {
+  background: #fff;
+  border: 1px solid #e3ebe8;
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(11, 31, 26, 0.04), 0 8px 24px -12px rgba(11, 31, 26, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.qw-card:hover {
+  transform: translateY(-3px);
+  border-color: #afe6d2;
+  box-shadow: 0 2px 4px rgba(11, 31, 26, 0.05), 0 18px 40px -16px rgba(19, 130, 106, 0.35);
+}
+.qw-hero-bg {
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(69, 185, 155, 0.35), transparent 60%),
+    radial-gradient(700px 420px at -5% 20%, rgba(251, 171, 47, 0.18), transparent 60%),
+    linear-gradient(180deg, #05271f 0%, #0b3a2f 100%);
+}
+.qw-soft-bg {
+  background:
+    radial-gradient(800px 380px at 100% 0%, rgba(175, 230, 210, 0.45), transparent 60%),
+    radial-gradient(600px 320px at 0% 100%, rgba(255, 216, 143, 0.25), transparent 60%),
+    #faf7f1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .qw-card { transition: none; }
+  .qw-card:hover { transform: none; }
+  html { scroll-behavior: auto; }
 }
 
 /* Improve input field visibility */
@@ -48,43 +227,6 @@ a, [role="link"] {
   cursor: pointer !important;
 }
 
-/* Public homepage / landing accent color */
-.hospital-landing {
-  --color-teal-50: #eff6ff;
-  --color-teal-100: #dbeafe;
-  --color-teal-200: #bfdbfe;
-  --color-teal-300: #93c5fd;
-  --color-teal-400: #60a5fa;
-  --color-teal-500: #2563eb;
-  --color-teal-600: #1447e6;
-  --color-teal-700: #1447e6;
-  --color-teal-800: #1e40af;
-  --color-teal-900: #1e3a8a;
-  --color-teal-950: #172554;
-  --color-emerald-50: #eff6ff;
-  --color-emerald-100: #dbeafe;
-  --color-emerald-200: #bfdbfe;
-  --color-emerald-300: #93c5fd;
-  --color-emerald-400: #60a5fa;
-  --color-emerald-500: #2563eb;
-  --color-emerald-600: #1447e6;
-  --color-emerald-700: #1447e6;
-  --color-emerald-800: #1e40af;
-  --color-emerald-900: #1e3a8a;
-  --color-emerald-950: #172554;
-  --color-cyan-50: #eff6ff;
-  --color-cyan-100: #dbeafe;
-  --color-cyan-200: #bfdbfe;
-  --color-cyan-300: #93c5fd;
-  --color-cyan-400: #60a5fa;
-  --color-cyan-500: #2563eb;
-  --color-cyan-600: #1447e6;
-  --color-cyan-700: #1447e6;
-  --color-cyan-800: #1e40af;
-  --color-cyan-900: #1e3a8a;
-  --color-cyan-950: #172554;
-}
-
 /* Ensure clickable elements in navigation and interactive components */
 .nav-link, .btn, .button, .link, .clickable {
   cursor: pointer !important;
@@ -102,7 +244,7 @@ a, [role="link"] {
 }
 
 *:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #13826a;
   outline-offset: 2px;
 }
 
@@ -226,31 +368,3 @@ a, [role="link"] {
     page-break-after: avoid;
   }
 }
-
-
-/* Qwesi virtual-care visual system */
-:root {
-  --qwesi-emerald: #059669;
-  --qwesi-ink: #0f172a;
-  --qwesi-surface: #f7faf9;
-}
-html { scroll-behavior: smooth; }
-body { background: var(--qwesi-surface); color: var(--qwesi-ink); }
-::selection { background: #a7f3d0; color: #064e3b; }
-button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
-@media (max-width: 640px) {
-  input, select, textarea { max-width: 100%; }
-  table { display: block; max-width: 100%; overflow-x: auto; }
-}
-
-
-/* Consistent responsive surfaces across authenticated workspaces */
-@media (min-width: 768px) {
-  main { min-width: 0; }
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #10b981 !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, .12);
-}
-img { max-width: 100%; }

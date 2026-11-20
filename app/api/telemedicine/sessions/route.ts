@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     // Build query: admin and staff see all sessions; doctor sees only their own
     const query: any = {};
 
-    if (['doctor', 'herbalist'].includes(session.user.role || '')) {
+    if (session.user.role === 'doctor') {
       const doctorUser = await User.findOne({ email: session.user.email });
       if (doctorUser) {
         query.doctorId = doctorUser._id;
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Only allow doctorId filter for non-doctor users (admin/staff)
-    if (doctorId && !['doctor', 'herbalist'].includes(session.user.role || '')) {
+    if (doctorId && session.user.role !== 'doctor') {
       query.doctorId = doctorId;
     }
 

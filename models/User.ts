@@ -5,7 +5,7 @@ export interface IUser {
   email: string;
   name: string;
   password?: string;
-  role: 'doctor' | 'herbalist' | 'admin' | 'staff' | 'nurse' | 'patient' | 'pharmacy' | 'hospital';
+  role: 'doctor' | 'admin' | 'staff' | 'nurse' | 'patient' | 'pharmacy' | 'hospital';
   image?: string;
   emailVerified?: Date;
   hasImage?: boolean;
@@ -35,10 +35,10 @@ export interface IUser {
   qualifications?: string[];
   languages?: string[];
   yearsOfExperience?: number;
+  /** Per-consultation fee a patient pays to book this doctor (GHS) */
+  consultationFee?: number;
   rating?: number;
   ratingCount?: number;
-  consultationFee?: number;
-  consultationCurrency?: string;
   agreement?: {
     version?: string;
     termsAccepted?: boolean;
@@ -77,7 +77,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['doctor', 'herbalist', 'admin', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'],
+      enum: ['doctor', 'admin', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'],
       default: 'doctor',
     },
     image: {
@@ -159,13 +159,16 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Number,
       min: 0,
     },
+    consultationFee: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
     rating: {
       type: Number,
       min: 0,
       max: 5,
     },
-    consultationFee: { type: Number, min: 0, default: 0 },
-    consultationCurrency: { type: String, trim: true, default: 'GHS' },
     ratingCount: {
       type: Number,
       min: 0,

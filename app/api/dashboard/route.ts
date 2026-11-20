@@ -4,17 +4,12 @@ import { authOptions } from '../auth/[...nextauth]/route';
 import Patient from '../../../models/Patient';
 import Appointment from '../../../models/Appointment';
 import Report from '../../../models/Report';
-import Bed from '../../../models/Bed';
-import Admission from '../../../models/Admission';
 import Invoice from '../../../models/Invoice';
 import LabTest from '../../../models/LabTest';
-import BloodInventory from '../../../models/BloodInventory';
-import EmergencyCase from '../../../models/EmergencyCase';
 import Medicine from '../../../models/Medicine';
 import Dispensing from '../../../models/Dispensing';
 import TelemedicineSession from '../../../models/TelemedicineSession';
 import User from '../../../models/User';
-import Hospital from '../../../models/Hospital';
 import PatientFamilyMember from '../../../models/PatientFamilyMember';
 import PatientReferral from '../../../models/PatientReferral';
 import HomeCareTask from '../../../models/HomeCareTask';
@@ -46,7 +41,7 @@ export async function GET(request: NextRequest) {
     const requestedRole = request.nextUrl.searchParams.get('role');
     const sessionRole = session.user.role || 'doctor';
     const role =
-      sessionRole === 'admin' && ['hospital', 'pharmacy'].includes(requestedRole || '')
+      sessionRole === 'admin' && ['pharmacy'].includes(requestedRole || '')
         ? String(requestedRole)
         : sessionRole;
 
@@ -289,83 +284,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    if (role === 'hospital') {
-      const [
-        totalHospitals,
-        activeHospitals,
-        totalPatients,
-        activeAdmissions,
-        criticalPatients,
-        totalBeds,
-        availableBeds,
-        occupiedBeds,
-        activeEmergencies,
-        waitingEmergencies,
-        recentAdmissions,
-        recentEmergencies,
-      ] = await Promise.all([
-        Hospital.countDocuments(),
-        Hospital.countDocuments({ isActive: true }),
-        Patient.countDocuments(),
-        Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] } }),
-        Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] }, priority: 'critical' }),
-        Bed.countDocuments({ isActive: true }),
-        Bed.countDocuments({ status: 'available', isActive: true }),
-        Bed.countDocuments({ status: 'occupied', isActive: true }),
-        EmergencyCase.countDocuments({ status: { $in: ['waiting', 'in-triage', 'in-treatment', 'under-observation'] } }),
-        EmergencyCase.countDocuments({ status: 'waiting' }),
-        Admission.find().sort({ createdAt: -1 }).limit(6).select('_id admissionNumber patientName wardName status createdAt').lean(),
-        EmergencyCase.find().sort({ createdAt: -1 }).limit(6).select('_id caseNumber patientName triageLevel status createdAt').lean(),
-      ]);
-
-      const recentActivities: any[] = [];
-      recentAdmissions.forEach((admission: any) => recentActivities.push({
-        id: String(admission._id),
-        type: 'admission',
-        title: `Admission: ${admission.admissionNumber}`,
-        description: `${admission.patientName} - ${admission.wardName}`,
-        time: formatTimeAgo(admission.createdAt),
-        createdAt: admission.createdAt,
-        status: admission.status,
-      }));
-      recentEmergencies.forEach((emergency: any) => recentActivities.push({
-        id: String(emergency._id),
-        type: 'emergency',
-        title: `Emergency: ${emergency.caseNumber}`,
-        description: `${emergency.patientName} - ${emergency.triageLevel}`,
-        time: formatTimeAgo(emergency.createdAt),
-        createdAt: emergency.createdAt,
-        status: emergency.status,
-      }));
-      recentActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      return NextResponse.json({
-        dashboardRole: 'hospital',
-        stats: [
-          { name: 'connectedHospitals', value: String(activeHospitals), change: `${totalHospitals} total`, changeType: 'neutral' },
-          { name: 'totalPatients', value: String(totalPatients), change: '0%', changeType: 'neutral' },
-          { name: 'activeAdmissions', value: String(activeAdmissions), change: '0%', changeType: criticalPatients > 0 ? 'negative' : 'neutral' },
-          { name: 'availableBeds', value: String(availableBeds), change: `${occupiedBeds} occupied`, changeType: 'neutral' },
-        ],
-        operationalStats: {
-          beds: { total: totalBeds, available: availableBeds, occupied: occupiedBeds, occupancyRate: totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0 },
-          inpatient: { activeAdmissions, criticalPatients },
-          emergency: { active: activeEmergencies, critical: 0, waiting: waitingEmergencies },
-        },
-        criticalAlerts: criticalPatients > 0 ? [{
-          id: 'critical-patients',
-          type: 'warning',
-          titleKey: criticalPatients > 1 ? 'criticalInpatientPlural' : 'criticalInpatient',
-          descriptionKey: 'requiresMonitoring',
-          count: criticalPatients,
-          link: '/inpatient/admissions?priority=critical',
-          icon: 'inpatient',
-        }] : [],
-        recentActivities: recentActivities.slice(0, 10),
-        upcomingAppointments: [],
-      });
-    }
-
     if (role === 'doctor') {
       const doctorUser = await User.findOne({ email: session.user.email }).lean() as any;
       const doctorId = doctorUser?._id;
@@ -434,8 +352,6 @@ export async function GET(request: NextRequest) {
         urgentLabTests,
         activeTelemedicineSessions,
         waitingTelemedicineSessions,
-        totalHospitals,
-        activeHospitals,
         recentReports,
         recentTelemedicine,
       ] = await Promise.all([
@@ -467,8 +383,6 @@ export async function GET(request: NextRequest) {
         LabTest.countDocuments({ doctorId: { $in: doctorIdentity.map(String) }, status: { $in: ['pending', 'sample-collected', 'in-progress'] }, priority: { $in: ['urgent', 'stat'] } }),
         doctorId ? TelemedicineSession.countDocuments({ doctorId, status: 'in-progress' }) : 0,
         doctorId ? TelemedicineSession.countDocuments({ doctorId, status: 'waiting' }) : 0,
-        Hospital.countDocuments(),
-        Hospital.countDocuments({ isActive: true }),
         Report.find(doctorReportMatch).sort({ createdAt: -1 }).limit(5).select('_id patientName doctorName reportType status createdAt'),
         doctorId
           ? TelemedicineSession.find({ doctorId }).populate('patientId', 'name').sort({ createdAt: -1 }).limit(5).select('_id sessionNumber patientId status createdAt')
@@ -562,7 +476,6 @@ export async function GET(request: NextRequest) {
           },
         ],
         operationalStats: {
-          hospitals: { total: totalHospitals, active: activeHospitals },
           billing: { pendingInvoices, todayRevenue: todayRevenue[0]?.total || 0, monthlyRevenue: monthlyTotal },
           laboratory: { pending: pendingLabTests, urgent: urgentLabTests, criticalResults: 0 },
           telemedicine: { active: activeTelemedicineSessions, waiting: waitingTelemedicineSessions },
@@ -589,402 +502,87 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    if (role === 'staff' || role === 'nurse') {
-      const [
-        totalPatients,
-        appointmentsToday,
-        activeAdmissions,
-        criticalPatients,
-        pendingLabTests,
-        urgentLabTests,
-        activeEmergencies,
-        waitingEmergencies,
-        activeTelemedicineSessions,
-        waitingTelemedicineSessions,
-        totalHospitals,
-        activeHospitals,
-        todayRevenue,
-        monthlyRevenue,
-        previousMonthlyRevenue,
-        pendingInvoices,
-        recentAppointments,
-        recentAdmissions,
-      ] = await Promise.all([
-        Patient.countDocuments(),
-        Appointment.countDocuments({ appointmentDate: { $gte: startOfToday, $lt: endOfToday }, status: { $ne: 'cancelled' } }),
-        Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] } }),
-        Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] }, priority: 'critical' }),
-        LabTest.countDocuments({ status: { $in: ['pending', 'sample-collected', 'in-progress'] } }),
-        LabTest.countDocuments({ status: { $in: ['pending', 'sample-collected', 'in-progress'] }, priority: { $in: ['urgent', 'stat'] } }),
-        EmergencyCase.countDocuments({ status: { $in: ['waiting', 'in-triage', 'in-treatment', 'under-observation'] } }),
-        EmergencyCase.countDocuments({ status: 'waiting' }),
-        TelemedicineSession.countDocuments({ status: 'in-progress' }),
-        TelemedicineSession.countDocuments({ status: 'waiting' }),
-        Hospital.countDocuments(),
-        Hospital.countDocuments({ isActive: true }),
-        Invoice.aggregate([
-          { $match: { status: 'paid', updatedAt: { $gte: startOfToday, $lt: endOfToday } } },
-          { $group: { _id: null, total: { $sum: '$total' } } }
-        ]),
-        Invoice.aggregate([
-          { $match: { status: 'paid', updatedAt: { $gte: startOfMonth, $lt: endOfToday } } },
-          { $group: { _id: null, total: { $sum: '$total' } } }
-        ]),
-        Invoice.aggregate([
-          { $match: { status: 'paid', updatedAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } } },
-          { $group: { _id: null, total: { $sum: '$total' } } }
-        ]),
-        Invoice.countDocuments({ status: { $in: ['pending', 'partial'] } }),
-        Appointment.find().sort({ createdAt: -1 }).limit(6).select('_id patientName doctorName appointmentDate appointmentTime status createdAt'),
-        Admission.find().sort({ createdAt: -1 }).limit(4).select('_id admissionNumber patientName wardName status createdAt'),
-      ]);
-
-      const calculateChange = (current: number, previous: number) => {
-        if (previous === 0) return current > 0 ? '+100%' : '0%';
-        const change = ((current - previous) / previous) * 100;
-        const sign = change >= 0 ? '+' : '';
-        return `${sign}${Math.round(change)}%`;
-      };
-
-      const monthlyTotal = monthlyRevenue[0]?.total || 0;
-      const previousMonthlyTotal = previousMonthlyRevenue[0]?.total || 0;
-      const recentActivities: any[] = [];
-      recentAppointments.forEach((appointment: any) => {
-        recentActivities.push({
-          id: appointment._id.toString(),
-          type: 'appointment',
-          title: `Appointment: ${appointment.patientName}`,
-          description: `${appointment.doctorName} - ${appointment.appointmentTime}`,
-          time: formatTimeAgo(appointment.createdAt),
-          createdAt: appointment.createdAt,
-          status: appointment.status,
-        });
-      });
-      recentAdmissions.forEach((admission: any) => {
-        recentActivities.push({
-          id: admission._id.toString(),
-          type: 'admission',
-          title: `Admission: ${admission.admissionNumber}`,
-          description: `${admission.patientName} - ${admission.wardName}`,
-          time: formatTimeAgo(admission.createdAt),
-          createdAt: admission.createdAt,
-          status: admission.status,
-        });
-      });
-      recentActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      const upcomingAppointments = await Appointment.find({
-        appointmentDate: { $gte: startOfToday },
-        status: { $in: ['scheduled', 'confirmed'] }
-      })
-        .sort({ appointmentDate: 1, appointmentTime: 1 })
-        .limit(5)
-        .select('_id patientName appointmentTime appointmentType status appointmentDate');
-
-      return NextResponse.json({
-        dashboardRole: role === 'nurse' ? 'nurse' : 'staff',
-        stats: [
-          { name: 'totalPatients', value: totalPatients.toString(), change: '0%', changeType: 'neutral' },
-          { name: 'appointmentsToday', value: appointmentsToday.toString(), change: '0%', changeType: 'neutral' },
-          { name: 'pendingLabTests', value: pendingLabTests.toString(), change: '0%', changeType: pendingLabTests > 0 ? 'negative' : 'neutral' },
-          {
-            name: 'monthlyRevenue',
-            value: formatCurrencyAmount(monthlyTotal, systemCurrency),
-            change: calculateChange(monthlyTotal, previousMonthlyTotal),
-            changeType: monthlyTotal >= previousMonthlyTotal ? 'positive' : 'negative',
-          },
-        ],
-        operationalStats: {
-          hospitals: { total: totalHospitals, active: activeHospitals },
-          inpatient: { activeAdmissions, criticalPatients },
-          billing: { pendingInvoices, todayRevenue: todayRevenue[0]?.total || 0, monthlyRevenue: monthlyTotal },
-          laboratory: { pending: pendingLabTests, urgent: urgentLabTests, criticalResults: 0 },
-          emergency: { active: activeEmergencies, critical: 0, waiting: waitingEmergencies },
-          telemedicine: { active: activeTelemedicineSessions, waiting: waitingTelemedicineSessions },
-        },
-        criticalAlerts: [
-          ...(criticalPatients > 0 ? [{
-            id: 'critical-patients',
-            type: 'warning',
-            titleKey: criticalPatients > 1 ? 'criticalInpatientPlural' : 'criticalInpatient',
-            descriptionKey: 'requiresMonitoring',
-            count: criticalPatients,
-            link: '/inpatient/admissions?priority=critical',
-            icon: 'inpatient',
-          }] : []),
-          ...(urgentLabTests > 0 ? [{
-            id: 'urgent-lab',
-            type: 'info',
-            titleKey: urgentLabTests > 1 ? 'urgentLabTestPlural' : 'urgentLabTest',
-            descriptionKey: 'pendingProcessing',
-            count: urgentLabTests,
-            link: '/lab?priority=urgent',
-            icon: 'lab',
-          }] : []),
-        ],
-        recentActivities: recentActivities.slice(0, 10),
-        upcomingAppointments: upcomingAppointments.map((appointment: any) => ({
-          id: appointment._id.toString(),
-          patient: appointment.patientName || 'Unknown Patient',
-          time: appointment.appointmentTime || 'N/A',
-          type: appointment.appointmentType || 'consultation',
-          status: appointment.status === 'confirmed' ? 'confirmed' : 'pending',
-        })),
-      });
-    }
-
-    // Fetch all stats in parallel
+    // Admin / staff / nurse overview (virtual hospital: patients, doctors, bookings, revenue)
     const [
-      // Patient stats
       totalPatients,
-      patientsLastMonth,
-      
-      // Appointment stats
+      totalDoctors,
+      pendingApprovals,
       appointmentsToday,
       appointmentsLastMonth,
-      
-      // Report stats
-      totalReports,
-      reportsLastMonth,
-      
-      // Bed stats
-      totalBeds,
-      availableBeds,
-      occupiedBeds,
-      
-      // Inpatient stats
-      activeAdmissions,
-      criticalPatients,
-      
-      // Billing stats
+      upcomingBookings,
+      pendingLabTests,
+      activeTelemedicineSessions,
+      waitingTelemedicineSessions,
       todayRevenue,
       monthlyRevenue,
       previousMonthlyRevenue,
       pendingInvoices,
-      
-      // Lab stats
-      pendingLabTests,
-      urgentLabTests,
-      criticalLabResults,
-      
-      // Blood bank stats
-      bloodInventory,
-      lowBloodStock,
-      expiringBlood,
-      
-      // Emergency stats
-      activeEmergencies,
-      criticalEmergencies,
-      waitingEmergencies,
-      
-      // Pharmacy stats
       lowStockMedicines,
-      expiringMedicines,
-      
-      // Telemedicine stats
-      activeTelemedicineSessions,
-      waitingTelemedicineSessions,
-      
-      // Recent activities data
       recentAppointments,
       recentPatients,
-      recentReports,
-      recentEmergencies,
-      recentAdmissions,
     ] = await Promise.all([
-      // Patient counts
       Patient.countDocuments(),
-      Patient.countDocuments({ createdAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } }),
-      
-      // Appointment counts
+      User.countDocuments({ role: 'doctor', approvalStatus: 'approved' }),
+      User.countDocuments({ role: { $in: ['doctor', 'staff', 'nurse', 'pharmacy'] }, approvalStatus: { $in: ['pending_profile', 'pending_verification'] } }),
       Appointment.countDocuments({ appointmentDate: { $gte: startOfToday, $lt: endOfToday }, status: { $ne: 'cancelled' } }),
       Appointment.countDocuments({ appointmentDate: { $gte: startOfLastMonth, $lt: endOfLastMonth }, status: { $ne: 'cancelled' } }),
-      
-      // Report counts
-      Report.countDocuments(),
-      Report.countDocuments({ createdAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } }),
-      
-      // Bed counts
-      Bed.countDocuments({ isActive: true }),
-      Bed.countDocuments({ status: 'available', isActive: true }),
-      Bed.countDocuments({ status: 'occupied', isActive: true }),
-      
-      // Admission counts
-      Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] } }),
-      Admission.countDocuments({ status: { $in: ['admitted', 'in-treatment'] }, priority: 'critical' }),
-      
-      // Billing - Today's revenue
-      Invoice.aggregate([
-        { $match: { status: 'paid', updatedAt: { $gte: startOfToday, $lt: endOfToday } } },
-        { $group: { _id: null, total: { $sum: '$total' } } }
-      ]),
-      Invoice.aggregate([
-        { $match: { status: 'paid', updatedAt: { $gte: startOfMonth, $lt: endOfToday } } },
-        { $group: { _id: null, total: { $sum: '$total' } } }
-      ]),
-      Invoice.aggregate([
-        { $match: { status: 'paid', updatedAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } } },
-        { $group: { _id: null, total: { $sum: '$total' } } }
-      ]),
-      Invoice.countDocuments({ status: { $in: ['pending', 'partial'] } }),
-      
-      // Lab counts
+      Appointment.countDocuments({ appointmentDate: { $gte: startOfToday }, status: { $in: ['scheduled', 'confirmed'] } }),
       LabTest.countDocuments({ status: { $in: ['pending', 'sample-collected', 'in-progress'] } }),
-      LabTest.countDocuments({ status: { $in: ['pending', 'sample-collected', 'in-progress'] }, priority: { $in: ['urgent', 'stat'] } }),
-      LabTest.countDocuments({ isCritical: true, criticalNotified: false }),
-      
-      // Blood bank
-      BloodInventory.aggregate([
-        { $match: { status: 'available' } },
-        { $group: { _id: '$bloodGroup', count: { $sum: 1 } } }
-      ]),
-      BloodInventory.countDocuments({ status: 'available' }).then(count => count < 10),
-      BloodInventory.countDocuments({ status: 'available', expiryDate: { $lte: thirtyDaysFromNow } }),
-      
-      // Emergency
-      EmergencyCase.countDocuments({ status: { $in: ['waiting', 'in-triage', 'in-treatment', 'under-observation'] } }),
-      EmergencyCase.countDocuments({ status: { $in: ['waiting', 'in-triage', 'in-treatment'] }, triageLevel: 'critical' }),
-      EmergencyCase.countDocuments({ status: 'waiting' }),
-      
-      // Pharmacy
-      Medicine.countDocuments({ $expr: { $lte: ['$currentStock', '$reorderLevel'] }, isActive: true }),
-      Medicine.countDocuments({ expiryDate: { $lte: thirtyDaysFromNow }, isActive: true }),
-      
-      // Telemedicine
       TelemedicineSession.countDocuments({ status: 'in-progress' }),
       TelemedicineSession.countDocuments({ status: 'waiting' }),
-      
-      // Recent activities
-      Appointment.find().sort({ createdAt: -1 }).limit(10).select('_id patientName doctorName appointmentDate appointmentTime status createdAt'),
-      Patient.find().sort({ createdAt: -1 }).limit(10).select('name createdAt'),
-      Report.find().sort({ createdAt: -1 }).limit(10).select('_id patientName doctorName reportType status createdAt'),
-      EmergencyCase.find().sort({ createdAt: -1 }).limit(5).select('_id caseNumber patientName triageLevel status createdAt'),
-      Admission.find().sort({ createdAt: -1 }).limit(5).select('_id admissionNumber patientName wardName status createdAt'),
+      Invoice.aggregate([{ $match: { status: 'paid', updatedAt: { $gte: startOfToday, $lt: endOfToday } } }, { $group: { _id: null, total: { $sum: '$total' } } }]),
+      Invoice.aggregate([{ $match: { status: 'paid', updatedAt: { $gte: startOfMonth, $lt: endOfToday } } }, { $group: { _id: null, total: { $sum: '$total' } } }]),
+      Invoice.aggregate([{ $match: { status: 'paid', updatedAt: { $gte: startOfLastMonth, $lt: endOfLastMonth } } }, { $group: { _id: null, total: { $sum: '$total' } } }]),
+      Invoice.countDocuments({ status: { $in: ['pending', 'partial'] } }),
+      Medicine.countDocuments({ $expr: { $lte: ['$currentStock', '$reorderLevel'] }, isActive: true }),
+      Appointment.find().sort({ createdAt: -1 }).limit(6).select('_id patientName doctorName appointmentTime status createdAt').lean(),
+      Patient.find().sort({ createdAt: -1 }).limit(4).select('_id name patientId createdAt').lean(),
     ]);
 
-    // Calculate percentage changes
     const calculateChange = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? '+100%' : '0%';
       const change = ((current - previous) / previous) * 100;
-      const sign = change >= 0 ? '+' : '';
-      return `${sign}${Math.round(change)}%`;
+      return `${change >= 0 ? '+' : ''}${Math.round(change)}%`;
     };
+    const monthlyTotal = monthlyRevenue[0]?.total || 0;
+    const previousMonthlyTotal = previousMonthlyRevenue[0]?.total || 0;
 
-    // Primary stats (main stat cards)
-    const stats = [
-      {
-        name: 'totalPatients',
-        value: totalPatients.toString(),
-        change: calculateChange(totalPatients, patientsLastMonth),
-        changeType: totalPatients >= patientsLastMonth ? 'positive' : 'negative'
-      },
-      {
-        name: 'appointmentsToday',
-        value: appointmentsToday.toString(),
-        change: calculateChange(appointmentsToday, appointmentsLastMonth),
-        changeType: appointmentsToday >= appointmentsLastMonth ? 'positive' : 'negative'
-      },
-      {
-        name: 'reportsGenerated',
-        value: totalReports.toString(),
-        change: calculateChange(totalReports, reportsLastMonth),
-        changeType: totalReports >= reportsLastMonth ? 'positive' : 'negative'
-      },
-      {
-        name: 'todayRevenue',
-        value: formatCurrencyAmount(todayRevenue[0]?.total || 0, systemCurrency),
-        change: '+0%',
-        changeType: 'neutral'
-      },
-      {
-        name: 'monthlyRevenue',
-        value: formatCurrencyAmount(monthlyRevenue[0]?.total || 0, systemCurrency),
-        change: calculateChange(monthlyRevenue[0]?.total || 0, previousMonthlyRevenue[0]?.total || 0),
-        changeType: (monthlyRevenue[0]?.total || 0) >= (previousMonthlyRevenue[0]?.total || 0) ? 'positive' : 'negative'
-      }
-    ];
-
-    // Secondary stats (operational metrics)
-    const operationalStats = {
-      beds: {
-        total: totalBeds,
-        available: availableBeds,
-        occupied: occupiedBeds,
-        occupancyRate: totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0
-      },
-      inpatient: {
-        activeAdmissions,
-        criticalPatients
-      },
-      billing: {
-        pendingInvoices,
-        todayRevenue: todayRevenue[0]?.total || 0,
-        monthlyRevenue: monthlyRevenue[0]?.total || 0
-      },
-      laboratory: {
-        pending: pendingLabTests,
-        urgent: urgentLabTests,
-        criticalResults: criticalLabResults
-      },
-      bloodBank: {
-        inventory: bloodInventory,
-        isLowStock: lowBloodStock,
-        expiringSoon: expiringBlood
-      },
-      emergency: {
-        active: activeEmergencies,
-        critical: criticalEmergencies,
-        waiting: waitingEmergencies
-      },
-      pharmacy: {
-        lowStock: lowStockMedicines,
-        expiringSoon: expiringMedicines
-      },
-      telemedicine: {
-        active: activeTelemedicineSessions,
-        waiting: waitingTelemedicineSessions
-      }
-    };
-
-    // Build critical alerts with translation keys
-    const criticalAlerts = [];
-    
-    if (criticalEmergencies > 0) {
-      criticalAlerts.push({
-        id: 'critical-emergency',
-        type: 'critical',
-        titleKey: criticalEmergencies > 1 ? 'criticalEmergencyPlural' : 'criticalEmergency',
-        descriptionKey: 'requiresImmediateAttention',
-        count: criticalEmergencies,
-        link: '/emergency?triageLevel=critical',
-        icon: 'emergency'
+    const recentActivities: any[] = [];
+    recentAppointments.forEach((appointment: any) => {
+      recentActivities.push({
+        id: String(appointment._id),
+        type: 'appointment',
+        title: `Booking: ${appointment.patientName || 'Patient'}`,
+        description: `${appointment.doctorName ? `Dr. ${appointment.doctorName}` : 'Doctor'} - ${appointment.appointmentTime || 'Scheduled'} - ${appointment.status}`,
+        time: formatTimeAgo(appointment.createdAt),
+        createdAt: appointment.createdAt,
+        status: appointment.status,
       });
-    }
-    
-    if (criticalLabResults > 0) {
-      criticalAlerts.push({
-        id: 'critical-lab',
-        type: 'critical',
-        titleKey: criticalLabResults > 1 ? 'criticalLabResultPlural' : 'criticalLabResult',
-        descriptionKey: 'pendingNotification',
-        count: criticalLabResults,
-        link: '/lab?isCritical=true',
-        icon: 'lab'
+    });
+    recentPatients.forEach((patient: any) => {
+      recentActivities.push({
+        id: String(patient._id),
+        type: 'patient',
+        title: 'New patient joined',
+        description: `${patient.name} (${patient.patientId || 'ID pending'})`,
+        time: formatTimeAgo(patient.createdAt),
+        createdAt: patient.createdAt,
       });
-    }
-    
-    if (criticalPatients > 0) {
+    });
+    recentActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const criticalAlerts: any[] = [];
+    if (pendingApprovals > 0) {
       criticalAlerts.push({
-        id: 'critical-patients',
+        id: 'pending-approvals',
         type: 'warning',
-        titleKey: criticalPatients > 1 ? 'criticalInpatientPlural' : 'criticalInpatient',
-        descriptionKey: 'requiresMonitoring',
-        count: criticalPatients,
-        link: '/inpatient/admissions?priority=critical',
-        icon: 'inpatient'
+        titleKey: pendingApprovals > 1 ? 'pendingApprovalPlural' : 'pendingApproval',
+        descriptionKey: 'requiresReview',
+        count: pendingApprovals,
+        link: '/doctors',
+        icon: 'doctor',
       });
     }
-    
     if (lowStockMedicines > 0) {
       criticalAlerts.push({
         id: 'low-stock-medicine',
@@ -993,154 +591,43 @@ export async function GET(request: NextRequest) {
         descriptionKey: 'reorderRequired',
         count: lowStockMedicines,
         link: '/pharmacy?filter=low-stock',
-        icon: 'pharmacy'
-      });
-    }
-    
-    if (expiringMedicines > 0) {
-      criticalAlerts.push({
-        id: 'expiring-medicine',
-        type: 'warning',
-        titleKey: expiringMedicines > 1 ? 'expiringMedicinePlural' : 'expiringMedicine',
-        descriptionKey: 'withinThirtyDays',
-        count: expiringMedicines,
-        link: '/pharmacy?filter=expiring',
-        icon: 'pharmacy'
-      });
-    }
-    
-    if (expiringBlood > 0) {
-      criticalAlerts.push({
-        id: 'expiring-blood',
-        type: 'warning',
-        titleKey: expiringBlood > 1 ? 'expiringBloodPlural' : 'expiringBlood',
-        descriptionKey: 'withinThirtyDays',
-        count: expiringBlood,
-        link: '/blood-bank/inventory?filter=expiring',
-        icon: 'blood'
-      });
-    }
-    
-    if (urgentLabTests > 0) {
-      criticalAlerts.push({
-        id: 'urgent-lab',
-        type: 'info',
-        titleKey: urgentLabTests > 1 ? 'urgentLabTestPlural' : 'urgentLabTest',
-        descriptionKey: 'pendingProcessing',
-        count: urgentLabTests,
-        link: '/lab?priority=urgent',
-        icon: 'lab'
-      });
-    }
-    
-    if (waitingEmergencies > 0) {
-      criticalAlerts.push({
-        id: 'waiting-emergency',
-        type: 'info',
-        titleKey: waitingEmergencies > 1 ? 'waitingInERPlural' : 'waitingInER',
-        descriptionKey: 'inTriageQueue',
-        count: waitingEmergencies,
-        link: '/emergency?status=waiting',
-        icon: 'emergency'
+        icon: 'pharmacy',
       });
     }
 
-    // Build recent activities
-    const recentActivities: any[] = [];
-
-    recentAppointments.forEach(appointment => {
-      recentActivities.push({
-        id: appointment._id.toString(),
-        type: 'appointment',
-        title: `Appointment: ${appointment.patientName}`,
-        description: `${appointment.doctorName} - ${appointment.appointmentTime}`,
-        time: formatTimeAgo(appointment.createdAt),
-        createdAt: appointment.createdAt,
-        status: appointment.status
-      });
-    });
-
-    recentPatients.forEach(patient => {
-      recentActivities.push({
-        id: `patient-${patient._id}`,
-        type: 'patient',
-        title: 'New patient registered',
-        description: patient.name,
-        time: formatTimeAgo(patient.createdAt),
-        createdAt: patient.createdAt,
-        status: 'completed'
-      });
-    });
-
-    recentReports.forEach(report => {
-      recentActivities.push({
-        id: report._id.toString(),
-        type: 'report',
-        title: 'Report generated',
-        description: `${report.patientName} - ${report.reportType}`,
-        time: formatTimeAgo(report.createdAt),
-        createdAt: report.createdAt,
-        status: report.status
-      });
-    });
-
-    recentEmergencies.forEach(emergency => {
-      recentActivities.push({
-        id: emergency._id.toString(),
-        type: 'emergency',
-        title: `Emergency: ${emergency.caseNumber}`,
-        description: `${emergency.patientName} - ${emergency.triageLevel}`,
-        time: formatTimeAgo(emergency.createdAt),
-        createdAt: emergency.createdAt,
-        status: emergency.status
-      });
-    });
-
-    recentAdmissions.forEach(admission => {
-      recentActivities.push({
-        id: admission._id.toString(),
-        type: 'admission',
-        title: `Admission: ${admission.admissionNumber}`,
-        description: `${admission.patientName} - ${admission.wardName}`,
-        time: formatTimeAgo(admission.createdAt),
-        createdAt: admission.createdAt,
-        status: admission.status
-      });
-    });
-
-    // Sort and limit activities
-    recentActivities.sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
-      return dateB - dateA;
-    });
-
-    // Get upcoming appointments
     const upcomingAppointments = await Appointment.find({
       appointmentDate: { $gte: startOfToday },
-      status: { $in: ['scheduled', 'confirmed'] }
+      status: { $in: ['scheduled', 'confirmed'] },
     })
-    .sort({ appointmentDate: 1, appointmentTime: 1 })
-    .limit(5)
-    .select('_id patientName appointmentTime appointmentType status appointmentDate');
-
-    const formattedUpcomingAppointments = upcomingAppointments.map(appointment => ({
-      id: appointment._id.toString(),
-      patient: appointment.patientName || 'Unknown Patient',
-      time: appointment.appointmentTime || 'N/A',
-      type: appointment.appointmentType || 'consultation',
-      status: appointment.status === 'confirmed' ? 'confirmed' : 'pending'
-    }));
+      .sort({ appointmentDate: 1, appointmentTime: 1 })
+      .limit(5)
+      .select('_id patientName appointmentTime appointmentType status appointmentDate');
 
     return NextResponse.json({
-      dashboardRole: 'admin',
-      stats,
-      operationalStats,
-      criticalAlerts: criticalAlerts.slice(0, 6),
+      dashboardRole: role === 'admin' ? 'admin' : role,
+      stats: [
+        { name: 'totalPatients', value: String(totalPatients), change: '0%', changeType: 'neutral' },
+        { name: 'totalDoctors', value: String(totalDoctors), change: `${pendingApprovals} pending`, changeType: pendingApprovals > 0 ? 'negative' : 'neutral' },
+        { name: 'appointmentsToday', value: String(appointmentsToday), change: calculateChange(appointmentsToday, appointmentsLastMonth), changeType: appointmentsToday >= appointmentsLastMonth ? 'positive' : 'negative' },
+        { name: 'upcomingAppointments', value: String(upcomingBookings), change: '0%', changeType: 'neutral' },
+        { name: 'monthlyRevenue', value: formatCurrencyAmount(monthlyTotal, systemCurrency), change: calculateChange(monthlyTotal, previousMonthlyTotal), changeType: monthlyTotal >= previousMonthlyTotal ? 'positive' : 'negative' },
+      ],
+      operationalStats: {
+        billing: { pendingInvoices, todayRevenue: todayRevenue[0]?.total || 0, monthlyRevenue: monthlyTotal },
+        laboratory: { pending: pendingLabTests, urgent: 0, criticalResults: 0 },
+        telemedicine: { active: activeTelemedicineSessions, waiting: waitingTelemedicineSessions },
+        pharmacy: { lowStock: lowStockMedicines },
+      },
+      criticalAlerts,
       recentActivities: recentActivities.slice(0, 10),
-      upcomingAppointments: formattedUpcomingAppointments
+      upcomingAppointments: upcomingAppointments.map((appointment: any) => ({
+        id: appointment._id.toString(),
+        patient: appointment.patientName || 'Unknown Patient',
+        time: appointment.appointmentTime || 'N/A',
+        type: appointment.appointmentType || 'consultation',
+        status: appointment.status === 'confirmed' ? 'confirmed' : 'pending',
+      })),
     });
-
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
     return NextResponse.json(

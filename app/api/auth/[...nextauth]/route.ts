@@ -49,7 +49,7 @@ export const authOptions: AuthOptions = {
               const isValidPassword = await bcrypt.compare(credentials.password, user.password);
               if (isValidPassword) {
                 const role = (user.role || 'doctor').toString().toLowerCase();
-                const safeRole = ['admin', 'doctor', 'herbalist', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'].includes(role)
+                const safeRole = ['admin', 'doctor', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'].includes(role)
                   ? role
                   : 'doctor';
                 const approvalStatus = getEffectiveProviderApprovalStatus(user);

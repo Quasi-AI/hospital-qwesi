@@ -11,7 +11,7 @@ type ProviderLike = {
 };
 
 export function getEffectiveProviderApprovalStatus(user: ProviderLike): string {
-  if (!['doctor', 'herbalist', 'staff', 'nurse', 'pharmacy'].includes(user.role || '')) {
+  if (!['doctor', 'staff', 'nurse', 'pharmacy'].includes(user.role || '')) {
     return user.approvalStatus || 'approved';
   }
 

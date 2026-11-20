@@ -1,4 +1,4 @@
-type ProviderRole = 'doctor' | 'herbalist' | 'staff' | 'nurse' | 'pharmacy';
+type ProviderRole = 'doctor' | 'staff' | 'nurse' | 'pharmacy';
 
 export interface LicenseVerificationInput {
   name: string;

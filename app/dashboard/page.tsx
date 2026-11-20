@@ -1,5 +1,5 @@
 import ProtectedRoute from '../protected-route';
-import { AdminAttachedDashboard } from '../components/qwesi-network-dashboards';
+import { AdminAttachedDashboard } from '../components/dashboards';
 
 export default function DashboardPage() {
   return (

@@ -39,11 +39,12 @@ export default function ProfilePage() {
     email: '',
     image: '',
     licenseNumber: '',
-    consultationFee: '0',
     licenseCertificate: '',
     licenseCertificateFileName: '',
     licenseCertificateFileType: '',
     languages: [] as string[],
+    consultationFee: '',
+    bio: '',
     approvalStatus: 'approved',
     licenseVerificationMessage: '',
     currentPassword: '',
@@ -83,11 +84,12 @@ export default function ProfilePage() {
             email: data.user.email || prev.email,
             image: data.user.image || '',
             licenseNumber: data.user.licenseNumber || '',
-            consultationFee: String(data.user.consultationFee ?? 0),
             licenseCertificate: data.user.licenseCertificate?.data || '',
             licenseCertificateFileName: data.user.licenseCertificate?.fileName || '',
             licenseCertificateFileType: data.user.licenseCertificate?.fileType || '',
             languages: data.user.languages || [],
+            consultationFee: data.user.consultationFee != null ? String(data.user.consultationFee) : '',
+            bio: data.user.bio || '',
             approvalStatus: data.user.approvalStatus || 'approved',
             licenseVerificationMessage: data.user.licenseVerification?.message || '',
           }));
@@ -173,7 +175,8 @@ export default function ProfilePage() {
           licenseCertificateFileName: formData.licenseCertificateFileName,
           licenseCertificateFileType: formData.licenseCertificateFileType,
           languages: formData.languages,
-          consultationFee: Number(formData.consultationFee) || 0,
+          consultationFee: formData.consultationFee === '' ? 0 : Number(formData.consultationFee),
+          bio: formData.bio,
         }),
       });
 
@@ -199,7 +202,6 @@ export default function ProfilePage() {
             hasLicenseCertificate: Boolean(formData.licenseCertificate),
             hasLicenseNumber: Boolean(formData.licenseNumber.trim()),
             languages: formData.languages,
-            consultationFee: Number(formData.consultationFee) || 0,
             approvalStatus: updatedApprovalStatus,
           }
         });
@@ -262,16 +264,14 @@ export default function ProfilePage() {
     }
   };
 
-  const isProvider = ['doctor', 'herbalist', 'staff', 'nurse', 'pharmacy'].includes(session?.user?.role || '');
-  const providerLabel = session?.user?.role === 'pharmacy' ? 'Pharmacist' : session?.user?.role === 'herbalist' ? 'Herbalist' : session?.user?.role === 'nurse' ? 'Nurse' : 'Provider';
+  const isProvider = ['doctor', 'staff', 'nurse', 'pharmacy'].includes(session?.user?.role || '');
+  const providerLabel = session?.user?.role === 'pharmacy' ? 'Pharmacist' : session?.user?.role === 'nurse' ? 'Nurse' : 'Provider';
   const profileHome =
     session?.user?.role === 'pharmacy'
       ? '/pharmacy'
-      : session?.user?.role === 'hospital'
-        ? '/hospital-portal'
-        : session?.user?.role === 'patient'
-          ? '/patient-portal'
-          : '/dashboard';
+      : session?.user?.role === 'patient'
+        ? '/patient-portal'
+        : '/dashboard';
   const returnTo =
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('returnTo') || profileHome
@@ -366,14 +366,6 @@ export default function ProfilePage() {
                         <p className="mt-1 text-xs text-gray-500">JPG, PNG, or WEBP. Max 1 MB.</p>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {['doctor', 'herbalist'].includes(session?.user?.role || '') && (
-                  <div>
-                    <label htmlFor="consultationFee" className="mb-1 block text-sm font-medium text-gray-700">Consultation fee (GHS)</label>
-                    <input id="consultationFee" name="consultationFee" type="number" min="0" step="0.01" value={formData.consultationFee} onChange={handleInputChange} className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500" />
-                    <p className="mt-1 text-xs text-gray-500">Set the amount patients pay for a consultation. You can update it at any time.</p>
                   </div>
                 )}
 
@@ -496,6 +488,41 @@ export default function ProfilePage() {
                         <p className="text-xs text-gray-500">Add languages patients can use when choosing a provider.</p>
                       )}
                     </div>
+
+                    {session?.user?.role === 'doctor' && (
+                      <div className="grid gap-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                        <div>
+                          <label htmlFor="consultationFee" className="mb-1 block text-sm font-semibold text-gray-900">
+                            Your consultation fee (GHS)
+                          </label>
+                          <input
+                            id="consultationFee"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={formData.consultationFee}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, consultationFee: event.target.value }))}
+                            placeholder="e.g. 150"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          />
+                          <p className="mt-1 text-xs text-gray-600">Patients see this price on your profile and pay it to book you.</p>
+                        </div>
+                        <div>
+                          <label htmlFor="bio" className="mb-1 block text-sm font-semibold text-gray-900">
+                            About you
+                          </label>
+                          <textarea
+                            id="bio"
+                            rows={3}
+                            maxLength={1500}
+                            value={formData.bio}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))}
+                            placeholder="Briefly tell patients about your experience and what you treat."
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
