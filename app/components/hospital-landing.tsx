@@ -320,7 +320,7 @@ export function HospitalLanding({
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-            <Link href="/signup?role=doctor" className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-400 px-6 py-3.5 font-semibold text-brand-950 hover:bg-accent-300">
+            <Link href="/signup/doctor" className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-400 px-6 py-3.5 font-semibold text-brand-950 hover:bg-accent-300">
               Join as a doctor <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/login" className="inline-flex items-center justify-center rounded-full border border-white/30 px-6 py-3.5 font-semibold text-white hover:bg-white/10">
@@ -365,7 +365,7 @@ export function HospitalLanding({
                   ))}
                 </ul>
                 <Link
-                  href="/signup?role=patient"
+                  href="/signup/patient"
                   className={`mt-7 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition ${
                     i === 1 ? 'bg-brand-600 text-white hover:bg-brand-700' : 'border border-brand-200 text-brand-800 hover:bg-brand-50'
                   }`}
@@ -459,7 +459,7 @@ export function HospitalLanding({
               <Link href="/find-doctors" className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-400 px-6 py-3.5 font-semibold text-brand-950 hover:bg-accent-300">
                 Find a doctor <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/signup?role=patient" className="inline-flex items-center justify-center rounded-full border border-white/30 px-6 py-3.5 font-semibold hover:bg-white/10">
+              <Link href="/signup/patient" className="inline-flex items-center justify-center rounded-full border border-white/30 px-6 py-3.5 font-semibold hover:bg-white/10">
                 Create free account
               </Link>
             </div>

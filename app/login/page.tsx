@@ -266,7 +266,7 @@ export default function LoginPage() {
 
               <div className="mt-6 space-y-3">
                 <Link
-                  href="/signup?role=patient"
+                  href="/signup/patient"
                   className="flex items-center justify-between rounded-2xl border border-brand-200 bg-brand-50 p-4 transition hover:border-brand-400"
                 >
                   <span>
@@ -276,7 +276,7 @@ export default function LoginPage() {
                   <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">Sign up</span>
                 </Link>
                 <Link
-                  href="/signup"
+                  href="/signup/doctor"
                   className="flex items-center justify-between rounded-2xl border border-accent-200 bg-accent-50 p-4 transition hover:border-accent-400"
                 >
                   <span>
