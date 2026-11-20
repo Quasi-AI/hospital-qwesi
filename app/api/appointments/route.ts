@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     let query: Record<string, unknown> = {};
 
     if (session?.user) {
-      if (session.user.role === 'doctor') {
+      if (['doctor', 'herbalist'].includes(session.user.role || '')) {
         const or: Record<string, unknown>[] = [
           { doctorEmail: session.user.email },
           { doctorName: session.user.name },
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
             .lean()
         : Promise.resolve([]),
       docEmails.size
-        ? User.find({ role: 'doctor', email: { $in: [...docEmails] } })
+        ? User.find({ role: { $in: ['doctor', 'herbalist'] }, email: { $in: [...docEmails] } })
             .select('email specialization')
             .lean()
         : Promise.resolve([]),
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       const User = (await import('@/models/User')).default;
       const doctor = await User.findOne({ 
         name: body.doctorName,
-        role: 'doctor'
+        role: { $in: ['doctor', 'herbalist'] }
       });
       if (doctor) {
         body.doctorEmail = doctor.email;
@@ -264,10 +264,10 @@ export async function POST(request: NextRequest) {
       }
       if (!doctor && body.doctorEmail) {
         const docEmail = String(body.doctorEmail).trim().toLowerCase();
-        doctor = await User.findOne({ email: docEmail, role: 'doctor' });
+        doctor = await User.findOne({ email: docEmail, role: { $in: ['doctor', 'herbalist'] } });
       }
       if (!doctor && body.doctorName) {
-        doctor = await User.findOne({ name: body.doctorName.trim(), role: 'doctor' });
+        doctor = await User.findOne({ name: body.doctorName.trim(), role: { $in: ['doctor', 'herbalist'] } });
       }
 
       if (!patient || !doctor) {
@@ -314,7 +314,7 @@ export async function POST(request: NextRequest) {
             scheduledEndTime,
             status: 'scheduled',
             chiefComplaint: body.reason,
-            consultationFee: 0,
+            consultationFee: Number(doctor.consultationFee || 0),
             currency: systemCurrency,
             paymentStatus: 'pending',
             recordingEnabled: false,

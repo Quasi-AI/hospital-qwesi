@@ -17,13 +17,13 @@ export async function GET(request: NextRequest) {
     if (id) {
       const doctor = await User.findOne({
         _id: id,
-        role: 'doctor',
+        role: { $in: ['doctor', 'herbalist'] },
         approvalStatus: 'approved',
         hasImage: true,
         licenseNumber: { $exists: true, $ne: '' },
         'licenseCertificate.data': { $exists: true, $ne: '' },
       })
-        .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience rating ratingCount bio phone address gender')
+        .select('name email image specialization department role consultationFee consultationCurrency licenseNumber qualifications languages yearsOfExperience rating ratingCount bio phone address gender')
         .lean();
 
       if (!doctor) {
@@ -34,13 +34,13 @@ export async function GET(request: NextRequest) {
     }
 
     const doctors = await User.find({
-      role: 'doctor',
+      role: { $in: ['doctor', 'herbalist'] },
       approvalStatus: 'approved',
       hasImage: true,
       licenseNumber: { $exists: true, $ne: '' },
       'licenseCertificate.data': { $exists: true, $ne: '' },
     })
-      .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience rating ratingCount bio phone')
+      .select('name email image specialization department role consultationFee consultationCurrency licenseNumber qualifications languages yearsOfExperience rating ratingCount bio phone')
       .sort({ name: 1 })
       .lean();
 

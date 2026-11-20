@@ -120,9 +120,9 @@ export async function POST(request: NextRequest) {
     }
 
     const doctor = await User.findById(doctorId)
-      .select('name email role approvalStatus hasImage licenseNumber licenseCertificate')
+      .select('name email role approvalStatus hasImage licenseNumber licenseCertificate consultationFee consultationCurrency')
       .lean();
-    if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
+    if (!doctor || !['doctor', 'herbalist'].includes((doctor as { role?: string }).role || '')) {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
     if (
@@ -193,6 +193,9 @@ export async function POST(request: NextRequest) {
       appointmentType: 'consultation' as const,
       status: 'scheduled' as const,
       location: '',
+      consultationFee: Number((doctor as any).consultationFee || 0),
+      currency: (doctor as any).consultationCurrency || 'GHS',
+      paymentStatus: 'pending',
       reason: reason || undefined,
       notes,
     };
@@ -213,7 +216,7 @@ export async function POST(request: NextRequest) {
         console.error('scheduleAppointmentReminder (public)', e);
       }
       return NextResponse.json(
-        { ok: true, id: idStr, portalAccountCreated },
+        { ok: true, id: idStr, portalAccountCreated, consultationFee: Number((doctor as any).consultationFee || 0), currency: (doctor as any).consultationCurrency || 'GHS', paymentStatus: 'pending' },
         { status: 201 }
       );
     }
@@ -227,7 +230,7 @@ export async function POST(request: NextRequest) {
       console.error('scheduleAppointmentReminder (public)', e);
     }
     return NextResponse.json(
-      { ok: true, id: idStr, portalAccountCreated },
+      { ok: true, id: idStr, portalAccountCreated, consultationFee: Number((doctor as any).consultationFee || 0), currency: (doctor as any).consultationCurrency || 'GHS', paymentStatus: 'pending' },
       { status: 201 }
     );
   } catch (error) {

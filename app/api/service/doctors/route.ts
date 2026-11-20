@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     const specialization = request.nextUrl.searchParams.get('specialization');
 
     const query: Record<string, unknown> = {
-      role: 'doctor',
+      role: { $in: ['doctor', 'herbalist'] },
       approvalStatus: 'approved',
     };
     if (specialization) {

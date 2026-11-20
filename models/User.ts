@@ -5,7 +5,7 @@ export interface IUser {
   email: string;
   name: string;
   password?: string;
-  role: 'doctor' | 'admin' | 'staff' | 'nurse' | 'patient' | 'pharmacy' | 'hospital';
+  role: 'doctor' | 'herbalist' | 'admin' | 'staff' | 'nurse' | 'patient' | 'pharmacy' | 'hospital';
   image?: string;
   emailVerified?: Date;
   hasImage?: boolean;
@@ -37,6 +37,8 @@ export interface IUser {
   yearsOfExperience?: number;
   rating?: number;
   ratingCount?: number;
+  consultationFee?: number;
+  consultationCurrency?: string;
   agreement?: {
     version?: string;
     termsAccepted?: boolean;
@@ -75,7 +77,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['doctor', 'admin', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'],
+      enum: ['doctor', 'herbalist', 'admin', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'],
       default: 'doctor',
     },
     image: {
@@ -162,6 +164,8 @@ const userSchema = new mongoose.Schema<IUser>(
       min: 0,
       max: 5,
     },
+    consultationFee: { type: Number, min: 0, default: 0 },
+    consultationCurrency: { type: String, trim: true, default: 'GHS' },
     ratingCount: {
       type: Number,
       min: 0,

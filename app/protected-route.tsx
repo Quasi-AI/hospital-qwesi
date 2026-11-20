@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const providerRoles = ['doctor', 'staff', 'nurse', 'pharmacy'];
+const providerRoles = ['doctor', 'herbalist', 'staff', 'nurse', 'pharmacy'];
 
 function roleHome(role?: string | null) {
   if (role === 'patient') return '/patient-portal';

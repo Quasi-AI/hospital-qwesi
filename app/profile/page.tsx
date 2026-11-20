@@ -39,6 +39,7 @@ export default function ProfilePage() {
     email: '',
     image: '',
     licenseNumber: '',
+    consultationFee: '0',
     licenseCertificate: '',
     licenseCertificateFileName: '',
     licenseCertificateFileType: '',
@@ -82,6 +83,7 @@ export default function ProfilePage() {
             email: data.user.email || prev.email,
             image: data.user.image || '',
             licenseNumber: data.user.licenseNumber || '',
+            consultationFee: String(data.user.consultationFee ?? 0),
             licenseCertificate: data.user.licenseCertificate?.data || '',
             licenseCertificateFileName: data.user.licenseCertificate?.fileName || '',
             licenseCertificateFileType: data.user.licenseCertificate?.fileType || '',
@@ -171,6 +173,7 @@ export default function ProfilePage() {
           licenseCertificateFileName: formData.licenseCertificateFileName,
           licenseCertificateFileType: formData.licenseCertificateFileType,
           languages: formData.languages,
+          consultationFee: Number(formData.consultationFee) || 0,
         }),
       });
 
@@ -196,6 +199,7 @@ export default function ProfilePage() {
             hasLicenseCertificate: Boolean(formData.licenseCertificate),
             hasLicenseNumber: Boolean(formData.licenseNumber.trim()),
             languages: formData.languages,
+            consultationFee: Number(formData.consultationFee) || 0,
             approvalStatus: updatedApprovalStatus,
           }
         });
@@ -258,8 +262,8 @@ export default function ProfilePage() {
     }
   };
 
-  const isProvider = ['doctor', 'staff', 'nurse', 'pharmacy'].includes(session?.user?.role || '');
-  const providerLabel = session?.user?.role === 'pharmacy' ? 'Pharmacist' : session?.user?.role === 'nurse' ? 'Nurse' : 'Provider';
+  const isProvider = ['doctor', 'herbalist', 'staff', 'nurse', 'pharmacy'].includes(session?.user?.role || '');
+  const providerLabel = session?.user?.role === 'pharmacy' ? 'Pharmacist' : session?.user?.role === 'herbalist' ? 'Herbalist' : session?.user?.role === 'nurse' ? 'Nurse' : 'Provider';
   const profileHome =
     session?.user?.role === 'pharmacy'
       ? '/pharmacy'
@@ -362,6 +366,14 @@ export default function ProfilePage() {
                         <p className="mt-1 text-xs text-gray-500">JPG, PNG, or WEBP. Max 1 MB.</p>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {['doctor', 'herbalist'].includes(session?.user?.role || '') && (
+                  <div>
+                    <label htmlFor="consultationFee" className="mb-1 block text-sm font-medium text-gray-700">Consultation fee (GHS)</label>
+                    <input id="consultationFee" name="consultationFee" type="number" min="0" step="0.01" value={formData.consultationFee} onChange={handleInputChange} className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500" />
+                    <p className="mt-1 text-xs text-gray-500">Set the amount patients pay for a consultation. You can update it at any time.</p>
                   </div>
                 )}
 

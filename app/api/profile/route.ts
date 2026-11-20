@@ -50,6 +50,7 @@ export async function PUT(request: NextRequest) {
       licenseCertificateFileName,
       licenseCertificateFileType,
       languages,
+      consultationFee,
     } = await request.json();
 
     if (!name || !email) {
@@ -123,7 +124,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const isProvider = ['doctor', 'staff', 'nurse', 'pharmacy'].includes(existingCurrentUser.role);
+    const isProvider = ['doctor', 'herbalist', 'staff', 'nurse', 'pharmacy'].includes(existingCurrentUser.role);
     const nextImage = image !== undefined ? String(image || '').trim() : existingCurrentUser.image || '';
     const nextLicenseNumber =
       licenseNumber !== undefined ? String(licenseNumber || '').trim() : existingCurrentUser.licenseNumber || '';
@@ -143,6 +144,7 @@ export async function PUT(request: NextRequest) {
       ...(image !== undefined ? { image: nextImage, hasImage: Boolean(nextImage) } : {}),
       ...(licenseNumber !== undefined ? { licenseNumber: nextLicenseNumber } : {}),
       ...(nextLanguages !== undefined ? { languages: nextLanguages } : {}),
+      ...(['doctor', 'herbalist'].includes(existingCurrentUser.role) && consultationFee !== undefined ? { consultationFee: Math.max(0, Number(consultationFee) || 0) } : {}),
     };
 
     if (licenseCertificate !== undefined) {

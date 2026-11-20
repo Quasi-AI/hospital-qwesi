@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, FileText, Heart, Lock, Pill, ShieldCheck, Stethoscope, User, UserCheck } from 'lucide-react';
 
-type SignupRole = 'patient' | 'doctor' | 'nurse' | 'pharmacy';
+type SignupRole = 'patient' | 'doctor' | 'herbalist' | 'pharmacy';
 
 function SignupApprovalForm() {
   const searchParams = useSearchParams();
@@ -21,6 +21,7 @@ function SignupApprovalForm() {
     specialization: '',
     licenseNumber: '',
     yearsOfExperience: '',
+    consultationFee: '0',
     address: '',
     agreementTerms: false,
     agreementPrivacy: false,
@@ -39,7 +40,7 @@ function SignupApprovalForm() {
     const roleParam = searchParams.get('role');
     const phoneParam = searchParams.get('phone');
 
-    if (roleParam === 'patient' || roleParam === 'doctor' || roleParam === 'nurse' || roleParam === 'pharmacy') {
+    if (roleParam === 'patient' || roleParam === 'doctor' || roleParam === 'herbalist' || roleParam === 'pharmacy') {
       setRole(roleParam);
     }
     if (phoneParam) {
@@ -91,6 +92,7 @@ function SignupApprovalForm() {
         specialization: '',
         licenseNumber: '',
         yearsOfExperience: '',
+        consultationFee: '0',
         address: '',
         agreementTerms: false,
         agreementPrivacy: false,
@@ -116,7 +118,7 @@ function SignupApprovalForm() {
           <p className="mt-1 text-sm text-gray-600">
             {role === 'patient'
               ? 'Patient accounts are activated immediately — you can log in as soon as you sign up.'
-              : 'Doctors, nurses, and pharmacies can request access here. Admin approval controls activation.'}
+              : 'Doctors, herbalists, and pharmacies can request access here. Provider approval controls activation.'}
           </p>
         </div>
 
@@ -125,7 +127,7 @@ function SignupApprovalForm() {
             {[
               ['patient', 'Patient', Heart],
               ['doctor', 'Doctor', Stethoscope],
-              ['nurse', 'Nurse', UserCheck],
+              ['herbalist', 'Herbalist', Heart],
               ['pharmacy', 'Pharmacy', Pill],
             ].map(([value, label, Icon]) => (
               <button
@@ -167,10 +169,13 @@ function SignupApprovalForm() {
               </>
             ) : (
               <>
-                <Field label="Department" value={form.department} onChange={(value) => update('department', value)} placeholder={role === 'nurse' ? 'Nursing' : role === 'pharmacy' ? 'Pharmacy' : 'Clinical'} />
+                <Field label="Department" value={form.department} onChange={(value) => update('department', value)} placeholder={role === 'herbalist' ? 'Traditional & herbal care' : role === 'pharmacy' ? 'Pharmacy' : 'Clinical'} />
                 <Field label="Specialization" value={form.specialization} onChange={(value) => update('specialization', value)} placeholder={role === 'pharmacy' ? 'Community pharmacy' : 'Specialization'} />
                 <Field label="License number" value={form.licenseNumber} onChange={(value) => update('licenseNumber', value)} />
                 <Field label="Years of experience" value={form.yearsOfExperience} onChange={(value) => update('yearsOfExperience', value)} type="number" />
+                {['doctor', 'herbalist'].includes(role) && (
+                  <Field label="Consultation fee (GHS)" value={form.consultationFee} onChange={(value) => update('consultationFee', value)} type="number" />
+                )}
               </>
             )}
           </div>
@@ -257,7 +262,7 @@ function SignupApprovalForm() {
                 className="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
               />
               <p className="mt-1 text-xs text-gray-600">
-                By typing your name, you sign this agreement electronically for your {role === 'pharmacy' ? 'pharmacy' : role} account request.
+                By typing your name, you sign this agreement electronically for your {role} account request.
               </p>
             </label>
           </section>

@@ -3,40 +3,42 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { getEffectiveDoctorSchedule } from '@/lib/appointmentSlotting';
 
-/** Public list of doctors available for online booking */
+/** Public marketplace directory: approved doctors and herbalists who enable online bookings. */
 export async function GET() {
   try {
     await dbConnect();
-    const doctors = await User.find({
-      role: 'doctor',
+    const providers = await User.find({
+      role: { $in: ['doctor', 'herbalist'] },
       approvalStatus: 'approved',
       hasImage: true,
       licenseNumber: { $exists: true, $ne: '' },
       'licenseCertificate.data': { $exists: true, $ne: '' },
     })
-      .select('_id name email specialization department')
+      .select('_id name specialization department role consultationFee consultationCurrency rating yearsOfExperience')
       .sort({ name: 1 })
       .lean();
 
     const list = [];
-    for (const d of doctors) {
-      const u = d as { _id: { toString: () => string }; name: string; email: string; specialization?: string; department?: string };
-      const id = u._id.toString();
-      const sched = await getEffectiveDoctorSchedule(id);
-      if (!sched.websiteBookingEnabled) continue;
+    for (const provider of providers as any[]) {
+      const id = provider._id.toString();
+      const schedule = await getEffectiveDoctorSchedule(id);
+      if (!schedule.websiteBookingEnabled) continue;
       list.push({
         id,
-        name: u.name,
-        email: u.email,
-        specialization: u.specialization || '',
-        department: u.department || '',
-        slotDurationMinutes: sched.slotDurationMinutes,
+        name: provider.name,
+        specialization: provider.specialization || '',
+        department: provider.department || '',
+        providerType: provider.role,
+        consultationFee: Number(provider.consultationFee || 0),
+        currency: provider.consultationCurrency || 'GHS',
+        rating: provider.rating,
+        yearsOfExperience: provider.yearsOfExperience,
+        slotDurationMinutes: schedule.slotDurationMinutes,
       });
     }
-
     return NextResponse.json(list);
-  } catch (e) {
-    console.error('GET /api/public/booking/doctors', e);
-    return NextResponse.json({ error: 'Failed to load doctors' }, { status: 500 });
+  } catch (error) {
+    console.error('GET /api/public/booking/doctors', error);
+    return NextResponse.json({ error: 'Failed to load providers' }, { status: 500 });
   }
 }
