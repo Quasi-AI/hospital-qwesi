@@ -1,5 +1,5 @@
 import ProtectedRoute from '../protected-route';
-import { PharmacyAttachedDashboard } from '../components/qwesi-network-dashboards';
+import { PharmacyAttachedDashboard } from '../components/dashboards';
 
 export default function PharmacyPage() {
   return (

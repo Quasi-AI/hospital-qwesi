@@ -43,6 +43,8 @@ export default function ProfilePage() {
     licenseCertificateFileName: '',
     licenseCertificateFileType: '',
     languages: [] as string[],
+    consultationFee: '',
+    bio: '',
     approvalStatus: 'approved',
     licenseVerificationMessage: '',
     currentPassword: '',
@@ -86,6 +88,8 @@ export default function ProfilePage() {
             licenseCertificateFileName: data.user.licenseCertificate?.fileName || '',
             licenseCertificateFileType: data.user.licenseCertificate?.fileType || '',
             languages: data.user.languages || [],
+            consultationFee: data.user.consultationFee != null ? String(data.user.consultationFee) : '',
+            bio: data.user.bio || '',
             approvalStatus: data.user.approvalStatus || 'approved',
             licenseVerificationMessage: data.user.licenseVerification?.message || '',
           }));
@@ -171,6 +175,8 @@ export default function ProfilePage() {
           licenseCertificateFileName: formData.licenseCertificateFileName,
           licenseCertificateFileType: formData.licenseCertificateFileType,
           languages: formData.languages,
+          consultationFee: formData.consultationFee === '' ? 0 : Number(formData.consultationFee),
+          bio: formData.bio,
         }),
       });
 
@@ -263,11 +269,9 @@ export default function ProfilePage() {
   const profileHome =
     session?.user?.role === 'pharmacy'
       ? '/pharmacy'
-      : session?.user?.role === 'hospital'
-        ? '/hospital-portal'
-        : session?.user?.role === 'patient'
-          ? '/patient-portal'
-          : '/dashboard';
+      : session?.user?.role === 'patient'
+        ? '/patient-portal'
+        : '/dashboard';
   const returnTo =
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('returnTo') || profileHome
@@ -484,6 +488,41 @@ export default function ProfilePage() {
                         <p className="text-xs text-gray-500">Add languages patients can use when choosing a provider.</p>
                       )}
                     </div>
+
+                    {session?.user?.role === 'doctor' && (
+                      <div className="grid gap-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                        <div>
+                          <label htmlFor="consultationFee" className="mb-1 block text-sm font-semibold text-gray-900">
+                            Your consultation fee (GHS)
+                          </label>
+                          <input
+                            id="consultationFee"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={formData.consultationFee}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, consultationFee: event.target.value }))}
+                            placeholder="e.g. 150"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          />
+                          <p className="mt-1 text-xs text-gray-600">Patients see this price on your profile and pay it to book you.</p>
+                        </div>
+                        <div>
+                          <label htmlFor="bio" className="mb-1 block text-sm font-semibold text-gray-900">
+                            About you
+                          </label>
+                          <textarea
+                            id="bio"
+                            rows={3}
+                            maxLength={1500}
+                            value={formData.bio}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))}
+                            placeholder="Briefly tell patients about your experience and what you treat."
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 

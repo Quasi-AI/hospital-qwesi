@@ -53,7 +53,7 @@ export async function getLandingChatDoctorsContext(options: {
   }
 
   const baseOrigin = origin.replace(/\/$/, '');
-  const bookingUrl = `${baseOrigin}/request-appointment`;
+  const bookingUrl = `${baseOrigin}/find-doctors`;
 
   if (!appointmentRequestEnabled) {
     const text = [
@@ -74,7 +74,7 @@ export async function getLandingChatDoctorsContext(options: {
   const practiceFallback = await getPracticeWorkingHoursFallback();
 
   const doctorUsers = await User.find({ role: 'doctor' })
-    .select('_id name email specialization department qualifications bio')
+    .select('_id name email specialization department qualifications bio consultationFee')
     .sort({ name: 1 })
     .limit(maxDoctors * 3)
     .lean();
@@ -139,6 +139,8 @@ export async function getLandingChatDoctorsContext(options: {
     }
 
     const extraParts: string[] = [];
+    const fee = Number((u as { consultationFee?: number }).consultationFee || 0);
+    extraParts.push(fee > 0 ? `Consultation fee: GHS ${fee}` : 'Consultation fee: free');
     if (qual) extraParts.push(`Qualifications (short): ${qual}`);
     if (bioShort) extraParts.push(`Bio (snippet): ${bioShort}${(u.bio || '').trim().length > 160 ? '…' : ''}`);
 

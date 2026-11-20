@@ -71,6 +71,7 @@ function NewDoctorForm() {
     qualifications: [] as string[],
     languages: [] as string[],
     yearsOfExperience: '',
+    consultationFee: '',
     rating: '',
     ratingCount: '',
     bio: '',
@@ -407,6 +408,21 @@ function NewDoctorForm() {
                         value={formData.yearsOfExperience}
                         onChange={(e) => setFormData({ ...formData, yearsOfExperience: e.target.value })}
                         placeholder={t('doctors.new.phYearsExperience')}
+                        className="w-full rounded-md border border-gray-300 px-2.5 py-1 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="consultationFee" className="mb-1 block text-sm font-medium text-gray-700">
+                        Consultation fee (GHS)
+                      </label>
+                      <input
+                        type="number"
+                        id="consultationFee"
+                        min="0"
+                        value={formData.consultationFee}
+                        onChange={(e) => setFormData({ ...formData, consultationFee: e.target.value })}
+                        placeholder="e.g. 150"
                         className="w-full rounded-md border border-gray-300 px-2.5 py-1 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       />
                     </div>

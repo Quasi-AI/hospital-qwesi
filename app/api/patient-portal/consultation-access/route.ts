@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
 import { getPatientConsultationAccess } from '@/lib/patientConsultationAccess';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email || session.user.role !== 'patient') {
@@ -21,6 +21,7 @@ export async function GET() {
     const access = await getPatientConsultationAccess({
       patientEmail: session.user.email,
       patientMongoId: String(patient._id),
+      doctorId: request.nextUrl.searchParams.get('doctorId') || undefined,
     });
 
     return NextResponse.json(access);

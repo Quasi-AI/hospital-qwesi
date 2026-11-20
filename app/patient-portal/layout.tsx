@@ -65,20 +65,17 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   }, [status, session, router]);
 
   const navigation: PatientNavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/patient-portal', exact: true },
-    { id: 'assistant', label: 'AI Health Assistant', icon: Bot, href: '/patient-portal/assistant' },
-    { id: 'appointments', label: 'Book Appointment', icon: Calendar, href: '/patient-portal/appointments/new', exact: true },
-    { id: 'doctors', label: 'My Doctors', icon: Stethoscope, href: '/patient-portal/doctors' },
-    { id: 'care-team', label: 'My Care Team', icon: Users, href: '/patient-portal/care-team' },
+    { id: 'dashboard', label: 'Home', icon: Home, href: '/patient-portal', exact: true },
+    { id: 'find-doctor', label: 'Find a Doctor', icon: Stethoscope, href: '/patient-portal/doctors' },
+    { id: 'appointments', label: 'My Appointments', icon: Calendar, href: '/patient-portal/appointments' },
     { id: 'telemedicine', label: 'Video Consultations', icon: Video, href: '/patient-portal/telemedicine' },
-    { id: 'diagnostics', label: 'Lab & Diagnostics', icon: FlaskConical, href: '/patient-portal/reports' },
+    { id: 'assistant', label: 'AI Health Assistant', icon: Bot, href: '/patient-portal/assistant' },
     { id: 'prescriptions', label: 'Prescriptions', icon: Pill, href: '/patient-portal/prescriptions' },
+    { id: 'diagnostics', label: 'Lab Reports', icon: FlaskConical, href: '/patient-portal/reports' },
     { id: 'medical-records', label: 'Medical Records', icon: FileText, href: '/patient-portal/medical-records' },
-    { id: 'referrals', label: 'Referrals', icon: Activity, href: '/patient-portal/referrals' },
-    { id: 'home-care', label: 'Home Care', icon: Heart, href: '/patient-portal/home-care' },
     { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/patient-portal/messages' },
     { id: 'family', label: 'Family Members', icon: Users, href: '/patient-portal/family' },
-    { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard, href: '/patient-portal/subscriptions' },
+    { id: 'subscriptions', label: 'Plans & Payments', icon: CreditCard, href: '/patient-portal/subscriptions' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/patient-portal/profile' },
     { id: 'help', label: 'Help & Support', icon: HelpCircle, href: '/patient-portal/help' },
   ];
@@ -107,6 +104,13 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     if (exact) {
       return pathname === href;
     }
+    // "Find a doctor" also covers a doctor's profile and the booking flow
+    if (href === '/patient-portal/doctors') {
+      return pathname.startsWith(href) || pathname.startsWith('/patient-portal/appointments/new');
+    }
+    if (href === '/patient-portal/appointments') {
+      return pathname.startsWith(href) && !pathname.startsWith('/patient-portal/appointments/new');
+    }
     return pathname.startsWith(href);
   };
 
@@ -130,7 +134,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -147,8 +151,8 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         {/* Sidebar Header */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-4">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-              <Heart className="h-5 w-5 text-emerald-600" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50">
+              <Heart className="h-5 w-5 text-brand-600" />
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-xl font-bold text-slate-950">
@@ -174,8 +178,8 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
               className={`
                 flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all
                 ${isActiveRoute(item.href, item.exact)
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-700'
+                  ? 'bg-brand-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
                 }
               `}
               onClick={() => setSidebarOpen(false)}

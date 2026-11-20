@@ -151,15 +151,14 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
 
   const navigation: NavigationItem[] = [
     { id: 'dashboard', label: t('navigation.dashboard'), icon: Home, href: '/dashboard', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { id: 'hospital-portal', label: 'Hospital Portal', icon: Building2, href: '/hospital-portal', roles: ['admin', 'hospital'] },
-    { id: 'hospital-network', label: 'Hospital Network', icon: Hospital, href: '/hospital-network', roles: ['admin', 'hospital'] },
     { id: 'doctors', label: t('navigation.doctors'), icon: UserPlus, href: '/doctors', roles: ['admin'] },
+    { id: 'my-fee', label: 'My fee & profile', icon: Wallet, href: '/profile', roles: ['doctor'] },
     { id: 'staff', label: t('navigation.staff'), icon: UserCheck, href: '/staff', roles: ['admin'] },
-    { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital'] },
-    { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital'] },
+    { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor', 'staff', 'nurse'] },
+    { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor', 'staff', 'nurse'] },
     { id: 'appointment-slots', label: t('navigation.appointmentSlots'), icon: LayoutGrid, href: '/appointments/slots', roles: ['admin', 'doctor', 'staff', 'nurse'] },
     { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'staff', 'nurse', 'hospital', 'pharmacy'] },
+    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'staff', 'nurse', 'pharmacy'] },
     { id: 'clinical-notes', label: 'Notes', icon: ClipboardList, href: '/clinical-notes', roles: ['admin', 'doctor', 'staff', 'nurse'] },
     { 
       id: 'laboratory', 
@@ -172,34 +171,6 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
         { id: 'lab-new-order', label: t('lab.newTestOrder'), icon: Plus, href: '/lab/new', roles: ['admin', 'doctor', 'staff'] },
         { id: 'lab-pending', label: t('lab.pendingTests'), icon: ClipboardList, href: '/lab?status=pending', roles: ['admin', 'doctor', 'staff'] },
         { id: 'lab-results', label: t('lab.completedResults'), icon: ClipboardCheck, href: '/lab?status=completed', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'lab-incoming', label: t('lab.incomingResults') || 'Incoming Results', icon: Wifi, href: '/lab/incoming', roles: ['admin', 'staff'] },
-        { id: 'lab-devices', label: t('lab.connectedDevices') || 'Connected Devices', icon: Cpu, href: '/lab/devices', roles: ['admin'] }
-      ]
-    },
-    { 
-      id: 'inpatient', 
-      label: t('navigation.inpatient'), 
-      icon: Building2, 
-      href: '/inpatient/admissions', 
-      roles: ['admin', 'staff', 'nurse', 'hospital'],
-      children: [
-        { id: 'admissions', label: t('inpatient.admissions'), icon: HeartPulse, href: '/inpatient/admissions', roles: ['admin', 'staff', 'hospital'] },
-        { id: 'new-admission', label: t('inpatient.newAdmission'), icon: UserPlus, href: '/inpatient/admissions/new', roles: ['admin', 'staff', 'hospital'] },
-        { id: 'wards', label: t('inpatient.wards'), icon: Building2, href: '/inpatient/wards', roles: ['admin', 'staff', 'hospital'] },
-        { id: 'beds', label: t('inpatient.beds'), icon: Bed, href: '/inpatient/beds', roles: ['admin', 'staff', 'hospital'] }
-      ]
-    },
-    { 
-      id: 'radiology', 
-      label: t('navigation.radiology'), 
-      icon: Radio, 
-      href: '/radiology', 
-      roles: ['admin', 'doctor', 'staff', 'nurse'],
-      children: [
-        { id: 'radiology-studies', label: t('radiology.studies'), icon: Image, href: '/radiology', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'radiology-new', label: t('radiology.newStudy'), icon: Plus, href: '/radiology/new', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'imaging-incoming', label: t('imaging.incomingImages') || 'Incoming Images', icon: ImageDown, href: '/imaging/incoming', roles: ['admin', 'staff'] },
-        { id: 'imaging-devices', label: t('imaging.connectedDevices') || 'Imaging Devices', icon: MonitorPlay, href: '/imaging/devices', roles: ['admin'] }
       ]
     },
     { 
@@ -224,19 +195,6 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
         { id: 'pharmacy-settings', label: 'Settings', icon: Settings, href: '/pharmacy/settings', exact: true, roles: ['admin', 'pharmacy'] }
       ]
     },
-    { 
-      id: 'inventory', 
-      label: t('navigation.inventory'), 
-      icon: Package, 
-      href: '/inventory', 
-      roles: ['admin', 'staff'],
-      children: [
-        { id: 'inventory-items', label: t('inventory.items'), icon: Package, href: '/inventory', roles: ['admin', 'staff'] },
-        { id: 'inventory-new', label: t('inventory.addItem'), icon: Plus, href: '/inventory/items/new', roles: ['admin', 'staff'] },
-        { id: 'inventory-suppliers', label: t('inventory.suppliers'), icon: Truck, href: '/inventory/suppliers', roles: ['admin', 'staff'] },
-        { id: 'inventory-orders', label: t('inventory.purchaseOrders'), icon: ShoppingCart, href: '/inventory/purchase-orders', roles: ['admin', 'staff'] }
-      ]
-    },
     { id: 'medical-reports', label: t('navigation.medicalReports'), icon: FileText, href: '/reports', roles: ['admin', 'doctor', 'staff'] },
     { 
       id: 'documents', 
@@ -250,17 +208,6 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       ]
     },
     { 
-      id: 'emergency', 
-      label: t('navigation.emergency'), 
-      icon: Siren, 
-      href: '/emergency', 
-      roles: ['admin', 'staff'],
-      children: [
-        { id: 'emergency-cases', label: t('emergency.title'), icon: AlertTriangle, href: '/emergency', roles: ['admin', 'staff'] },
-        { id: 'emergency-new', label: t('emergency.newCase'), icon: Ambulance, href: '/emergency/new', roles: ['admin', 'staff'] }
-      ]
-    },
-    { 
       id: 'telemedicine', 
       label: t('navigation.telemedicine') || 'Telemedicine', 
       icon: Video, 
@@ -271,32 +218,6 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
         { id: 'telemedicine-sessions', label: t('telemedicine.sessions') || 'All Sessions', icon: MessageCircle, href: '/telemedicine/sessions', roles: ['admin', 'doctor', 'staff'] },
         { id: 'telemedicine-new', label: t('telemedicine.newSession') || 'New Session', icon: Plus, href: '/telemedicine/sessions/new', roles: ['admin', 'doctor', 'staff'] },
         { id: 'telemedicine-waiting', label: t('telemedicine.waitingRoom') || 'Waiting Room', icon: Clock, href: '/telemedicine/waiting-room', roles: ['admin', 'doctor', 'staff'] }
-      ]
-    },
-    { 
-      id: 'ambulance', 
-      label: t('navigation.ambulance'), 
-      icon: Ambulance, 
-      href: '/ambulance', 
-      roles: ['admin', 'staff'],
-      children: [
-        { id: 'ambulance-bookings', label: t('ambulance.title'), icon: Ambulance, href: '/ambulance', roles: ['admin', 'staff'] },
-        { id: 'ambulance-new', label: t('ambulance.newBooking'), icon: Plus, href: '/ambulance/bookings/new', roles: ['admin', 'staff'] },
-        { id: 'ambulance-fleet', label: t('ambulance.fleetManagement'), icon: Truck, href: '/ambulance/fleet', roles: ['admin', 'staff'] }
-      ]
-    },
-    { 
-      id: 'blood-bank', 
-      label: t('navigation.bloodBank') || 'Blood Bank', 
-      icon: Droplets, 
-      href: '/blood-bank', 
-      roles: ['admin', 'staff'],
-      children: [
-        { id: 'blood-bank-dashboard', label: t('bloodBank.dashboard') || 'Dashboard', icon: Droplets, href: '/blood-bank', roles: ['admin', 'staff'] },
-        { id: 'blood-bank-inventory', label: t('bloodBank.inventory') || 'Inventory', icon: Package, href: '/blood-bank/inventory', roles: ['admin', 'staff'] },
-        { id: 'blood-bank-donors', label: t('bloodBank.donors') || 'Donors', icon: Heart, href: '/blood-bank/donors', roles: ['admin', 'staff'] },
-        { id: 'blood-bank-transfusions', label: t('bloodBank.transfusions') || 'Transfusions', icon: Activity, href: '/blood-bank/transfusions', roles: ['admin', 'staff'] },
-        { id: 'blood-bank-new-request', label: t('bloodBank.newRequest') || 'New Request', icon: Plus, href: '/blood-bank/transfusions/new', roles: ['admin', 'staff'] }
       ]
     },
     { 
@@ -423,35 +344,14 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     if (pathname.startsWith('/lab')) {
       setExpandedMenus(prev => new Set(prev).add('laboratory'));
     }
-    if (pathname.startsWith('/radiology')) {
-      setExpandedMenus(prev => new Set(prev).add('radiology'));
-    }
     if (pathname.startsWith('/pharmacy')) {
       setExpandedMenus(prev => new Set(prev).add('pharmacy'));
-    }
-    if (pathname.startsWith('/inventory')) {
-      setExpandedMenus(prev => new Set(prev).add('inventory'));
     }
     if (pathname.startsWith('/documents')) {
       setExpandedMenus(prev => new Set(prev).add('documents'));
     }
-    if (pathname.startsWith('/emergency')) {
-      setExpandedMenus(prev => new Set(prev).add('emergency'));
-    }
-    if (pathname.startsWith('/ambulance')) {
-      setExpandedMenus(prev => new Set(prev).add('ambulance'));
-    }
-    if (pathname.startsWith('/blood-bank')) {
-      setExpandedMenus(prev => new Set(prev).add('blood-bank'));
-    }
-    if (pathname.startsWith('/inpatient')) {
-      setExpandedMenus(prev => new Set(prev).add('inpatient'));
-    }
     if (pathname.startsWith('/telemedicine')) {
       setExpandedMenus(prev => new Set(prev).add('telemedicine'));
-    }
-    if (pathname.startsWith('/imaging')) {
-      setExpandedMenus(prev => new Set(prev).add('radiology'));
     }
   }, [pathname]);
 
@@ -470,7 +370,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 flex">
+    <div className="h-screen overflow-hidden flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -696,33 +596,6 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 >
                   <Package className="h-4 w-4 text-amber-600" />
                   <span>Inventory</span>
-                </Link>
-              </>
-            ) : currentRole === 'hospital' ? (
-              <>
-                <Link
-                  href="/patients/new"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <Plus className="h-4 w-4 text-blue-600" />
-                  <span>{t('ai.quickActions.newPatient')}</span>
-                </Link>
-                <Link
-                  href="/inpatient/admissions/new"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <HeartPulse className="h-4 w-4 text-red-600" />
-                  <span>New Admission</span>
-                </Link>
-                <Link
-                  href="/inpatient/beds"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <Bed className="h-4 w-4 text-purple-600" />
-                  <span>Beds</span>
                 </Link>
               </>
             ) : (

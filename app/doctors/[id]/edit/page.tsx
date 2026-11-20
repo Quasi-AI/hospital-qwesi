@@ -64,6 +64,7 @@ function EditDoctorForm() {
     qualifications: [] as string[],
     languages: [] as string[],
     yearsOfExperience: '',
+    consultationFee: '',
     rating: '',
     ratingCount: '',
     bio: '',
@@ -153,6 +154,7 @@ function EditDoctorForm() {
           qualifications: doctor.qualifications || [],
           languages: doctor.languages || [],
           yearsOfExperience: doctor.yearsOfExperience?.toString() || '',
+          consultationFee: doctor.consultationFee?.toString() || '',
           rating: doctor.rating?.toString() || '',
           ratingCount: doctor.ratingCount?.toString() || '',
           bio: doctor.bio || '',
@@ -428,6 +430,21 @@ function EditDoctorForm() {
                         max="50"
                         value={formData.yearsOfExperience}
                         onChange={(e) => setFormData({ ...formData, yearsOfExperience: e.target.value })}
+                        placeholder="0"
+                        className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="consultationFee" className="mb-1 block text-sm font-medium text-gray-700">
+                        Consultation fee (GHS)
+                      </label>
+                      <input
+                        type="number"
+                        id="consultationFee"
+                        min="0"
+                        value={formData.consultationFee}
+                        onChange={(e) => setFormData({ ...formData, consultationFee: e.target.value })}
                         placeholder="0"
                         className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       />

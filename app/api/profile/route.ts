@@ -50,6 +50,8 @@ export async function PUT(request: NextRequest) {
       licenseCertificateFileName,
       licenseCertificateFileType,
       languages,
+      consultationFee,
+      bio,
     } = await request.json();
 
     if (!name || !email) {
@@ -143,6 +145,10 @@ export async function PUT(request: NextRequest) {
       ...(image !== undefined ? { image: nextImage, hasImage: Boolean(nextImage) } : {}),
       ...(licenseNumber !== undefined ? { licenseNumber: nextLicenseNumber } : {}),
       ...(nextLanguages !== undefined ? { languages: nextLanguages } : {}),
+      ...(isProvider && consultationFee !== undefined
+        ? { consultationFee: Math.min(100000, Math.max(0, Number(consultationFee) || 0)) }
+        : {}),
+      ...(isProvider && bio !== undefined ? { bio: String(bio || '').trim().slice(0, 1500) } : {}),
     };
 
     if (licenseCertificate !== undefined) {

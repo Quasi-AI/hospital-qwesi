@@ -1121,7 +1121,7 @@ export default function HospitalWebsiteCMSPage() {
                 <SectionCard
                   id="cms-appointment"
                   title={t('settings.hospitalWebsiteSectionAppointment')}
-                  description="Public form at /request-appointment creates a scheduled appointment for staff to confirm."
+                  description="Show the doctor-booking call to action on the public site."
                 >
                   <label className="flex items-center gap-2 text-xs text-gray-800">
                     <input

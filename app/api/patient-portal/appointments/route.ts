@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
     const access = await getPatientConsultationAccess({
       patientEmail: session.user.email,
       patientMongoId: String(patient._id),
+      doctorId,
     });
     if (!access.allowed) {
       return NextResponse.json(
@@ -157,8 +158,10 @@ export async function POST(request: NextRequest) {
       access.source === 'subscription'
         ? `Subscription: ${access.activeSubscription?.planName || 'Active plan'}`
         : access.source === 'payg'
-          ? `PAYG: ${access.paygTransaction?.reference || 'Paid'}`
-          : 'Payment required';
+          ? `Paid consultation fee: ${access.paygTransaction?.reference || 'Paid'}`
+          : access.source === 'free'
+            ? 'Free consultation'
+            : 'Payment required';
     const notes = [String(body.notes || '').trim(), `Billing cover: ${coverageLabel}`]
       .filter(Boolean)
       .join('\n');

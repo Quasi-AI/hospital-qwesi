@@ -54,7 +54,7 @@ export default function PatientViewPage() {
   const [loadingAiResults, setLoadingAiResults] = useState(true);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
-  const [activeTab, setActiveTab] = useState<'details' | 'appointments' | 'billing' | 'lab-reports' | 'radiology' | 'treatment-plan' | 'prescription' | 'drug-interaction' | 'image-analysis' | 'appointment-optimizer' | 'risk-assessment' | 'voice-transcription'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'appointments' | 'billing' | 'lab-reports' | 'treatment-plan' | 'prescription' | 'drug-interaction' | 'image-analysis' | 'appointment-optimizer' | 'risk-assessment' | 'voice-transcription'>('details');
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(true);
   const [labTests, setLabTests] = useState<any[]>([]);
@@ -172,29 +172,6 @@ export default function PatientViewPage() {
     }
   }, [params.id]);
 
-  // Fetch radiology studies for this patient
-  useEffect(() => {
-    const fetchRadiologyStudies = async () => {
-      if (!params.id) return;
-      
-      try {
-        setLoadingRadiology(true);
-        const response = await fetch(`/api/radiology?patientId=${params.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setRadiologyStudies(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching radiology studies:', error);
-      } finally {
-        setLoadingRadiology(false);
-      }
-    };
-
-    if (params.id) {
-      fetchRadiologyStudies();
-    }
-  }, [params.id]);
 
   // Fetch AI results for this patient
   const fetchAIResults = async () => {
@@ -351,7 +328,6 @@ export default function PatientViewPage() {
     { id: 'appointments', label: 'Appointments', icon: Calendar, count: appointments.length },
     { id: 'billing', label: 'Billing & Invoices', icon: CreditCard, count: invoices.length },
     { id: 'lab-reports', label: 'Lab Reports', icon: FlaskConical, count: labTests.length },
-    { id: 'radiology', label: 'Radiology', icon: Radio, count: radiologyStudies.length },
     { id: 'treatment-plan', label: 'Treatment Plans', icon: Pill, count: getAIResultsByType('treatment-plan').length },
     { id: 'prescription', label: 'Prescriptions', icon: FileText, count: getAIResultsByType('prescription').length },
     { id: 'drug-interaction', label: 'Drug Interactions', icon: Pill, count: getAIResultsByType('drug-interaction').length },
@@ -420,14 +396,6 @@ export default function PatientViewPage() {
                   Lab order
                 </Link>
                 <Link
-                  href={`/radiology/new?patientId=${patient._id}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition-colors hover:bg-indigo-50/80 hover:border-indigo-300 sm:text-sm"
-                >
-                  <Plus className="h-4 w-4 text-indigo-600 shrink-0" />
-                  <Radio className="h-4 w-4 text-indigo-500 shrink-0" />
-                  Radiology
-                </Link>
-                <Link
                   href={`/reports/new?patientId=${patient._id}`}
                   className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition-colors hover:bg-violet-50/80 hover:border-violet-300 sm:text-sm"
                 >
@@ -452,36 +420,12 @@ export default function PatientViewPage() {
                   SOAP note
                 </Link>
                 <Link
-                  href={`/emergency/new?patientId=${patient._id}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition-colors hover:bg-red-50/80 hover:border-red-300 sm:text-sm"
-                >
-                  <Plus className="h-4 w-4 text-red-600 shrink-0" />
-                  <Siren className="h-4 w-4 text-red-500 shrink-0" />
-                  Emergency case
-                </Link>
-                <Link
-                  href={`/inpatient/admissions/new?patientId=${patient._id}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition-colors hover:bg-purple-50/80 hover:border-purple-300 sm:text-sm"
-                >
-                  <Plus className="h-4 w-4 text-purple-600 shrink-0" />
-                  <Bed className="h-4 w-4 text-purple-500 shrink-0" />
-                  Admission
-                </Link>
-                <Link
                   href={`/telemedicine/sessions/new?patientId=${patient._id}`}
                   className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition-colors hover:bg-sky-50/80 hover:border-sky-300 sm:text-sm"
                 >
                   <Plus className="h-4 w-4 text-sky-600 shrink-0" />
                   <Video className="h-4 w-4 text-sky-500 shrink-0" />
                   Telemedicine
-                </Link>
-                <Link
-                  href={`/ambulance/bookings/new?patientId=${patient._id}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition-colors hover:bg-orange-50/80 hover:border-orange-300 sm:text-sm"
-                >
-                  <Plus className="h-4 w-4 text-orange-600 shrink-0" />
-                  <Truck className="h-4 w-4 text-orange-500 shrink-0" />
-                  Ambulance
                 </Link>
               </div>
             </div>
@@ -980,111 +924,6 @@ export default function PatientViewPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <Link
                                 href={`/lab/${test._id}`}
-                                className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span>View</span>
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Radiology Tab */}
-            {activeTab === 'radiology' && (
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                    <Radio className="h-5 w-5" />
-                    <span>Radiology Studies</span>
-                  </h2>
-                  <Link
-                    href="/radiology"
-                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                  >
-                    <span>View All</span>
-                    <ExternalLink className="h-4 w-4" />
-                  </Link>
-                </div>
-                {loadingRadiology ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : radiologyStudies.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Radio className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="mt-2 text-sm text-gray-500">No radiology studies found for this patient</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Study #</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Body Part</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Radiologist</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {radiologyStudies.map((study) => (
-                          <tr key={study._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center space-x-2">
-                                {study.isCritical && (
-                                  <AlertCircle className="h-4 w-4 text-red-500" />
-                                )}
-                                <span className="text-sm font-medium text-gray-900">{study.studyNumber}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                {study.studyType?.toUpperCase().replace('-', ' ') || 'N/A'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {study.bodyPart || 'N/A'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {study.radiologistName || 'Not assigned'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {study.performedDate ? new Date(study.performedDate).toLocaleDateString() : 
-                               study.createdAt ? new Date(study.createdAt).toLocaleDateString() : 'N/A'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                study.priority === 'stat' ? 'bg-red-100 text-red-800' :
-                                study.priority === 'urgent' ? 'bg-orange-100 text-orange-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {study.priority?.toUpperCase() || 'ROUTINE'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                study.status === 'verified' ? 'bg-green-100 text-green-800' :
-                                study.status === 'reported' ? 'bg-teal-100 text-teal-800' :
-                                study.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                                study.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
-                                study.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {study.status?.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Ordered'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Link
-                                href={`/radiology/${study._id}`}
                                 className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
                               >
                                 <Eye className="h-4 w-4" />

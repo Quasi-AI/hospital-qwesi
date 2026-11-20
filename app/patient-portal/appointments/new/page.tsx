@@ -24,6 +24,9 @@ type Doctor = {
   email: string;
   specialization?: string;
   department?: string;
+  consultationFee?: number;
+  yearsOfExperience?: number;
+  rating?: number;
 };
 
 type Slot = {
@@ -33,9 +36,11 @@ type Slot = {
 
 type ConsultationAccess = {
   allowed: boolean;
-  source: 'subscription' | 'payg' | 'payment_required';
+  source: 'subscription' | 'payg' | 'free' | 'payment_required';
   previousConsultationCount: number;
   hasActiveSubscription: boolean;
+  amountDue?: number;
+  doctor?: { id: string; name: string; consultationFee: number; currency: 'GHS' };
   message: string;
   activeSubscription?: {
     planName: string;
@@ -102,8 +107,9 @@ function NewPatientAppointmentPageContent() {
     [doctors, form.doctorId]
   );
 
-  const refreshAccess = useCallback(async () => {
-    const res = await fetch('/api/patient-portal/consultation-access');
+  const refreshAccess = useCallback(async (doctorId?: string) => {
+    const qs = doctorId ? `?doctorId=${encodeURIComponent(doctorId)}` : '';
+    const res = await fetch(`/api/patient-portal/consultation-access${qs}`);
     if (res.ok) {
       setAccess(await res.json());
     }
@@ -114,7 +120,7 @@ function NewPatientAppointmentPageContent() {
     try {
       const [doctorRes, accessRes] = await Promise.all([
         fetch('/api/patient-portal/doctors'),
-        fetch('/api/patient-portal/consultation-access'),
+        fetch(`/api/patient-portal/consultation-access${preselectedDoctorId ? `?doctorId=${encodeURIComponent(preselectedDoctorId)}` : ''}`),
       ]);
       if (doctorRes.ok) {
         const data = await doctorRes.json();
@@ -128,7 +134,7 @@ function NewPatientAppointmentPageContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [preselectedDoctorId]);
 
   useEffect(() => {
     fetchInitial();
@@ -144,8 +150,8 @@ function NewPatientAppointmentPageContent() {
       const data = await res.json().catch(() => ({}));
       if (cancelled) return;
       if (res.ok) {
-        setMessage({ type: 'success', text: 'Payment verified. You can now book your consultation.' });
-        await refreshAccess();
+        setMessage({ type: 'success', text: 'Payment received. Pick a time slot to confirm your booking.' });
+        await refreshAccess(searchParams.get('doctorId') || undefined);
         const next = new URLSearchParams(searchParams.toString());
         next.delete('reference');
         router.replace(`/patient-portal/appointments/new${next.toString() ? `?${next.toString()}` : ''}`);
@@ -159,6 +165,11 @@ function NewPatientAppointmentPageContent() {
       cancelled = true;
     };
   }, [reference, refreshAccess, router, searchParams]);
+
+  // Re-evaluate fee / payment cover whenever the patient picks a different doctor
+  useEffect(() => {
+    if (form.doctorId) refreshAccess(form.doctorId);
+  }, [form.doctorId, refreshAccess]);
 
   useEffect(() => {
     if (!form.doctorId || !form.appointmentDate) {
@@ -205,6 +216,10 @@ function NewPatientAppointmentPageContent() {
     : 'border-amber-200 bg-amber-50 text-amber-900';
 
   const startPaygPayment = async () => {
+    if (!form.doctorId) {
+      setMessage({ type: 'error', text: 'Choose a doctor first.' });
+      return;
+    }
     setPaying(true);
     setMessage({ type: 'info', text: 'Opening Paystack checkout...' });
     try {
@@ -217,9 +232,8 @@ function NewPatientAppointmentPageContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          itemType: 'payg',
-          itemId: 'doctor-virtual-consultation',
-          amount: 80,
+          itemType: 'doctor_consultation',
+          itemId: form.doctorId,
           callbackPath,
         }),
       });
@@ -287,7 +301,7 @@ function NewPatientAppointmentPageContent() {
             Back to appointments
           </Link>
           <h1 className="text-xl font-bold text-gray-950">Book appointment</h1>
-          <p className="mt-0.5 text-sm text-gray-600">Choose a doctor after subscribing or paying for a consultation.</p>
+          <p className="mt-0.5 text-sm text-gray-600">Pick a time, pay the doctor’s fee, and your booking is confirmed.</p>
         </div>
         <Link
           href="/patient-portal/doctors"
@@ -340,7 +354,7 @@ function NewPatientAppointmentPageContent() {
                   className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-700 px-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50"
                 >
                   {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                  Pay GHS 80
+                  {access.amountDue ? `Pay GHS ${access.amountDue}` : 'Pay to book'}
                 </button>
                 <Link
                   href="/patient-portal/subscriptions"
@@ -371,6 +385,7 @@ function NewPatientAppointmentPageContent() {
               <option key={doctor._id} value={doctor._id}>
                 {doctor.name}
                 {doctor.specialization || doctor.department ? ` - ${doctor.specialization || doctor.department}` : ''}
+                {(doctor.consultationFee ?? 0) > 0 ? ` (GHS ${doctor.consultationFee})` : ''}
               </option>
             ))}
           </select>
@@ -378,6 +393,7 @@ function NewPatientAppointmentPageContent() {
             <div className="mt-3 rounded-md border border-teal-100 bg-teal-50 px-3 py-2 text-sm text-teal-900">
               <p className="font-semibold">{selectedDoctor.name}</p>
               <p className="text-xs">{selectedDoctor.specialization || selectedDoctor.department || 'Doctor'}</p>
+              <p className="mt-1 text-sm font-bold">{(selectedDoctor.consultationFee ?? 0) > 0 ? `GHS ${selectedDoctor.consultationFee} per consultation` : 'Free consultation'}</p>
             </div>
           ) : null}
         </section>
@@ -446,29 +462,6 @@ function NewPatientAppointmentPageContent() {
           </div>
           <div className="grid gap-3 lg:grid-cols-[1fr_16rem]">
             <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setForm((current) => ({ ...current, includeVideoCall: true }))}
-                  className={`inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-semibold ${
-                    form.includeVideoCall ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-200 bg-white text-gray-700'
-                  }`}
-                >
-                  <Video className="h-4 w-4" />
-                  Video consult
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setForm((current) => ({ ...current, includeVideoCall: false }))}
-                  className={`inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-semibold ${
-                    !form.includeVideoCall ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-200 bg-white text-gray-700'
-                  }`}
-                >
-                  <Calendar className="h-4 w-4" />
-                  In-person visit
-                </button>
-              </div>
-
               {form.includeVideoCall ? (
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -533,8 +526,18 @@ function NewPatientAppointmentPageContent() {
                   {form.appointmentDate} {form.appointmentTime || ''}
                 </p>
                 <p className="flex items-center gap-2">
-                  {form.includeVideoCall ? <Video className="h-4 w-4 text-gray-400" /> : <Calendar className="h-4 w-4 text-gray-400" />}
-                  {form.includeVideoCall ? `${form.consultationType} consultation` : 'In-person visit'}
+                  <Video className="h-4 w-4 text-gray-400" />
+                  {`${form.consultationType} consultation`}
+                </p>
+                <p className="flex items-center gap-2 border-t border-gray-200 pt-2 font-semibold text-gray-900">
+                  <CreditCard className="h-4 w-4 text-brand-600" />
+                  {access?.source === 'subscription'
+                    ? 'Included in your plan'
+                    : access?.source === 'payg'
+                      ? 'Fee paid ✓'
+                      : (selectedDoctor?.consultationFee ?? 0) > 0
+                        ? `Fee: GHS ${selectedDoctor?.consultationFee}`
+                        : 'Free consultation'}
                 </p>
               </div>
             </div>
@@ -548,14 +551,26 @@ function NewPatientAppointmentPageContent() {
           >
             Cancel
           </Link>
-          <button
-            type="submit"
-            disabled={submitting || !access?.allowed}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-            Book appointment
-          </button>
+          {access && !access.allowed ? (
+            <button
+              type="button"
+              disabled={paying || !form.doctorId || !form.appointmentTime}
+              onClick={startPaygPayment}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+              {access.amountDue ? `Pay GHS ${access.amountDue} & confirm` : 'Pay & confirm'}
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={submitting || !access?.allowed}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Confirm booking
+            </button>
+          )}
         </div>
       </form>
     </div>

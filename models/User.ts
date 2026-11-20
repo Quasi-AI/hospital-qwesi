@@ -35,6 +35,8 @@ export interface IUser {
   qualifications?: string[];
   languages?: string[];
   yearsOfExperience?: number;
+  /** Per-consultation fee a patient pays to book this doctor (GHS) */
+  consultationFee?: number;
   rating?: number;
   ratingCount?: number;
   agreement?: {
@@ -156,6 +158,11 @@ const userSchema = new mongoose.Schema<IUser>(
     yearsOfExperience: {
       type: Number,
       min: 0,
+    },
+    consultationFee: {
+      type: Number,
+      min: 0,
+      default: 0,
     },
     rating: {
       type: Number,

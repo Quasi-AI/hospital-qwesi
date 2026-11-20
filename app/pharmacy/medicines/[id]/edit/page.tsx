@@ -34,8 +34,8 @@ function EditMedicineForm({ params }: { params: Promise<{ id: string }> }) {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await fetch('/api/inventory/suppliers?isActive=true');
-      if (response.ok) setSuppliers(await response.json());
+      // Suppliers are managed outside the virtual platform; leave the list empty
+      setSuppliers([]);
     } catch (error) {
       console.error('Error fetching suppliers:', error);
     }
