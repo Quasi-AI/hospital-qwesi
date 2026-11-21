@@ -19,6 +19,8 @@ export type PublicDoctor = {
   bio: string;
   gender: string;
   practitionerType?: 'doctor' | 'herbalist';
+  /** true once an admin has verified the practitioner's licence */
+  verified?: boolean;
   photoUrl: string;
   slotDurationMinutes: number;
 };
@@ -87,10 +89,11 @@ export function DoctorCard({ doctor, portal = false }: { doctor: PublicDoctor; p
         <div className="min-w-0 flex-1">
           <h3 className="flex items-center gap-1.5 text-lg font-semibold leading-snug text-gray-900">
             <span className="truncate">{doctorTitle(doctor.name, doctor.practitionerType)}</span>
-            <BadgeCheck className="h-4 w-4 shrink-0 text-brand-600" aria-label="Verified licence" />
+            {doctor.verified !== false && <BadgeCheck className="h-4 w-4 shrink-0 text-brand-600" aria-label="Verified licence" />}
           </h3>
           <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm font-medium text-brand-700">
             {specialty}
+            {doctor.verified === false && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600">Not verified yet</span>}
             {herbal && <span className="rounded-full bg-accent-100 px-2 py-0.5 text-[11px] font-semibold text-accent-700">Herbalist</span>}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">

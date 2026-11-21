@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
-    if (!isProviderApproved(doctor as any)) {
+    if ((doctor as { approvalStatus?: string }).approvalStatus === 'rejected') {
       return NextResponse.json({ error: 'This doctor is not available for booking yet' }, { status: 403 });
     }
 

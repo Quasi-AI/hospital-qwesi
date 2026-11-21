@@ -77,7 +77,7 @@ export function DoctorProfile({ id, portal = false }: { id: string; portal?: boo
               <div className="min-w-0">
                 <h1 className="font-display flex flex-wrap items-center gap-2 text-3xl font-semibold text-brand-950">
                   {doctorTitle(doctor.name, doctor.practitionerType)}
-                  <BadgeCheck className="h-6 w-6 text-brand-600" aria-label="Verified licence" />
+                  {doctor.verified !== false ? <BadgeCheck className="h-6 w-6 text-brand-600" aria-label="Verified licence" /> : <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">Not verified yet</span>}
                 </h1>
                 <p className="mt-1 text-lg font-medium text-brand-700">{specialty}</p>
                 <div className="mt-3 flex flex-wrap gap-2 text-sm">

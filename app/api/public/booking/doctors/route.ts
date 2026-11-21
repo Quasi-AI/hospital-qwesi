@@ -6,14 +6,13 @@ import { getEffectiveDoctorSchedule } from '@/lib/appointmentSlotting';
 export const dynamic = 'force-dynamic';
 
 const PUBLIC_FIELDS =
-  '_id name email specialization department consultationFee rating ratingCount yearsOfExperience languages qualifications bio gender practitionerType';
+  '_id name email specialization department consultationFee rating ratingCount yearsOfExperience languages qualifications bio gender practitionerType approvalStatus';
 
+// Every doctor is listed (verified or not) except ones an admin has rejected.
+// `verified` on each result tells the UI whether to show the verified badge.
 const APPROVED_DOCTOR = {
   role: 'doctor',
-  approvalStatus: 'approved',
-  hasImage: true,
-  licenseNumber: { $exists: true, $ne: '' },
-  'licenseCertificate.data': { $exists: true, $ne: '' },
+  approvalStatus: { $ne: 'rejected' },
 };
 
 type PublicDoctorDoc = {
@@ -31,6 +30,7 @@ type PublicDoctorDoc = {
   bio?: string;
   gender?: string;
   practitionerType?: string;
+  approvalStatus?: string;
 };
 
 function shape(u: PublicDoctorDoc, slotDurationMinutes: number) {
@@ -50,6 +50,7 @@ function shape(u: PublicDoctorDoc, slotDurationMinutes: number) {
     qualifications: u.qualifications || [],
     bio: u.bio || '',
     gender: u.gender || '',
+    verified: u.approvalStatus === 'approved',
     practitionerType: u.practitionerType === 'herbalist' ? 'herbalist' : 'doctor',
     photoUrl: `/api/public/doctors/${id}/photo`,
     slotDurationMinutes,

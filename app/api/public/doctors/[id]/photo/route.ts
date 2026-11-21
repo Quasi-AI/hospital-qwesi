@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   try {
     const { id } = await params;
     await dbConnect();
-    const doctor = await User.findOne({ _id: id, role: 'doctor', approvalStatus: 'approved' })
+    const doctor = await User.findOne({ _id: id, role: 'doctor', approvalStatus: { $ne: 'rejected' } })
       .select('image')
       .lean<{ image?: string }>();
 
