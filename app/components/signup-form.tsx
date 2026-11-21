@@ -145,9 +145,11 @@ export default function SignupForm({ role }: { role: SignupRole }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[0.9fr_1.1fr]">
       {/* Brand panel */}
-      <aside className="qw-hero-bg hidden flex-col justify-between p-10 text-white lg:flex">
-        <LogoLink tone="dark" className="h-11" priority />
-        <div className="hero-in">
+      <aside className="qw-hero-bg hidden flex-col justify-between text-white lg:flex">
+        <div className="relative z-10 border-b border-brand-100 !bg-white px-10 py-5">
+          <LogoLink className="h-11" priority />
+        </div>
+        <div className="hero-in px-10">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
             <Icon className="h-7 w-7" />
           </span>
@@ -161,7 +163,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
             ))}
           </ul>
         </div>
-        <p className="text-xs text-white/50">Virtual care is not for emergencies.</p>
+        <p className="px-10 pb-8 text-xs text-white/50">Virtual care is not for emergencies.</p>
       </aside>
 
       {/* Form */}

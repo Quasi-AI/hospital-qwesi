@@ -37,14 +37,16 @@ export function PublicHeader({
   const [open, setOpen] = useState(false);
   const { data: session, status } = useSession();
   const signedIn = status === 'authenticated' && !!session;
-  const dark = tone === 'dark';
+  // Header is always a solid white bar so the logo's white background blends in on every page.
+  const dark = false;
+  void tone;
   const home =
     session?.user?.role === 'patient' ? '/patient-portal' : session?.user?.role === 'pharmacy' ? '/pharmacy' : '/dashboard';
 
   return (
     <header
-      className={`sticky top-0 z-40 border-b backdrop-blur-2xl backdrop-saturate-150 ${
-        dark ? 'border-white/15 bg-brand-950/35' : 'border-white/70 bg-white/55 shadow-[0_8px_32px_rgba(15,83,70,0.08)]'
+      className={`sticky top-0 z-40 border-b ${
+        'border-brand-100 !bg-white shadow-[0_4px_24px_rgba(76,48,190,0.08)]'
       }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
@@ -172,23 +174,23 @@ export function PublicFooter({
   const email = settings?.address?.email?.trim();
   const phone = settings?.address?.phone?.trim();
   return (
-    <footer className="bg-brand-950 text-white/80">
+    <footer className="border-t border-brand-100 !bg-white text-gray-600">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)] lg:px-8">
         <div>
-          <BrandMark settings={settings} inverse />
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/65">{content.footerTagline}</p>
+          <BrandMark settings={settings} />
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-gray-600">{content.footerTagline}</p>
           {(email || phone) && (
             <div className="mt-4 space-y-1 text-sm">
               {email && (
                 <p>
-                  <a className="hover:text-white" href={`mailto:${email}`}>
+                  <a className="hover:text-brand-700" href={`mailto:${email}`}>
                     {email}
                   </a>
                 </p>
               )}
               {phone && (
                 <p>
-                  <a className="hover:text-white" href={`tel:${phone}`}>
+                  <a className="hover:text-brand-700" href={`tel:${phone}`}>
                     {phone}
                   </a>
                 </p>
@@ -198,7 +200,7 @@ export function PublicFooter({
         </div>
         {content.footerColumns.map((col) => (
           <div key={col.title}>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white">{col.title}</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-brand-950">{col.title}</h3>
             <ul className="mt-4 space-y-2 text-sm">
               {col.lines.map((line) => {
                 const l = line.toLowerCase();
@@ -214,7 +216,7 @@ export function PublicFooter({
                 return (
                   <li key={line}>
                     {href ? (
-                      <Link href={href} className="hover:text-white">
+                      <Link href={href} className="hover:text-brand-700">
                         {line}
                       </Link>
                     ) : (
@@ -227,8 +229,8 @@ export function PublicFooter({
           </div>
         ))}
       </div>
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+      <div className="border-t border-brand-100">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p>
             © {new Date().getFullYear()} {brandName(settings)}. All rights reserved.
           </p>

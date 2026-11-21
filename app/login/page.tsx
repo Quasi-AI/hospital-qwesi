@@ -154,9 +154,11 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
-      <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex">
-        <LogoLink tone="dark" className="h-11" priority />
-        <div>
+      <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden text-white lg:flex">
+        <div className="relative z-10 border-b border-brand-100 !bg-white px-12 py-5">
+          <LogoLink className="h-11" priority />
+        </div>
+        <div className="px-12">
           <h1 className="font-display text-4xl font-semibold leading-tight xl:text-5xl">
             Your doctor is one <span className="text-accent-300">booking</span> away.
           </h1>
@@ -166,7 +168,7 @@ export default function LoginPage() {
             <li className="flex items-start gap-3"><Video className="mt-1 h-5 w-5 shrink-0 text-accent-300" /> Video, audio or chat from anywhere</li>
           </ul>
         </div>
-        <p className="text-sm text-white/50">Virtual care is not for emergencies.</p>
+        <p className="px-12 pb-8 text-sm text-white/50">Virtual care is not for emergencies.</p>
       </aside>
 
       {/* Form panel */}
