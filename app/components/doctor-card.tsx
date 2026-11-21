@@ -18,6 +18,9 @@ export type PublicDoctor = {
   qualifications: string[];
   bio: string;
   gender: string;
+  practitionerType?: 'doctor' | 'herbalist';
+  /** true once an admin has verified the practitioner's licence */
+  verified?: boolean;
   photoUrl: string;
   slotDurationMinutes: number;
 };
@@ -27,7 +30,12 @@ export function formatFee(fee: number, currency = 'GHS') {
   return `${currency} ${Number.isInteger(fee) ? fee : fee.toFixed(2)}`;
 }
 
-export function doctorTitle(name: string) {
+export function isHerbalist(d?: { practitionerType?: string }) {
+  return d?.practitionerType === 'herbalist';
+}
+
+export function doctorTitle(name: string, practitionerType?: string) {
+  if (practitionerType === 'herbalist') return name.replace(/^dr\.?\s+/i, '');
   return /^dr\.?\s/i.test(name) ? name : `Dr. ${name}`;
 }
 
@@ -35,7 +43,7 @@ export function DoctorAvatar({
   doctor,
   className = 'h-20 w-20',
 }: {
-  doctor: Pick<PublicDoctor, 'name' | 'photoUrl'>;
+  doctor: Pick<PublicDoctor, 'name' | 'photoUrl'> & { practitionerType?: string };
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);
@@ -61,7 +69,7 @@ export function DoctorAvatar({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={doctor.photoUrl}
-      alt={doctorTitle(doctor.name)}
+      alt={doctorTitle(doctor.name, (doctor as PublicDoctor).practitionerType)}
       loading="lazy"
       onError={() => setFailed(true)}
       className={`${className} shrink-0 rounded-2xl bg-brand-50 object-cover`}
@@ -72,17 +80,22 @@ export function DoctorAvatar({
 export function DoctorCard({ doctor, portal = false }: { doctor: PublicDoctor; portal?: boolean }) {
   const profileHref = portal ? `/patient-portal/doctors/${doctor.id}` : `/find-doctors/${doctor.id}`;
   const bookHref = portal ? `/patient-portal/appointments/new?doctorId=${doctor.id}` : `/find-doctors/${doctor.id}?book=1`;
-  const specialty = doctor.specialization || doctor.department || 'General Practice';
+  const herbal = isHerbalist(doctor);
+  const specialty = doctor.specialization || doctor.department || (herbal ? 'Herbal medicine' : 'General Practice');
   return (
     <article className="qw-card flex h-full flex-col p-5">
       <div className="flex items-start gap-4">
         <DoctorAvatar doctor={doctor} />
         <div className="min-w-0 flex-1">
           <h3 className="flex items-center gap-1.5 text-lg font-semibold leading-snug text-gray-900">
-            <span className="truncate">{doctorTitle(doctor.name)}</span>
-            <BadgeCheck className="h-4 w-4 shrink-0 text-brand-600" aria-label="Verified licence" />
+            <span className="truncate">{doctorTitle(doctor.name, doctor.practitionerType)}</span>
+            {doctor.verified !== false && <BadgeCheck className="h-4 w-4 shrink-0 text-brand-600" aria-label="Verified licence" />}
           </h3>
-          <p className="mt-0.5 text-sm font-medium text-brand-700">{specialty}</p>
+          <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm font-medium text-brand-700">
+            {specialty}
+            {doctor.verified === false && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600">Not verified yet</span>}
+            {herbal && <span className="rounded-full bg-accent-100 px-2 py-0.5 text-[11px] font-semibold text-accent-700">Herbalist</span>}
+          </p>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
             {doctor.rating != null && (
               <span className="inline-flex items-center gap-1 font-semibold text-accent-700">

@@ -281,11 +281,11 @@ export default function LoginPage() {
                   <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">Sign up</span>
                 </Link>
                 <Link
-                  href="/signup/doctor"
+                  href="/signup"
                   className="flex items-center justify-between rounded-2xl border border-accent-200 bg-accent-50 p-4 transition hover:border-accent-400"
                 >
                   <span>
-                    <span className="block text-sm font-semibold text-accent-700">Are you a doctor?</span>
+                    <span className="block text-sm font-semibold text-accent-700">Are you a doctor or herbalist?</span>
                     <span className="block text-xs text-accent-700/80">Join, set your own fee and start earning.</span>
                   </span>
                   <span className="rounded-full bg-accent-400 px-3 py-1.5 text-xs font-semibold text-brand-950">Join</span>

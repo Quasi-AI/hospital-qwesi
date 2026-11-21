@@ -203,7 +203,7 @@ export default function PatientPortalDashboard() {
                     >
                       <DoctorAvatar doctor={d} className="h-12 w-12" />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-gray-900">{doctorTitle(d.name)}</span>
+                        <span className="block truncate text-sm font-semibold text-gray-900">{doctorTitle(d.name, d.practitionerType)}</span>
                         <span className="block truncate text-xs text-gray-600">{d.specialization || d.department || 'General Practice'}</span>
                       </span>
                       <span className="text-sm font-bold text-brand-800">{formatFee(d.consultationFee, d.currency)}</span>

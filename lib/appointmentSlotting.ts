@@ -237,7 +237,7 @@ export async function computeDoctorDaySlots(
     }
     if (
       options?.forPublicWebsite &&
-      !isProviderApproved(doctor as any)
+      (doctor as { approvalStatus?: string }).approvalStatus === 'rejected'
     ) {
       return { ok: false, error: 'Doctor is not available for online booking', status: 403 };
     }

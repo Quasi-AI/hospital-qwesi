@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       if (!mongoose.Types.ObjectId.isValid(itemId)) {
         return NextResponse.json({ error: 'Unknown doctor' }, { status: 400 });
       }
-      const doctor = (await User.findOne({ _id: itemId, role: 'doctor', approvalStatus: 'approved' })
+      const doctor = (await User.findOne({ _id: itemId, role: 'doctor', approvalStatus: { $ne: 'rejected' } })
         .select('name consultationFee')
         .lean()) as { name: string; consultationFee?: number } | null;
       if (!doctor) return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });

@@ -37,6 +37,8 @@ export interface IUser {
   yearsOfExperience?: number;
   /** Per-consultation fee a patient pays to book this doctor (GHS) */
   consultationFee?: number;
+  /** Kind of practitioner behind a 'doctor' account: medical doctor or herbalist */
+  practitionerType?: 'doctor' | 'herbalist';
   rating?: number;
   ratingCount?: number;
   agreement?: {
@@ -158,6 +160,11 @@ const userSchema = new mongoose.Schema<IUser>(
     yearsOfExperience: {
       type: Number,
       min: 0,
+    },
+    practitionerType: {
+      type: String,
+      enum: ['doctor', 'herbalist'],
+      default: 'doctor',
     },
     consultationFee: {
       type: Number,
