@@ -103,8 +103,11 @@ export default function LoginPage() {
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      setError('Please enter a valid email address');
+    const id = formData.email.trim();
+    const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
+    const looksLikePhone = !id.includes('@') && id.replace(/\D/g, '').length >= 9;
+    if (!looksLikeEmail && !looksLikePhone) {
+      setError('Enter a valid email address or phone number');
       setIsLoading(false);
       return;
     }
@@ -122,7 +125,7 @@ export default function LoginPage() {
             'Your account is still pending admin approval. You\u2019ll be able to log in as soon as it\u2019s approved — no need to sign up again.'
           );
         } else {
-          setError('Invalid email or password');
+          setError('Invalid login or password');
         }
       } else {
         router.refresh();
@@ -130,7 +133,7 @@ export default function LoginPage() {
         if (session?.user?.role === 'admin') {
           // Administrators sign in through their own private page.
           await signOut({ redirect: false });
-          setError('Invalid email or password');
+          setError('Invalid login or password');
           return;
         }
         if (session?.user?.role === 'patient') {
@@ -185,19 +188,20 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="mt-7 space-y-4">
                 <div>
-                  <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">{t('login.email')}</label>
+                  <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">Email or phone number</label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                       id="email"
                       name="email"
-                      type="email"
-                      autoComplete="email"
+                      type="text"
+                      inputMode="email"
+                      autoComplete="username"
                       required
                       value={formData.email}
                       onChange={handleInputChange}
                       className="block h-12 w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-3 text-base transition focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
-                      placeholder={t('login.email')}
+                      placeholder="Email or phone number"
                       disabled={isLoading}
                       suppressHydrationWarning
                     />

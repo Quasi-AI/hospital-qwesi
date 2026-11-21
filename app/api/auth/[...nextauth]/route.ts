@@ -2,6 +2,7 @@ import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import clientPromise from '../../../../lib/mongodb-adapter';
+import { findPatientByPhone } from '@/lib/bridge';
 import dbConnect from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import Patient from '../../../../models/Patient';
@@ -31,7 +32,19 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        const email = credentials.email.trim().toLowerCase();
+        let email = credentials.email.trim().toLowerCase();
+
+        // Phone-number login (WhatsApp / Facebook patients): resolve the number to its account email.
+        if (!email.includes('@')) {
+          try {
+            await dbConnect();
+            const byPhone = await findPatientByPhone(email);
+            if (!byPhone?.email) return null;
+            email = byPhone.email;
+          } catch {
+            return null;
+          }
+        }
 
         try {
           await dbConnect();
