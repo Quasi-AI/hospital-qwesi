@@ -1,5 +1,6 @@
 'use client';
 
+import { CURRENCIES, CURRENCY_LABELS } from '@/lib/practitioner-currency';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -44,6 +45,7 @@ export default function ProfilePage() {
     licenseCertificateFileType: '',
     languages: [] as string[],
     consultationFee: '',
+    currency: 'GHS',
     bio: '',
     approvalStatus: 'approved',
     licenseVerificationMessage: '',
@@ -89,6 +91,7 @@ export default function ProfilePage() {
             licenseCertificateFileType: data.user.licenseCertificate?.fileType || '',
             languages: data.user.languages || [],
             consultationFee: data.user.consultationFee != null ? String(data.user.consultationFee) : '',
+            currency: data.user.currency || 'GHS',
             bio: data.user.bio || '',
             approvalStatus: data.user.approvalStatus || 'approved',
             licenseVerificationMessage: data.user.licenseVerification?.message || '',
@@ -176,6 +179,7 @@ export default function ProfilePage() {
           licenseCertificateFileType: formData.licenseCertificateFileType,
           languages: formData.languages,
           consultationFee: formData.consultationFee === '' ? 0 : Number(formData.consultationFee),
+          currency: formData.currency,
           bio: formData.bio,
         }),
       });
@@ -493,8 +497,18 @@ export default function ProfilePage() {
                       <div className="grid gap-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
                         <div>
                           <label htmlFor="consultationFee" className="mb-1 block text-sm font-semibold text-gray-900">
-                            Your consultation fee (GHS)
+                            Your consultation fee
                           </label>
+                          <select
+                            id="currency"
+                            value={formData.currency}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, currency: event.target.value }))}
+                            className="mb-2 w-full rounded-lg border border-gray-300 px-3 py-2"
+                          >
+                            {CURRENCIES.map((c) => (
+                              <option key={c} value={c}>{CURRENCY_LABELS[c]}</option>
+                            ))}
+                          </select>
                           <input
                             id="consultationFee"
                             type="number"

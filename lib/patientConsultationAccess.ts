@@ -1,3 +1,4 @@
+import { normalizeCurrency, type Currency } from '@/lib/practitioner-currency';
 import mongoose from 'mongoose';
 import Appointment from '@/models/Appointment';
 import PatientSubscription from '@/models/PatientSubscription';
@@ -33,14 +34,18 @@ export type PatientConsultationAccess = {
     itemId: string;
     itemName: string;
     amount: number;
-    currency: 'GHS' | 'USD';
+    currency: Currency;
   };
-  /** Set when a specific doctor was requested: that doctor's fee in GHS */
-  doctor?: { id: string; name: string; consultationFee: number; currency: 'GHS' };
+  /** Set when a specific doctor was requested: that doctor's fee in their own currency */
+  doctor?: { id: string; name: string; consultationFee: number; currency: Currency; practitionerType?: string };
   /** Amount the patient still has to pay to book (0 when already covered) */
   amountDue?: number;
   message: string;
 };
+
+function displayName(d: { name: string; practitionerType?: string }) {
+  return d.practitionerType === 'herbalist' ? d.name : `Dr. ${d.name.replace(/^dr\.?\s+/i, '')}`;
+}
 
 function normalizeEmail(email: string) {
   return String(email || '').trim().toLowerCase();
@@ -70,15 +75,16 @@ export async function getPatientConsultationAccess(params: {
   const requestedDoctor =
     params.doctorId && mongoose.Types.ObjectId.isValid(params.doctorId)
       ? ((await User.findOne({ _id: params.doctorId, role: 'doctor' })
-          .select('name consultationFee')
-          .lean()) as { _id: { toString: () => string }; name: string; consultationFee?: number } | null)
+          .select('name consultationFee currency practitionerType')
+          .lean()) as { _id: { toString: () => string }; name: string; consultationFee?: number; currency?: string; practitionerType?: string } | null)
       : null;
   const doctorInfo = requestedDoctor
     ? {
         id: requestedDoctor._id.toString(),
         name: requestedDoctor.name,
         consultationFee: Number(requestedDoctor.consultationFee || 0),
-        currency: 'GHS' as const,
+        currency: normalizeCurrency(requestedDoctor.currency),
+        practitionerType: requestedDoctor.practitionerType,
       }
     : undefined;
 
@@ -147,7 +153,7 @@ export async function getPatientConsultationAccess(params: {
       itemId: string;
       itemName: string;
       amount: number;
-      currency: 'GHS' | 'USD';
+      currency: Currency;
     };
     return {
       allowed: true,
@@ -176,7 +182,7 @@ export async function getPatientConsultationAccess(params: {
       hasActiveSubscription: false,
       doctor: doctorInfo,
       amountDue: 0,
-      message: `Dr. ${doctorInfo.name} offers free consultations.`,
+      message: `${displayName(doctorInfo)} offers free consultations.`,
     };
   }
 
@@ -188,7 +194,7 @@ export async function getPatientConsultationAccess(params: {
     doctor: doctorInfo,
     amountDue: doctorInfo?.consultationFee,
     message: doctorInfo
-      ? `Pay Dr. ${doctorInfo.name}'s consultation fee of GHS ${doctorInfo.consultationFee} to confirm your booking.`
+      ? `Pay ${displayName(doctorInfo)}'s consultation fee of ${doctorInfo.currency} ${doctorInfo.consultationFee} to confirm your booking.`
       : 'Choose a doctor to see the consultation fee, or subscribe for included consultations.',
   };
 }

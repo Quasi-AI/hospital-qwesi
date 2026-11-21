@@ -135,7 +135,7 @@ export const qwesiSubscriptionPlans: QwesiSubscriptionPlan[] = [
     maxAmount: 50,
     currency: 'USD',
     billingInterval: 'month',
-    audience: 'For families abroad caring for loved ones in Ghana.',
+    audience: 'For families abroad caring for loved ones back home.',
     features: [
       'Nurse check-ins for parent/relative',
       'Doctor review access',

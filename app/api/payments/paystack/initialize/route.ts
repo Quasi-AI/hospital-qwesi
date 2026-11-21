@@ -1,3 +1,4 @@
+import { normalizeCurrency } from '@/lib/practitioner-currency';
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     let itemName = '';
     let amount = 0;
-    let currency: 'GHS' | 'USD' = 'GHS';
+    let currency: 'GHS' | 'USD' | 'NGN' | 'KES' | 'ZAR' = 'GHS';
     let metadata: Record<string, unknown> = {};
     let storedItemType: 'subscription' | 'payg' | 'invoice' | null = null;
     let storedItemId: string | null = null;
@@ -68,16 +69,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unknown doctor' }, { status: 400 });
       }
       const doctor = (await User.findOne({ _id: itemId, role: 'doctor', approvalStatus: { $ne: 'rejected' } })
-        .select('name consultationFee')
-        .lean()) as { name: string; consultationFee?: number } | null;
+        .select('name consultationFee currency practitionerType')
+        .lean()) as { name: string; consultationFee?: number; currency?: string; practitionerType?: string } | null;
       if (!doctor) return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
       const fee = Number(doctor.consultationFee || 0);
       if (fee <= 0) {
         return NextResponse.json({ error: 'This doctor offers free consultations - no payment needed' }, { status: 400 });
       }
-      itemName = `Consultation with Dr. ${doctor.name}`;
+      itemName = `Consultation with ${doctor.practitionerType === 'herbalist' ? '' : 'Dr. '}${doctor.name}`;
       amount = fee;
-      currency = 'GHS';
+      currency = normalizeCurrency(doctor.currency);
       storedItemType = 'payg';
       storedItemId = 'doctor-virtual-consultation';
       metadata = { paygId: 'doctor-virtual-consultation', serviceName: itemName, doctorId: itemId, doctorName: doctor.name };

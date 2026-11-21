@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
+import { normalizeCurrency } from '@/lib/practitioner-currency';
 import User from '@/models/User';
 import { getEffectiveDoctorSchedule } from '@/lib/appointmentSlotting';
 
 export const dynamic = 'force-dynamic';
 
 const PUBLIC_FIELDS =
-  '_id name email specialization department consultationFee rating ratingCount yearsOfExperience languages qualifications bio gender practitionerType approvalStatus';
+  '_id name email specialization department consultationFee rating ratingCount yearsOfExperience languages qualifications bio gender practitionerType approvalStatus currency';
 
 // Every doctor is listed (verified or not) except ones an admin has rejected.
 // `verified` on each result tells the UI whether to show the verified badge.
@@ -31,6 +32,7 @@ type PublicDoctorDoc = {
   gender?: string;
   practitionerType?: string;
   approvalStatus?: string;
+  currency?: string;
 };
 
 function shape(u: PublicDoctorDoc, slotDurationMinutes: number) {
@@ -42,7 +44,7 @@ function shape(u: PublicDoctorDoc, slotDurationMinutes: number) {
     specialization: u.specialization || '',
     department: u.department || '',
     consultationFee: Number(u.consultationFee || 0),
-    currency: 'GHS',
+    currency: normalizeCurrency(u.currency),
     rating: u.rating ?? null,
     ratingCount: u.ratingCount ?? 0,
     yearsOfExperience: u.yearsOfExperience ?? null,

@@ -8,7 +8,7 @@ export interface IPatientSubscription {
   planId: string;
   planName: string;
   amount: number;
-  currency: 'GHS' | 'USD';
+  currency: 'GHS' | 'USD' | 'NGN' | 'KES' | 'ZAR';
   status: 'active' | 'past_due' | 'cancelled' | 'expired';
   startedAt: Date;
   currentPeriodStart: Date;
@@ -26,7 +26,7 @@ const patientSubscriptionSchema = new mongoose.Schema<IPatientSubscription>(
     planId: { type: String, required: true, trim: true },
     planName: { type: String, required: true, trim: true },
     amount: { type: Number, required: true, min: 0 },
-    currency: { type: String, enum: ['GHS', 'USD'], required: true },
+    currency: { type: String, enum: ['GHS', 'USD', 'NGN', 'KES', 'ZAR'], required: true },
     status: {
       type: String,
       enum: ['active', 'past_due', 'cancelled', 'expired'],

@@ -245,7 +245,7 @@ export default function PatientPortalDashboard() {
             <WalletCards className="h-6 w-6 shrink-0 text-accent-600" />
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-semibold text-gray-900">{plan ? `${plan} plan` : 'Save with a care plan'}</span>
-              <span className="block text-xs text-gray-600">{plan ? 'Manage your plan' : 'Included consultations from GHS 50/month'}</span>
+              <span className="block text-xs text-gray-600">{plan ? 'Manage your plan' : 'Included consultations with a monthly care plan'}</span>
             </span>
             <ArrowRight className="h-4 w-4 text-accent-600" />
           </Link>

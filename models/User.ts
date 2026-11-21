@@ -35,10 +35,12 @@ export interface IUser {
   qualifications?: string[];
   languages?: string[];
   yearsOfExperience?: number;
-  /** Per-consultation fee a patient pays to book this doctor (GHS) */
+  /** Per-consultation fee a patient pays to book this doctor (in `currency`) */
   consultationFee?: number;
   /** Kind of practitioner behind a 'doctor' account: medical doctor or herbalist */
   practitionerType?: 'doctor' | 'herbalist';
+  /** Currency the consultation fee is charged in */
+  currency?: 'USD' | 'GHS' | 'NGN' | 'KES' | 'ZAR';
   rating?: number;
   ratingCount?: number;
   agreement?: {
@@ -160,6 +162,11 @@ const userSchema = new mongoose.Schema<IUser>(
     yearsOfExperience: {
       type: Number,
       min: 0,
+    },
+    currency: {
+      type: String,
+      enum: ['USD', 'GHS', 'NGN', 'KES', 'ZAR'],
+      default: 'GHS',
     },
     practitionerType: {
       type: String,

@@ -38,6 +38,7 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
   const [kind, setKind] = useState<'' | 'doctor' | 'herbalist'>('');
   const [language, setLanguage] = useState('');
   const [maxFee, setMaxFee] = useState<number | null>(null);
+  const [currency, setCurrency] = useState('');
   const [sort, setSort] = useState<Sort>('recommended');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -49,7 +50,13 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
     () => Array.from(new Set(doctors.flatMap((d) => d.languages))).sort((a, b) => a.localeCompare(b)),
     [doctors]
   );
-  const highestFee = useMemo(() => Math.max(0, ...doctors.map((d) => d.consultationFee)), [doctors]);
+  const currencies = useMemo(() => Array.from(new Set(doctors.map((d) => d.currency || 'GHS'))).sort(), [doctors]);
+  // Fees in different currencies can't be compared, so price tools work within one currency
+  const activeCurrency = currency || (currencies.length === 1 ? currencies[0] : '');
+  const highestFee = useMemo(
+    () => Math.max(0, ...doctors.filter((d) => !activeCurrency || (d.currency || 'GHS') === activeCurrency).map((d) => d.consultationFee)),
+    [doctors, activeCurrency]
+  );
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -57,24 +64,26 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
       if (kind && (d.practitionerType || 'doctor') !== kind) return false;
       if (specialty && specialtyOf(d) !== specialty) return false;
       if (language && !d.languages.includes(language)) return false;
+      if (currency && (d.currency || 'GHS') !== currency) return false;
       if (maxFee != null && d.consultationFee > maxFee) return false;
       if (!q) return true;
       return [d.name, specialtyOf(d), d.bio, ...d.qualifications, ...d.languages].join(' ').toLowerCase().includes(q);
     });
     const sorted = [...list];
-    if (sort === 'price-asc') sorted.sort((a, b) => a.consultationFee - b.consultationFee);
-    else if (sort === 'price-desc') sorted.sort((a, b) => b.consultationFee - a.consultationFee);
+    if (sort === 'price-asc' && activeCurrency) sorted.sort((a, b) => a.consultationFee - b.consultationFee);
+    else if (sort === 'price-desc' && activeCurrency) sorted.sort((a, b) => b.consultationFee - a.consultationFee);
     else if (sort === 'rating') sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     else if (sort === 'experience') sorted.sort((a, b) => (b.yearsOfExperience ?? 0) - (a.yearsOfExperience ?? 0));
     else sorted.sort((a, b) => (b.rating ?? 0) * Math.log(2 + b.ratingCount) - (a.rating ?? 0) * Math.log(2 + a.ratingCount));
     return sorted;
-  }, [doctors, query, kind, specialty, language, maxFee, sort]);
+  }, [doctors, query, kind, specialty, language, currency, activeCurrency, maxFee, sort]);
 
-  const activeFilters = [specialty, language, maxFee != null ? `≤ GHS ${maxFee}` : ''].filter(Boolean).length;
+  const activeFilters = [specialty, language, currency, maxFee != null ? `≤ ${activeCurrency} ${maxFee}` : ''].filter(Boolean).length;
   const clearAll = () => {
     setQuery('');
     setSpecialty('');
     setLanguage('');
+    setCurrency('');
     setMaxFee(null);
   };
 
@@ -104,8 +113,8 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
               className="h-12 flex-1 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 sm:w-52 sm:flex-none"
             >
               <option value="recommended">Recommended</option>
-              <option value="price-asc">Fee: low to high</option>
-              <option value="price-desc">Fee: high to low</option>
+              <option value="price-asc" disabled={!activeCurrency}>Fee: low to high</option>
+              <option value="price-desc" disabled={!activeCurrency}>Fee: high to low</option>
               <option value="rating">Top rated</option>
               <option value="experience">Most experienced</option>
             </select>
@@ -143,7 +152,25 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
               </option>
             ))}
           </select>
-          <label className="flex h-11 items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700">
+          {currencies.length > 1 && (
+            <select
+              aria-label="Currency"
+              value={currency}
+              onChange={(e) => {
+                setCurrency(e.target.value);
+                setMaxFee(null);
+              }}
+              className={selectCls}
+            >
+              <option value="">All currencies</option>
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+          <label className={`flex h-11 items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 ${activeCurrency ? '' : 'opacity-50'}`}>
             <span className="shrink-0 whitespace-nowrap">Max fee</span>
             <input
               type="range"
@@ -155,9 +182,11 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
                 const v = Number(e.target.value);
                 setMaxFee(v >= Math.max(50, Math.ceil(highestFee / 10) * 10) ? null : v);
               }}
+              disabled={!activeCurrency}
+              title={activeCurrency ? undefined : 'Pick a currency to filter by fee'}
               className="w-full accent-brand-600"
             />
-            <span className="w-20 shrink-0 text-right font-semibold text-brand-800">{maxFee != null ? `GHS ${maxFee}` : 'Any'}</span>
+            <span className="w-24 shrink-0 text-right font-semibold text-brand-800">{maxFee != null ? `${activeCurrency} ${maxFee}` : 'Any'}</span>
           </label>
         </div>
       </div>
