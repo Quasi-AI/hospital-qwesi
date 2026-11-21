@@ -143,7 +143,7 @@ export function HospitalLanding({
                   >
                     <DoctorAvatar doctor={d} className="h-16 w-16" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold">{doctorTitle(d.name)}</p>
+                      <p className="truncate font-semibold">{doctorTitle(d.name, d.practitionerType)}</p>
                       <p className="truncate text-sm text-brand-700">{d.specialization || d.department || 'General Practice'}</p>
                     </div>
                     <div className="text-right">

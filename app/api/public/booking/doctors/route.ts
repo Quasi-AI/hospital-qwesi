@@ -6,7 +6,7 @@ import { getEffectiveDoctorSchedule } from '@/lib/appointmentSlotting';
 export const dynamic = 'force-dynamic';
 
 const PUBLIC_FIELDS =
-  '_id name email specialization department consultationFee rating ratingCount yearsOfExperience languages qualifications bio gender';
+  '_id name email specialization department consultationFee rating ratingCount yearsOfExperience languages qualifications bio gender practitionerType';
 
 const APPROVED_DOCTOR = {
   role: 'doctor',
@@ -30,6 +30,7 @@ type PublicDoctorDoc = {
   qualifications?: string[];
   bio?: string;
   gender?: string;
+  practitionerType?: string;
 };
 
 function shape(u: PublicDoctorDoc, slotDurationMinutes: number) {
@@ -49,6 +50,7 @@ function shape(u: PublicDoctorDoc, slotDurationMinutes: number) {
     qualifications: u.qualifications || [],
     bio: u.bio || '',
     gender: u.gender || '',
+    practitionerType: u.practitionerType === 'herbalist' ? 'herbalist' : 'doctor',
     photoUrl: `/api/public/doctors/${id}/photo`,
     slotDurationMinutes,
   };

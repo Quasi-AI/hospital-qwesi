@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   FileText,
   Heart,
+  Leaf,
   Lock,
   Mail,
   Phone,
@@ -16,7 +17,7 @@ import {
   User,
 } from 'lucide-react';
 
-export type SignupRole = 'patient' | 'doctor' | 'pharmacy';
+export type SignupRole = 'patient' | 'doctor' | 'herbalist' | 'pharmacy';
 
 const copy: Record<
   SignupRole,
@@ -30,6 +31,7 @@ const copy: Record<
     points: ['Browse verified doctors and their fees', 'Pay securely to confirm a booking', 'Prescriptions and reports in one place'],
     other: [
       { href: '/signup/doctor', label: 'I’m a doctor' },
+      { href: '/signup/herbalist', label: 'I’m a herbalist' },
       { href: '/signup/pharmacy', label: 'I’m a pharmacy' },
     ],
   },
@@ -41,6 +43,19 @@ const copy: Record<
     points: ['You decide your consultation fee', 'Patients pay up front to book you', 'Video, audio or chat from anywhere'],
     other: [
       { href: '/signup/patient', label: 'I’m a patient' },
+      { href: '/signup/herbalist', label: 'I’m a herbalist' },
+      { href: '/signup/pharmacy', label: 'I’m a pharmacy' },
+    ],
+  },
+  herbalist: {
+    title: 'Join as a herbalist',
+    subtitle: 'Offer herbal consultations, set your own fee and get booked by patients. Your credentials are reviewed before your profile goes live.',
+    icon: Leaf,
+    submit: 'Submit for approval',
+    points: ['You decide your consultation fee', 'Patients pay up front to book you', 'Consult by video, audio or chat'],
+    other: [
+      { href: '/signup/patient', label: 'I’m a patient' },
+      { href: '/signup/doctor', label: 'I’m a doctor' },
       { href: '/signup/pharmacy', label: 'I’m a pharmacy' },
     ],
   },
@@ -53,6 +68,7 @@ const copy: Record<
     other: [
       { href: '/signup/patient', label: 'I’m a patient' },
       { href: '/signup/doctor', label: 'I’m a doctor' },
+      { href: '/signup/herbalist', label: 'I’m a herbalist' },
     ],
   },
 };
@@ -196,11 +212,11 @@ export default function SignupForm({ role }: { role: SignupRole }) {
               </>
             )}
 
-            {role === 'doctor' && (
+            {(role === 'doctor' || role === 'herbalist') && (
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Specialization" value={form.specialization} onChange={(v) => update('specialization', v)} placeholder="e.g. Cardiology" required />
-                  <Field label="Licence number" value={form.licenseNumber} onChange={(v) => update('licenseNumber', v)} required />
+                  <Field label="Specialization" value={form.specialization} onChange={(v) => update('specialization', v)} placeholder={role === 'herbalist' ? 'e.g. Herbal medicine' : 'e.g. Cardiology'} required />
+                  <Field label={role === 'herbalist' ? 'Registration / licence number' : 'Licence number'} value={form.licenseNumber} onChange={(v) => update('licenseNumber', v)} required />
                   <Field label="Years of experience" value={form.yearsOfExperience} onChange={(v) => update('yearsOfExperience', v)} type="number" />
                   <Field label="Consultation fee (GHS)" value={form.consultationFee} onChange={(v) => update('consultationFee', v)} type="number" placeholder="e.g. 150" required />
                 </div>

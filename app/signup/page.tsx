@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
-import { ArrowRight, Heart, Pill, Stethoscope } from 'lucide-react';
+import { ArrowRight, Heart, Leaf, Pill, Stethoscope } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Create an account · Qwesi' };
 
@@ -23,6 +23,14 @@ const options = [
     note: 'Licence reviewed first',
   },
   {
+    href: '/signup/herbalist',
+    title: 'Herbalist',
+    text: 'Offer herbal consultations, set your fee and get booked by patients.',
+    cta: 'Join as a herbalist',
+    icon: Leaf,
+    note: 'Credentials reviewed first',
+  },
+  {
     href: '/signup/pharmacy',
     title: 'Pharmacy',
     text: 'Receive e-prescriptions and dispense medicine to patients.',
@@ -42,7 +50,7 @@ export default async function SignupChooser({
 
   // Old deep links (?role=doctor&phone=...) go straight to the right page.
   const role = pick('role');
-  if (role === 'patient' || role === 'doctor' || role === 'pharmacy') {
+  if (role === 'patient' || role === 'doctor' || role === 'herbalist' || role === 'pharmacy') {
     const qs = new URLSearchParams();
     for (const k of ['phone', 'next']) {
       const v = pick(k);
@@ -60,7 +68,7 @@ export default async function SignupChooser({
         <h1 className="font-display text-3xl font-semibold text-brand-950 sm:text-4xl">Create your account</h1>
         <p className="mt-2 text-gray-600">Choose how you’ll use Qwesi.</p>
       </div>
-      <div className="reveal-stagger mt-10 grid w-full max-w-4xl gap-5 md:grid-cols-3">
+      <div className="reveal-stagger mt-10 grid w-full max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {options.map(({ href, title, text, cta, icon: Icon, note }) => (
           <Link key={href} href={`${href}${href === '/signup/patient' ? suffix : ''}`} className="qw-card group flex flex-col p-6">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">

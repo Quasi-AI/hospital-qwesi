@@ -35,6 +35,7 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
   const { doctors, loading, error } = usePublicDoctors();
   const [query, setQuery] = useState('');
   const [specialty, setSpecialty] = useState(initialSpecialty);
+  const [kind, setKind] = useState<'' | 'doctor' | 'herbalist'>('');
   const [language, setLanguage] = useState('');
   const [maxFee, setMaxFee] = useState<number | null>(null);
   const [sort, setSort] = useState<Sort>('recommended');
@@ -53,6 +54,7 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = doctors.filter((d) => {
+      if (kind && (d.practitionerType || 'doctor') !== kind) return false;
       if (specialty && specialtyOf(d) !== specialty) return false;
       if (language && !d.languages.includes(language)) return false;
       if (maxFee != null && d.consultationFee > maxFee) return false;
@@ -66,7 +68,7 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
     else if (sort === 'experience') sorted.sort((a, b) => (b.yearsOfExperience ?? 0) - (a.yearsOfExperience ?? 0));
     else sorted.sort((a, b) => (b.rating ?? 0) * Math.log(2 + b.ratingCount) - (a.rating ?? 0) * Math.log(2 + a.ratingCount));
     return sorted;
-  }, [doctors, query, specialty, language, maxFee, sort]);
+  }, [doctors, query, kind, specialty, language, maxFee, sort]);
 
   const activeFilters = [specialty, language, maxFee != null ? `≤ GHS ${maxFee}` : ''].filter(Boolean).length;
   const clearAll = () => {
@@ -159,6 +161,23 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
           </label>
         </div>
       </div>
+
+      {doctors.some((d) => d.practitionerType === 'herbalist') && (
+        <div className="mt-4 inline-flex rounded-full border border-gray-200 bg-white p-1 text-sm font-semibold" role="tablist" aria-label="Practitioner type">
+          {([['', 'All'], ['doctor', 'Doctors'], ['herbalist', 'Herbalists']] as const).map(([v, label]) => (
+            <button
+              key={v}
+              type="button"
+              role="tab"
+              aria-selected={kind === v}
+              onClick={() => setKind(v)}
+              className={`rounded-full px-4 py-1.5 transition ${kind === v ? 'bg-brand-600 text-white' : 'text-gray-700 hover:text-brand-700'}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {specialties.length > 0 && (
         <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0" role="tablist" aria-label="Specialties">
