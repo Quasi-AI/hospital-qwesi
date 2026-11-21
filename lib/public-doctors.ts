@@ -35,7 +35,7 @@ export function shapePublicDoctor(u: PublicDoctorDoc, slotDurationMinutes: numbe
     bio: u.bio || '',
     gender: u.gender || '',
     verified: u.approvalStatus === 'approved',
-    practitionerType: u.practitionerType === 'herbalist' ? 'herbalist' : 'doctor',
+    practitionerType: u.practitionerType === 'herbalist' ? ('herbalist' as const) : ('doctor' as const),
     photoUrl: `/api/public/doctors/${id}/photo`,
     slotDurationMinutes,
   };
