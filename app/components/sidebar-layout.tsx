@@ -1,5 +1,6 @@
 'use client';
 
+import { LogoLink } from './logo';
 import { useCallback, useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -386,19 +387,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       `}>
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-brand-100">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/30">
-              <Stethoscope className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                {settings?.systemTitle || ''}
-              </h1>
-              <p className="text-xs text-gray-700">
-                {settings?.systemDescription || ''}
-              </p>
-            </div>
-          </div>
+          <LogoLink href="/dashboard" className="h-8" priority />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600"

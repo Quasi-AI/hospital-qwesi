@@ -1,5 +1,6 @@
 'use client';
 
+import { LogoLink } from '@/app/components/logo';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { signIn, getSession, signOut } from 'next-auth/react';
@@ -154,12 +155,7 @@ export default function LoginPage() {
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
       <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-            <Stethoscope className="h-5 w-5" />
-          </span>
-          <span className="font-display text-2xl font-semibold">Qwesi</span>
-        </Link>
+        <LogoLink tone="dark" className="h-11" priority />
         <div>
           <h1 className="font-display text-4xl font-semibold leading-tight xl:text-5xl">
             Your doctor is one <span className="text-accent-300">booking</span> away.
@@ -176,12 +172,9 @@ export default function LoginPage() {
       {/* Form panel */}
       <main className="flex items-stretch justify-center sm:items-center sm:px-8 sm:py-10">
         <div className={`glass-strong w-full !rounded-none !border-0 px-5 pb-10 pt-8 !shadow-none sm:!rounded-3xl sm:!border sm:p-8 sm:!shadow-lg ${isDemo ? 'max-w-3xl' : 'max-w-md'}`}>
-          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
-              <Stethoscope className="h-5 w-5" />
-            </span>
-            <span className="font-display text-xl font-semibold text-brand-950">Qwesi</span>
-          </Link>
+          <div className="mb-8 lg:hidden">
+            <LogoLink className="h-9" priority />
+          </div>
 
           <div className={`flex flex-col gap-6 ${isDemo ? 'lg:flex-row' : ''}`}>
             <div className="w-full flex-1">

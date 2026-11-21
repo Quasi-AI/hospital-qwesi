@@ -1,5 +1,6 @@
 'use client';
 
+import { Logo } from '@/app/components/logo';
 import { useEffect, useState } from 'react';
 import { getSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -55,10 +56,8 @@ export default function AdminLoginPage() {
     <div className="qw-hero-bg flex min-h-screen items-center justify-center px-4 py-10">
       <div className="glass-strong hero-in w-full max-w-sm rounded-3xl p-6 sm:p-8">
         <div className="text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg shadow-brand-600/30">
-            <ShieldCheck className="h-7 w-7" />
-          </span>
-          <h1 className="font-display mt-4 text-2xl font-semibold text-brand-950">Administrator</h1>
+          <div className="flex justify-center"><Logo className="h-12" priority /></div>
+          <h1 className="font-display mt-5 text-2xl font-semibold text-brand-950">Administrator</h1>
           <p className="mt-1 text-sm text-gray-600">Authorised access only.</p>
         </div>
 

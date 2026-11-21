@@ -1,5 +1,6 @@
 'use client';
 
+import { LogoLink } from './logo';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -21,23 +22,8 @@ export function brandName(settings: LandingSettingsSnapshot) {
   return settings?.systemTitle?.trim() || 'Qwesi';
 }
 
-export function BrandMark({ settings, inverse = false }: { settings: LandingSettingsSnapshot; inverse?: boolean }) {
-  const logo = settings?.invoiceLogoUrl?.trim();
-  return (
-    <Link href="/" className="flex min-w-0 items-center gap-2.5">
-      {logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={logo} alt="" className="h-9 w-9 rounded-xl object-contain" />
-      ) : (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-700 text-white shadow-sm">
-          <Stethoscope className="h-5 w-5" />
-        </span>
-      )}
-      <span className={`truncate font-display text-xl font-semibold ${inverse ? 'text-white' : 'text-brand-950'}`}>
-        {brandName(settings)}
-      </span>
-    </Link>
-  );
+export function BrandMark({ inverse = false }: { settings?: LandingSettingsSnapshot; inverse?: boolean }) {
+  return <LogoLink tone={inverse ? 'dark' : 'light'} className="h-8 sm:h-9" priority />;
 }
 
 export function PublicHeader({

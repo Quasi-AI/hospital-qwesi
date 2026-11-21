@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { LogoLink } from './logo';
 import { CURRENCIES, CURRENCY_LABELS } from '@/lib/practitioner-currency';
 import {
   ArrowLeft,
@@ -145,12 +146,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
     <div className="grid min-h-screen lg:grid-cols-[0.9fr_1.1fr]">
       {/* Brand panel */}
       <aside className="qw-hero-bg hidden flex-col justify-between p-10 text-white lg:flex">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-            <Stethoscope className="h-5 w-5" />
-          </span>
-          <span className="font-display text-2xl font-semibold">Qwesi</span>
-        </Link>
+        <LogoLink tone="dark" className="h-11" priority />
         <div className="hero-in">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
             <Icon className="h-7 w-7" />
@@ -175,7 +171,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
             <Link href="/signup" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-900">
               <ArrowLeft className="h-4 w-4" /> All account types
             </Link>
-            <Link href="/" className="font-display text-lg font-semibold text-brand-950 lg:hidden">Qwesi</Link>
+            <span className="lg:hidden"><LogoLink className="h-7" priority /></span>
           </div>
 
           <h1 className="font-display text-2xl font-semibold text-brand-950 sm:text-3xl lg:hidden">{c.title}</h1>

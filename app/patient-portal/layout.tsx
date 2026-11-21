@@ -1,5 +1,6 @@
 'use client';
 
+import { LogoLink } from '@/app/components/logo';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -150,17 +151,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
       `}>
         {/* Sidebar Header */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-4">
-          <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50">
-              <Heart className="h-5 w-5 text-brand-600" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate text-xl font-bold text-slate-950">
-                Qwesi
-              </h1>
-              <p className="text-xs text-slate-500">Virtual Hospital</p>
-            </div>
-          </div>
+          <LogoLink href="/patient-portal" className="h-8" priority />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600"
