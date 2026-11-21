@@ -151,7 +151,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
       `}>
         {/* Sidebar Header */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-4">
-          <LogoLink href="/patient-portal" className="h-8" priority />
+          <LogoLink href="/patient-portal" className="h-7" priority />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600"

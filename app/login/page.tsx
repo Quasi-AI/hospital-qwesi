@@ -155,8 +155,8 @@ export default function LoginPage() {
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
       <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden text-white lg:flex">
-        <div className="relative z-10 border-b border-brand-100 !bg-white px-12 py-5">
-          <LogoLink className="h-11" priority />
+        <div className="relative z-10 border-b border-brand-100 !bg-white px-12 py-4">
+          <LogoLink className="h-8" priority />
         </div>
         <div className="px-12">
           <h1 className="font-display text-4xl font-semibold leading-tight xl:text-5xl">

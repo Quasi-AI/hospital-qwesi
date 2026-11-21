@@ -23,7 +23,7 @@ export function brandName(settings: LandingSettingsSnapshot) {
 }
 
 export function BrandMark({ inverse = false }: { settings?: LandingSettingsSnapshot; inverse?: boolean }) {
-  return <LogoLink tone={inverse ? 'dark' : 'light'} className="h-8 sm:h-9" priority />;
+  return <LogoLink tone={inverse ? 'dark' : 'light'} className="h-7 sm:h-8" priority />;
 }
 
 export function PublicHeader({

@@ -64,7 +64,7 @@ export default async function SignupChooser({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="mb-8"><LogoLink className="h-11" priority /></div>
+      <div className="mb-8"><LogoLink className="h-9" priority /></div>
       <div className="hero-in text-center">
         <h1 className="font-display text-3xl font-semibold text-brand-950 sm:text-4xl">Create your account</h1>
         <p className="mt-2 text-gray-600">Choose how you’ll use Qwesi.</p>
