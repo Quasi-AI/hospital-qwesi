@@ -143,11 +143,11 @@ export default function SignupForm({ role }: { role: SignupRole }) {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[0.9fr_1.1fr]">
+    <div className="grid min-h-screen lg:grid-cols-[0.8fr_1.2fr]">
       {/* Brand panel */}
-      <aside className="qw-hero-bg hidden flex-col justify-between text-white lg:flex">
-        <div className="relative z-10 border-b border-brand-100 !bg-white px-10 py-5">
-          <LogoLink className="h-11" priority />
+      <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden text-white lg:sticky lg:top-0 lg:flex lg:h-screen">
+        <div className="relative z-10 border-b border-brand-100 !bg-white px-10 py-4">
+          <LogoLink className="h-8" priority />
         </div>
         <div className="hero-in px-10">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
@@ -167,9 +167,9 @@ export default function SignupForm({ role }: { role: SignupRole }) {
       </aside>
 
       {/* Form */}
-      <main className="flex items-stretch justify-center sm:items-start sm:px-8 sm:py-8 lg:items-center lg:py-12">
-        <div className="glass-strong w-full max-w-xl !rounded-none !border-0 px-5 pb-10 pt-6 !shadow-none sm:!rounded-3xl sm:!border sm:p-8 sm:!shadow-lg">
-          <div className="mb-6 flex items-center justify-between gap-3">
+      <main className="flex items-stretch justify-center sm:items-start sm:px-8 sm:py-8 lg:items-center lg:py-6">
+        <div className="glass-strong w-full max-w-xl lg:max-w-2xl !rounded-none !border-0 px-5 pb-10 pt-6 !shadow-none sm:!rounded-3xl sm:!border sm:p-8 lg:p-6 sm:!shadow-lg">
+          <div className="mb-4 flex items-center justify-between gap-3 lg:mb-3">
             <Link href="/signup" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-900">
               <ArrowLeft className="h-4 w-4" /> All account types
             </Link>
@@ -178,28 +178,21 @@ export default function SignupForm({ role }: { role: SignupRole }) {
 
           <h1 className="font-display text-2xl font-semibold text-brand-950 sm:text-3xl lg:hidden">{c.title}</h1>
           <p className="mt-1 text-sm text-gray-600 lg:hidden">{c.subtitle}</p>
-          <h1 className="font-display hidden text-3xl font-semibold text-brand-950 lg:block">Your details</h1>
+          <h1 className="font-display hidden text-2xl font-semibold text-brand-950 lg:block">{c.title}</h1>
 
-          <form onSubmit={submit} className="mt-6 space-y-4">
-            <Field label="Full name" value={form.name} onChange={(v) => update('name', v)} icon={User} required />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Email" value={form.email} onChange={(v) => update('email', v)} type="email" icon={Mail} required />
-              <Field label="Phone" value={form.phone} onChange={(v) => update('phone', v)} icon={Phone} required={role === 'patient'} />
-            </div>
-            <Field label="Password" value={form.password} onChange={(v) => update('password', v)} type="password" icon={Lock} required />
+          <form onSubmit={submit} className="mt-5 space-y-3 lg:mt-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+              <Field wrap="lg:col-span-3" label="Full name" value={form.name} onChange={(v) => update('name', v)} icon={User} required />
+              <Field wrap="lg:col-span-3" label="Email" value={form.email} onChange={(v) => update('email', v)} type="email" icon={Mail} required />
+              <Field wrap="lg:col-span-3" label="Phone" value={form.phone} onChange={(v) => update('phone', v)} icon={Phone} required={role === 'patient'} />
+              <Field wrap="lg:col-span-3" label="Password" value={form.password} onChange={(v) => update('password', v)} type="password" icon={Lock} required />
 
-            {role === 'patient' && (
-              <>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Date of birth" value={form.dateOfBirth} onChange={(v) => update('dateOfBirth', v)} type="date" required />
-                  <label className="block">
+              {role === 'patient' && (
+                <>
+                  <Field wrap="lg:col-span-2" label="Date of birth" value={form.dateOfBirth} onChange={(v) => update('dateOfBirth', v)} type="date" required />
+                  <label className="block lg:col-span-2">
                     <span className="mb-1 block text-sm font-medium text-gray-700">Gender</span>
-                    <select
-                      value={form.gender}
-                      onChange={(e) => update('gender', e.target.value)}
-                      required
-                      className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                    >
+                    <select value={form.gender} onChange={(e) => update('gender', e.target.value)} required className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
                       <option value="">Select gender</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
@@ -207,46 +200,44 @@ export default function SignupForm({ role }: { role: SignupRole }) {
                       <option value="prefer-not-to-say">Prefer not to say</option>
                     </select>
                   </label>
-                </div>
-                <Field label="Address (optional)" value={form.address} onChange={(v) => update('address', v)} />
-              </>
-            )}
+                  <div className="sm:col-span-2 lg:col-span-2">
+                    <Field label="Address (optional)" value={form.address} onChange={(v) => update('address', v)} />
+                  </div>
+                </>
+              )}
 
-            {(role === 'doctor' || role === 'herbalist') && (
-              <>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Specialization" value={form.specialization} onChange={(v) => update('specialization', v)} placeholder={role === 'herbalist' ? 'e.g. Herbal medicine' : 'e.g. Cardiology'} required />
-                  <Field label={role === 'herbalist' ? 'Registration / licence number' : 'Licence number'} value={form.licenseNumber} onChange={(v) => update('licenseNumber', v)} required />
-                  <Field label="Years of experience" value={form.yearsOfExperience} onChange={(v) => update('yearsOfExperience', v)} type="number" />
-                  <label className="block">
+              {(role === 'doctor' || role === 'herbalist') && (
+                <>
+                  <Field wrap="lg:col-span-3" label="Specialization" value={form.specialization} onChange={(v) => update('specialization', v)} placeholder={role === 'herbalist' ? 'e.g. Herbal medicine' : 'e.g. Cardiology'} required />
+                  <Field wrap="lg:col-span-3" label={role === 'herbalist' ? 'Registration / licence no.' : 'Licence number'} value={form.licenseNumber} onChange={(v) => update('licenseNumber', v)} required />
+                  <Field wrap="lg:col-span-2" label="Years of experience" value={form.yearsOfExperience} onChange={(v) => update('yearsOfExperience', v)} type="number" />
+                  <label className="block lg:col-span-2">
                     <span className="mb-1 block text-sm font-medium text-gray-700">Currency</span>
-                    <select
-                      value={form.currency}
-                      onChange={(e) => update('currency', e.target.value)}
-                      className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                    >
+                    <select value={form.currency} onChange={(e) => update('currency', e.target.value)} className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
                       {CURRENCIES.map((c) => (
-                        <option key={c} value={c}>{CURRENCY_LABELS[c]}</option>
+                        <option key={c} value={c} title={CURRENCY_LABELS[c]}>{c}</option>
                       ))}
                     </select>
                   </label>
-                  <Field label="Consultation fee" value={form.consultationFee} onChange={(v) => update('consultationFee', v)} type="number" placeholder="e.g. 150" required />
-                </div>
-                <p className="-mt-1 text-xs text-gray-600">Patients pay this fee up front to book you. You can change it later in your profile.</p>
-              </>
-            )}
+                  <div className="sm:col-span-2 lg:col-span-2">
+                    <Field label="Fee patients pay" value={form.consultationFee} onChange={(v) => update('consultationFee', v)} type="number" placeholder="e.g. 150" required />
+                  </div>
+                </>
+              )}
 
-            {role === 'pharmacy' && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Pharmacy / pharmacist name" value={form.department} onChange={(v) => update('department', v)} placeholder="Pharmacy name" />
-                <Field label="Licence number" value={form.licenseNumber} onChange={(v) => update('licenseNumber', v)} required />
-                <Field label="Years of experience" value={form.yearsOfExperience} onChange={(v) => update('yearsOfExperience', v)} type="number" />
-                <Field label="Address" value={form.address} onChange={(v) => update('address', v)} />
-              </div>
-            )}
+              {role === 'pharmacy' && (
+                <>
+                  <Field wrap="lg:col-span-3" label="Pharmacy / pharmacist name" value={form.department} onChange={(v) => update('department', v)} placeholder="Pharmacy name" />
+                  <Field wrap="lg:col-span-3" label="Licence number" value={form.licenseNumber} onChange={(v) => update('licenseNumber', v)} required />
+                  <Field wrap="lg:col-span-3" label="Years of experience" value={form.yearsOfExperience} onChange={(v) => update('yearsOfExperience', v)} type="number" />
+                  <Field wrap="lg:col-span-3" label="Address" value={form.address} onChange={(v) => update('address', v)} />
+                </>
+              )}
+            </div>
 
             {/* Compact agreement */}
-            <section className="rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
+            <section className="grid gap-3 rounded-2xl border border-brand-100 bg-brand-50/60 p-3 sm:p-4 lg:grid-cols-2 lg:items-start">
+              <div>
               <label className="flex items-start gap-3 text-sm text-gray-800">
                 <input
                   type="checkbox"
@@ -259,7 +250,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
                   I accept the terms and conditions, data privacy notice, and telemedicine &amp; healthcare consent.
                 </span>
               </label>
-              <details className="mt-3 text-xs leading-relaxed text-gray-600">
+              <details className="mt-2 text-xs leading-relaxed text-gray-600">
                 <summary className="cursor-pointer font-semibold text-brand-700">Read the agreement</summary>
                 <ul className="mt-2 list-disc space-y-1.5 pl-4">
                   <li>Qwesi collects identity, contact, clinical, appointment, prescription and billing information to provide care. It is handled as confidential medical information and shared only with authorised parties and regulators where required.</li>
@@ -268,7 +259,8 @@ export default function SignupForm({ role }: { role: SignupRole }) {
                   <li>Virtual care has limits, such as network issues or the need for an in-person referral. Prescriptions and dispensing may require pharmacist review and local regulatory compliance.</li>
                 </ul>
               </details>
-              <label className="mt-4 block">
+              </div>
+              <label className="block">
                 <span className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-700">
                   <FileText className="h-4 w-4 text-brand-700" /> Electronic signature
                 </span>
@@ -318,13 +310,14 @@ export default function SignupForm({ role }: { role: SignupRole }) {
 }
 
 function Field({
-  label, value, onChange, type = 'text', required, placeholder, icon: Icon,
+  label, value, onChange, type = 'text', required, placeholder, icon: Icon, wrap = '',
 }: {
+  wrap?: string;
   label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; placeholder?: string; icon?: React.ElementType;
 }) {
   return (
-    <label className="block">
-      <span className="mb-1 block text-sm font-medium text-gray-700">{label}</span>
+    <label className={`block ${wrap}`}>
+      <span className="mb-1 block truncate text-sm font-medium text-gray-700">{label}</span>
       <div className="relative">
         {Icon && <Icon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />}
         <input

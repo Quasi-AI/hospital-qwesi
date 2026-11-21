@@ -387,7 +387,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       `}>
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-brand-100">
-          <LogoLink href="/dashboard" className="h-8" priority />
+          <LogoLink href="/dashboard" className="h-7" priority />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600"

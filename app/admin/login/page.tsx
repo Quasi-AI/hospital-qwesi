@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
     <div className="qw-hero-bg flex min-h-screen items-center justify-center px-4 py-10">
       <div className="glass-strong hero-in w-full max-w-sm rounded-3xl p-6 sm:p-8">
         <div className="text-center">
-          <div className="flex justify-center"><Logo className="h-12" priority /></div>
+          <div className="flex justify-center"><Logo className="h-9" priority /></div>
           <h1 className="font-display mt-5 text-2xl font-semibold text-brand-950">Administrator</h1>
           <p className="mt-1 text-sm text-gray-600">Authorised access only.</p>
         </div>
