@@ -22,6 +22,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const doctorIdParam = searchParams.get('doctorId');
 
+    // Appointments carry patient details: login required, and only admin/staff/nurse/doctor/patient may list them.
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
+    }
+    if (!['admin', 'staff', 'nurse', 'doctor', 'patient'].includes(String(session.user.role))) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     // Build query based on user role
     let query: Record<string, unknown> = {};
 

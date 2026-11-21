@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import mongoose from 'mongoose';
 import { authOptions } from '../../auth/[...nextauth]/route';
+import { parseBookingAgreement } from '@/lib/booking-agreement';
 import dbConnect from '../../../../lib/mongodb';
 import Appointment from '../../../../models/Appointment';
 import TelemedicineSession from '../../../../models/TelemedicineSession';
@@ -143,6 +144,10 @@ export async function POST(request: NextRequest) {
 
     const includeVideoCall = body.includeVideoCall === true || body.includeVideoCall === 'true';
     const reason = String(body.reason || '').trim().slice(0, 4000);
+
+    // Every booking needs the signed consultation agreement
+    const parsedAgreement = parseBookingAgreement({ accepted: body.agreementAccepted, signedName: body.signedName }, 'web');
+    if (!parsedAgreement.ok) return NextResponse.json({ error: parsedAgreement.error }, { status: 400 });
     if (reason.length < 2) {
       return NextResponse.json({ error: 'Please add a reason for the appointment' }, { status: 400 });
     }
@@ -182,6 +187,7 @@ export async function POST(request: NextRequest) {
       location: includeVideoCall ? 'Online consultation' : String(body.location || '').trim(),
       reason,
       notes,
+      consentAgreement: parsedAgreement.agreement,
     });
 
     try {

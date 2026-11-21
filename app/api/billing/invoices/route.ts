@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
+import { scopeRecordsByPatient } from '@/lib/patient-access';
 import dbConnect from '@/lib/mongodb';
 import Invoice from '@/models/Invoice';
 import Patient from '@/models/Patient';
@@ -12,6 +13,9 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    // Admin/staff see all invoices, doctors only their assigned patients', patients only their own.
+    const scoped = await scopeRecordsByPatient('patientId', { allowSelfByEmailField: 'patientEmail' });
+    if (scoped instanceof NextResponse) return scoped;
 
     await dbConnect();
 
@@ -31,14 +35,14 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query.$or = [
+      query.$and = [...(query.$and || []), { $or: [
         { invoiceNumber: { $regex: search, $options: 'i' } },
         { patientName: { $regex: search, $options: 'i' } },
         { patientEmail: { $regex: search, $options: 'i' } },
-      ];
+      ] }];
     }
 
-    const invoices = await Invoice.find(query)
+    const invoices = await Invoice.find({ $and: [query, scoped.filter] })
       .sort({ createdAt: -1 })
       .limit(100)
       .lean();

@@ -5,6 +5,7 @@ import User from '@/models/User';
 import { normalizeAppointmentDateForStorage, normalizeTimeLabel, isSlotAvailableForDoctor } from '@/lib/appointmentSlotting';
 import { getSystemCurrency } from '@/lib/getSystemCurrency';
 import { createNotification, scheduleAppointmentReminder } from '@/lib/notifications/notification-service';
+import { parseBookingAgreement } from '@/lib/booking-agreement';
 import { consumePatientPaygCredit, getPatientConsultationAccess } from '@/lib/patientConsultationAccess';
 
 export type BookingRequest = {
@@ -13,11 +14,13 @@ export type BookingRequest = {
   time: string; // HH:mm
   reason: string;
   consultationType?: 'video' | 'audio' | 'chat';
+  agreement?: unknown; // { accepted, signedName } captured in the chat
+  channel?: 'whatsapp' | 'facebook' | 'other';
 };
 
 export type BookingResult =
   | { ok: true; appointmentId: string; sessionId?: string; doctorName: string; date: string; time: string }
-  | { ok: false; status: number; error: string; needsPayment?: boolean };
+  | { ok: false; status: number; error: string; needsPayment?: boolean; needsAgreement?: boolean };
 
 /**
  * Creates the virtual appointment for a patient once consultation access is cleared
@@ -46,8 +49,12 @@ export async function createBridgeAppointment(patient: any, req: BookingRequest)
   });
   if (!access.allowed) return { ok: false, status: 402, error: access.message || 'Payment required', needsPayment: true };
 
+  const parsed = parseBookingAgreement(req.agreement, req.channel || 'whatsapp');
+  if (!parsed.ok) return { ok: false, status: 400, error: parsed.error, needsAgreement: true };
+
   const reason = String(req.reason || '').trim().slice(0, 4000) || 'Consultation booked via WhatsApp/Facebook';
-  const title = doctor.practitionerType === 'herbalist' ? '' : 'Dr. ';
+  const cleanName = String(doctor.name || '').replace(/^dr\.?\s+/i, '');
+  const shownName = doctor.practitionerType === 'herbalist' ? doctor.name : `Dr. ${cleanName}`;
   const appointment = await Appointment.create({
     patientId: String(patient._id),
     patientName: patient.name,
@@ -64,6 +71,7 @@ export async function createBridgeAppointment(patient: any, req: BookingRequest)
     location: 'Online consultation',
     reason,
     notes: `Booked by the Qwesi AI assistant. Billing cover: ${access.source}`,
+    consentAgreement: parsed.agreement,
   });
 
   const start = new Date(`${req.date}T${time}`);
@@ -116,5 +124,5 @@ export async function createBridgeAppointment(patient: any, req: BookingRequest)
     metadata: { appointmentId: String(appointment._id), telemedicineSessionId: String(session._id), billingCover: access.source },
   }).catch((e: unknown) => console.error('notify doctor', e));
 
-  return { ok: true, appointmentId: String(appointment._id), sessionId: String(session._id), doctorName: `${title}${doctor.name}`, date: req.date, time };
+  return { ok: true, appointmentId: String(appointment._id), sessionId: String(session._id), doctorName: shownName, date: req.date, time };
 }

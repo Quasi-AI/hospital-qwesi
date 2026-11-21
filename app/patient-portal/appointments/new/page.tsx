@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { BookingAgreement, agreementSigned } from '@/app/components/booking-agreement';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertCircle,
@@ -97,6 +98,8 @@ function NewPatientAppointmentPageContent() {
     appointmentDate: searchParams.get('date') || todayYmd(),
     appointmentTime: searchParams.get('time') || '',
     reason: '',
+    agreementAccepted: false,
+    signedName: '',
     notes: '',
     includeVideoCall: true,
     consultationType: 'video' as 'video' | 'audio' | 'chat',
@@ -261,6 +264,10 @@ function NewPatientAppointmentPageContent() {
     }
     if (!form.doctorId || !form.appointmentDate || !form.appointmentTime || !form.reason.trim()) {
       setMessage({ type: 'error', text: 'Please select a doctor, date, time, and reason.' });
+      return;
+    }
+    if (!agreementSigned({ accepted: form.agreementAccepted, signedName: form.signedName })) {
+      setMessage({ type: 'error', text: 'Please accept the agreement and sign with your full name.' });
       return;
     }
 
@@ -545,6 +552,11 @@ function NewPatientAppointmentPageContent() {
           </div>
         </section>
 
+        <BookingAgreement
+          value={{ accepted: form.agreementAccepted, signedName: form.signedName }}
+          onChange={(v) => setForm((cur) => ({ ...cur, agreementAccepted: v.accepted, signedName: v.signedName }))}
+        />
+
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
           <Link
             href="/patient-portal/appointments"
@@ -555,7 +567,7 @@ function NewPatientAppointmentPageContent() {
           {access && !access.allowed ? (
             <button
               type="button"
-              disabled={paying || !form.doctorId || !form.appointmentTime}
+              disabled={paying || !form.doctorId || !form.appointmentTime || !agreementSigned({ accepted: form.agreementAccepted, signedName: form.signedName })}
               onClick={startPaygPayment}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -565,7 +577,7 @@ function NewPatientAppointmentPageContent() {
           ) : (
             <button
               type="submit"
-              disabled={submitting || !access?.allowed}
+              disabled={submitting || !access?.allowed || !agreementSigned({ accepted: form.agreementAccepted, signedName: form.signedName })}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}

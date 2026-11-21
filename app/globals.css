@@ -166,13 +166,23 @@ body {
   min-height: 100vh;
   /* Colourful mesh that the glass panels frost over */
   background-color: #f1eeff;
+}
+
+/* The mesh lives on a fixed layer of its own: it is painted once and composited,
+   instead of being repainted on every scroll like background-attachment: fixed. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
     radial-gradient(60rem 40rem at 8% -10%, rgba(105, 73, 237, 0.42), transparent 60%),
     radial-gradient(48rem 36rem at 100% 5%, rgba(196, 170, 255, 0.55), transparent 62%),
     radial-gradient(52rem 40rem at 90% 100%, rgba(124, 164, 255, 0.30), transparent 60%),
     radial-gradient(44rem 34rem at 0% 95%, rgba(236, 140, 255, 0.22), transparent 62%);
-  background-attachment: fixed;
   background-repeat: no-repeat;
+  transform: translateZ(0);
 }
 
 h1, h2, h3 {
@@ -197,7 +207,7 @@ table { max-width: 100%; }
   --glass-border: rgba(255, 255, 255, 0.75);
   --glass-divider: rgba(105, 73, 237, 0.14);
   --glass-shadow: 0 8px 32px rgba(76, 48, 190, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --glass-blur: blur(18px) saturate(1.6);
+  --glass-blur: blur(12px);
 }
 
 .glass,
@@ -211,8 +221,8 @@ table { max-width: 100%; }
 }
 .glass-strong {
   background: var(--glass-bg-strong);
-  -webkit-backdrop-filter: blur(24px) saturate(1.7);
-  backdrop-filter: blur(24px) saturate(1.7);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
@@ -272,9 +282,7 @@ table { max-width: 100%; }
    by frosting the common white / grey surfaces over the mesh.
 ------------------------------------------------------------------- */
 .bg-white {
-  background-color: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
+  background-color: rgba(255, 255, 255, 0.88);
 }
 .bg-gray-50,
 .bg-slate-50 {
@@ -586,7 +594,6 @@ button:not(:disabled):active, a[class*="rounded-full"]:active { transform: scale
 }
 /* blurs inside an already-frosted panel add nothing visually */
 .glass .bg-white, .glass-strong .bg-white, .qw-card .bg-white { -webkit-backdrop-filter: none; backdrop-filter: none; }
-body { background-size: 140% 140%, 140% 140%, 140% 140%, 140% 140%; animation: qw-bg-drift 40s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }

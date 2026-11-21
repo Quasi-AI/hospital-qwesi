@@ -5,11 +5,15 @@ import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { generateTemporaryPassword } from '@/lib/temporaryPassword';
 import { sendCredentialEmail } from '@/lib/notifications/credential-email';
+import { forbidden, getPatientScope, patientFilterForScope, unauthorized } from '@/lib/patient-access';
 
 export async function GET() {
   try {
-    await dbConnect();
-    const patients = await Patient.find({}).sort({ createdAt: -1 });
+    const { user, scope } = await getPatientScope();
+    if (!user) return unauthorized();
+    if (scope.kind === 'none' || scope.kind === 'self') return forbidden();
+    // Doctors/herbalists only get the patients assigned to them; passwords are never returned.
+    const patients = await Patient.find(patientFilterForScope(scope)).select('-password').sort({ createdAt: -1 });
     return NextResponse.json(patients);
   } catch (error) {
     console.error('Error fetching patients:', error);
@@ -19,6 +23,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { user, scope } = await getPatientScope();
+    if (!user) return unauthorized();
+    if (scope.kind !== 'all') return forbidden(); // only admin / staff register patients here
     await dbConnect();
     const body = await request.json();
     

@@ -8,6 +8,7 @@ import PaystackTransaction from '@/models/PaystackTransaction';
 import { getPaystackConfigError, getPaystackSettings } from '@/lib/paystackSettings';
 import { toPaystackSubunit } from '@/lib/qwesi-pricing';
 import { normalizeCurrency } from '@/lib/practitioner-currency';
+import { parseBookingAgreement } from '@/lib/booking-agreement';
 import { createBridgeAppointment } from '@/lib/bridgeBooking';
 import { ensurePatientByPhone, requireServiceKey, setPasswordUrl, siteUrl } from '@/lib/bridge';
 
@@ -36,7 +37,14 @@ export async function POST(request: NextRequest) {
       time: String(time),
       reason: String(body.reason || ''),
       consultationType: ['video', 'audio', 'chat'].includes(body.consultationType) ? body.consultationType : 'video',
+      // The patient must have agreed in the chat and given their full name as signature
+      agreement: { accepted: body.agreementAccepted === true, signedName: body.signedName },
+      channel: ['whatsapp', 'facebook'].includes(body.channel) ? body.channel : 'whatsapp',
     };
+    const pre = parseBookingAgreement(booking.agreement, booking.channel);
+    if (!pre.ok) {
+      return NextResponse.json({ success: false, status: 'agreement_required', error: pre.error }, { status: 400 });
+    }
     const account = {
       patientId: patient.patientId,
       hasPassword: Boolean(patient.password),
@@ -59,7 +67,7 @@ export async function POST(request: NextRequest) {
     if (configError) return NextResponse.json({ success: false, error: configError }, { status: 400 });
 
     const reference = `QWESI-${Date.now()}-${randomUUID().slice(0, 8).toUpperCase()}`;
-    const itemName = `Consultation with ${doctor.practitionerType === 'herbalist' ? '' : 'Dr. '}${doctor.name}`;
+    const itemName = `Consultation with ${doctor.practitionerType === 'herbalist' ? doctor.name : `Dr. ${String(doctor.name).replace(/^dr\.?\s+/i, '')}`}`;
     const metadata = {
       paygId: 'doctor-virtual-consultation',
       serviceName: itemName,

@@ -20,6 +20,7 @@ export interface IAppointment {
   location?: string;
   reason?: string;
   notes?: string;
+  consentAgreement?: { accepted: boolean; signedName: string; signedAt: Date; version: string; channel: string };
   symptoms?: string[];
   diagnosis?: string;
   treatment?: string;
@@ -101,6 +102,14 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
     notes: {
       type: String,
       trim: true,
+    },
+    // Signed telemedicine consent captured at booking
+    consentAgreement: {
+      accepted: { type: Boolean },
+      signedName: { type: String, trim: true },
+      signedAt: { type: Date },
+      version: { type: String },
+      channel: { type: String },
     },
     symptoms: [{
       type: String,
