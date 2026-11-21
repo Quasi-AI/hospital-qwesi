@@ -48,7 +48,9 @@ export const authOptions: AuthOptions = {
             
               const isValidPassword = await bcrypt.compare(credentials.password, user.password);
               if (isValidPassword) {
-                const role = (user.role || 'doctor').toString().toLowerCase();
+                const rawRole = (user.role || 'doctor').toString().toLowerCase();
+                // "superadmin" / "super_admin" accounts get full admin access
+                const role = ['superadmin', 'super_admin', 'super-admin', 'administrator'].includes(rawRole) ? 'admin' : rawRole;
                 const safeRole = ['admin', 'doctor', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'].includes(role)
                   ? role
                   : 'doctor';
