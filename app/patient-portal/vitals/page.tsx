@@ -166,7 +166,7 @@ export default function PatientVitalsPage() {
       </div>
 
       {latest ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Latest</p>
             <p className="mt-2 text-sm font-semibold text-gray-900">{formatDateTime(latest.timestamp)}</p>
@@ -189,13 +189,13 @@ export default function PatientVitalsPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <form onSubmit={saveVitals} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
           <h2 className="flex items-center gap-2 text-base font-semibold text-gray-950">
             <Activity className="h-4 w-4 text-teal-600" />
             Add vitals
           </h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="text-xs font-medium text-gray-700">Blood pressure</span>
               <input
@@ -313,7 +313,7 @@ export default function PatientVitalsPage() {
                       {vital.source || 'patient'}
                     </span>
                   </div>
-                  <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                  <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                     {vital.bloodPressure ? <span>BP: {vital.bloodPressure}</span> : null}
                     {vital.pulse ? <span>Pulse: {vital.pulse} bpm</span> : null}
                     {vital.temperature ? (

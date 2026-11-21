@@ -152,7 +152,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
+    <div className="grid grid-cols-1 min-h-screen lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
       <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden text-white lg:flex">
         <div className="relative z-10 border-b border-brand-100 !bg-white px-12 py-4">

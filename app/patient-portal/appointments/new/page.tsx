@@ -404,7 +404,7 @@ function NewPatientAppointmentPageContent() {
             <Calendar className="h-4 w-4 text-blue-600" />
             <h2 className="text-sm font-semibold text-gray-950">Date and time</h2>
           </div>
-          <div className="grid gap-3 sm:grid-cols-[16rem_1fr]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[16rem_1fr]">
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-700">Date</label>
               <input
@@ -461,7 +461,7 @@ function NewPatientAppointmentPageContent() {
             <Video className="h-4 w-4 text-indigo-600" />
             <h2 className="text-sm font-semibold text-gray-950">Consultation</h2>
           </div>
-          <div className="grid gap-3 lg:grid-cols-[1fr_16rem]">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_16rem]">
             <div className="space-y-3">
               {form.includeVideoCall ? (
                 <div className="flex flex-wrap gap-2">

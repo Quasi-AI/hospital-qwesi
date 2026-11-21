@@ -120,7 +120,7 @@ export default function PatientMedicalRecordsPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* Medical History */}
         <div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
           <div className="flex items-center gap-1.5 border-b border-gray-100 px-4 py-2.5">
@@ -197,7 +197,7 @@ export default function PatientMedicalRecordsPage() {
             <AlertCircle className="h-4 w-4" />
             {t('patientPortal.medicalRecords.emergencyContact')}
           </h3>
-          <div className="grid gap-2 sm:grid-cols-3 sm:gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
             <div>
               <p className="text-sm text-red-600">{t('patientPortal.medicalRecords.contactName')}</p>
               <p className="font-medium text-red-900">{patient.emergencyContact.name}</p>

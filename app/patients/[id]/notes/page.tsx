@@ -221,9 +221,9 @@ export default function PatientClinicalNotesPage() {
 
             {message ? <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">{message}</div> : null}
 
-            <form onSubmit={handleSave} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <form onSubmit={handleSave} className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
               <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="grid gap-3 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <label className="text-sm font-medium text-slate-700">
                     Note type
                     <select value={form.noteType} onChange={(e) => update({ noteType: e.target.value })} className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2">
@@ -367,7 +367,7 @@ export default function PatientClinicalNotesPage() {
                           </button>
                         </div>
                       </div>
-                      <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
+                      <div className="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                         <p><span className="font-semibold">Assessment:</span> {note.assessment || 'Not documented'}</p>
                         <p><span className="font-semibold">Plan:</span> {note.plan || 'Not documented'}</p>
                       </div>

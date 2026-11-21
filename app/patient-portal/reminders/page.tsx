@@ -111,7 +111,7 @@ export default function PatientMedicationRemindersPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[24rem_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[24rem_1fr]">
         <form onSubmit={submit} className="space-y-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <Pill className="h-4 w-4 text-teal-600" />

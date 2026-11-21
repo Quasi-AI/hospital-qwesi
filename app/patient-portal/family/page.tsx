@@ -112,7 +112,7 @@ export default function PatientFamilyPage() {
 
       {showForm ? (
         <form onSubmit={handleSubmit} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label className="text-sm font-medium text-slate-700">
               Full name
               <input
@@ -191,7 +191,7 @@ export default function PatientFamilyPage() {
           <p className="mt-1 text-sm text-slate-500">Add a family member to keep dependent access and care coordination in one place.</p>
         </div>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {members.map((member) => (
             <article key={member._id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">

@@ -589,7 +589,7 @@ function EditDoctorForm() {
                     </div>
 
                     {formData.role === 'doctor' && (
-                      <div className="grid gap-2 md:col-span-2 md:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-2 md:col-span-2 md:grid-cols-2">
                         <label htmlFor="rating" className="mb-1 block text-sm font-medium text-gray-700">
                           Doctor rating
                           <div className="relative mt-1">
@@ -650,7 +650,7 @@ function EditDoctorForm() {
                     Defines time increments and which days appear on the public booking page and in the staff slot
                     view. Defaults match organisation working hours until you save custom values here.
                   </p>
-                  <div className="mb-2 grid gap-2 md:grid-cols-2">
+                  <div className="mb-2 grid grid-cols-1 gap-2 md:grid-cols-2">
                     <div>
                       <label className="mb-0.5 block text-xs font-medium text-gray-700 sm:text-sm">Slot length (minutes)</label>
                       <input

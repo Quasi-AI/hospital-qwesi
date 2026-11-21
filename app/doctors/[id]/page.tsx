@@ -302,7 +302,7 @@ export default function DoctorDetailPage() {
                   </Link>
                 </div>
 
-                <div className="grid gap-2.5 p-3 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-2.5 p-3 md:grid-cols-2">
                   {/* Contact */}
                   <section className="rounded-lg border border-gray-100 bg-white p-2.5 shadow-sm">
                     <h2 className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
