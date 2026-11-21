@@ -151,114 +151,48 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   };
 
   const navigation: NavigationItem[] = [
-    { id: 'dashboard', label: t('navigation.dashboard'), icon: Home, href: '/dashboard', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { id: 'doctors', label: t('navigation.doctors'), icon: UserPlus, href: '/doctors', roles: ['admin'] },
-    { id: 'my-fee', label: 'My fee & profile', icon: Wallet, href: '/profile', roles: ['doctor'] },
-    { id: 'staff', label: t('navigation.staff'), icon: UserCheck, href: '/staff', roles: ['admin'] },
-    { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { id: 'appointment-slots', label: t('navigation.appointmentSlots'), icon: LayoutGrid, href: '/appointments/slots', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'staff', 'nurse', 'pharmacy'] },
-    { id: 'clinical-notes', label: 'Notes', icon: ClipboardList, href: '/clinical-notes', roles: ['admin', 'doctor', 'staff', 'nurse'] },
-    { 
-      id: 'laboratory', 
-      label: t('navigation.laboratory'), 
-      icon: FlaskConical, 
-      href: '/lab', 
-      roles: ['admin', 'doctor', 'staff', 'nurse'],
+    // Qwesi is virtual-only: no wards, labs, staff rosters or in-clinic billing.
+    { id: 'dashboard', label: t('navigation.dashboard'), icon: Home, href: '/dashboard', roles: ['admin', 'doctor'] },
+
+    // Admin
+    { id: 'doctors', label: 'Doctors & herbalists', icon: UserPlus, href: '/doctors', roles: ['admin'] },
+    { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor'] },
+    { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor'] },
+    { id: 'payments', label: 'Payments', icon: Receipt, href: '/billing', roles: ['admin'] },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytical-reports/financial', roles: ['admin'] },
+
+    // Doctor / herbalist
+    { id: 'appointment-slots', label: 'My availability', icon: LayoutGrid, href: '/appointments/slots', roles: ['doctor'] },
+    { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['doctor'] },
+    {
+      id: 'telemedicine',
+      label: 'Consultations',
+      icon: Video,
+      href: '/telemedicine',
+      roles: ['doctor'],
       children: [
-        { id: 'lab-tests', label: t('lab.tests'), icon: TestTube, href: '/lab', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'lab-new-order', label: t('lab.newTestOrder'), icon: Plus, href: '/lab/new', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'lab-pending', label: t('lab.pendingTests'), icon: ClipboardList, href: '/lab?status=pending', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'lab-results', label: t('lab.completedResults'), icon: ClipboardCheck, href: '/lab?status=completed', roles: ['admin', 'doctor', 'staff'] },
+        { id: 'telemedicine-sessions', label: 'All sessions', icon: MessageCircle, href: '/telemedicine/sessions', roles: ['doctor'] },
+        { id: 'telemedicine-waiting', label: 'Waiting room', icon: Clock, href: '/telemedicine/waiting-room', roles: ['doctor'] }
       ]
     },
-    { 
-      id: 'pharmacy', 
-      label: t('navigation.pharmacy'), 
-      icon: Pill, 
-      href: '/pharmacy', 
-      roles: ['admin', 'doctor', 'staff', 'nurse', 'pharmacy'],
-      children: [
-        { id: 'pharmacy-dashboard', label: 'Directory', icon: Home, href: '/pharmacy', exact: true, roles: ['admin', 'doctor', 'staff', 'nurse', 'pharmacy'] },
-        { id: 'pharmacy-prescription-queue', label: 'Prescription Queue', icon: ClipboardList, href: '/pharmacy/prescription-queue', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-clinical-verification', label: 'Clinical Verification', icon: Shield, href: '/pharmacy/clinical-verification', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-orders', label: 'Orders', icon: ShoppingCart, href: '/pharmacy/orders', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-inventory', label: 'Inventory', icon: Package, href: '/pharmacy/inventory', roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-substitutions', label: 'Substitutions', icon: RefreshCw, href: '/pharmacy/substitutions', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-chronic-refills', label: 'Chronic Refills', icon: Clock, href: '/pharmacy/chronic-refills', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-deliveries', label: 'Deliveries', icon: Truck, href: '/pharmacy/deliveries', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-messages', label: 'Messages', icon: MessageCircle, href: '/pharmacy/messages', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-billing-wallet', label: 'Billing & Wallet', icon: Wallet, href: '/pharmacy/billing-wallet', exact: true, roles: ['admin', 'pharmacy'] },
-        { id: 'pharmacy-reports', label: 'Reports', icon: BarChart3, href: '/pharmacy/reports', exact: true, roles: ['admin', 'staff', 'pharmacy'] },
-        { id: 'pharmacy-compliance-logs', label: 'Compliance Logs', icon: FileText, href: '/pharmacy/compliance-logs', exact: true, roles: ['admin', 'pharmacy'] },
-        { id: 'pharmacy-settings', label: 'Settings', icon: Settings, href: '/pharmacy/settings', exact: true, roles: ['admin', 'pharmacy'] }
-      ]
-    },
-    { id: 'medical-reports', label: t('navigation.medicalReports'), icon: FileText, href: '/reports', roles: ['admin', 'doctor', 'staff'] },
-    { 
-      id: 'documents', 
-      label: t('navigation.documents'), 
-      icon: FolderOpen, 
-      href: '/documents', 
-      roles: ['admin', 'doctor', 'staff'],
-      children: [
-        { id: 'documents-list', label: t('documents.title'), icon: Files, href: '/documents', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'documents-new', label: t('documents.addNew'), icon: FilePlus, href: '/documents/new', roles: ['admin', 'doctor', 'staff'] }
-      ]
-    },
-    { 
-      id: 'telemedicine', 
-      label: t('navigation.telemedicine') || 'Telemedicine', 
-      icon: Video, 
-      href: '/telemedicine', 
-      roles: ['admin', 'doctor', 'staff'],
-      children: [
-        { id: 'telemedicine-dashboard', label: t('telemedicine.dashboard') || 'Dashboard', icon: Video, href: '/telemedicine', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'telemedicine-sessions', label: t('telemedicine.sessions') || 'All Sessions', icon: MessageCircle, href: '/telemedicine/sessions', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'telemedicine-new', label: t('telemedicine.newSession') || 'New Session', icon: Plus, href: '/telemedicine/sessions/new', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'telemedicine-waiting', label: t('telemedicine.waitingRoom') || 'Waiting Room', icon: Clock, href: '/telemedicine/waiting-room', roles: ['admin', 'doctor', 'staff'] }
-      ]
-    },
-    { 
-      id: 'analytical-reports', 
-      label: t('navigation.analyticalReports'), 
-      icon: BarChart3, 
-      href: '/analytical-reports', 
-      roles: ['admin', 'doctor', 'staff'],
-      children: [
-        { id: 'financial-reports', label: t('navigation.financialReports'), icon: DollarSign, href: '/analytical-reports/financial', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'clinical-analytics', label: t('navigation.clinicalAnalytics'), icon: Activity, href: '/analytical-reports/clinical', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'operational-analytics', label: t('navigation.operationalAnalytics'), icon: LineChart, href: '/analytical-reports/operational', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'performance-reports', label: t('navigation.performanceReports'), icon: Target, href: '/analytical-reports/performance', roles: ['admin', 'doctor'] },
-        { id: 'patient-analytics', label: t('navigation.patientAnalytics'), icon: Users, href: '/analytical-reports/patient', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'appointment-analytics', label: t('navigation.appointmentAnalytics'), icon: Calendar, href: '/analytical-reports/appointment', roles: ['admin', 'doctor', 'staff'] }
-      ]
-    },
-    { 
-      id: 'billing', 
-      label: t('navigation.billing'), 
-      icon: Receipt, 
-      href: '/billing', 
-      roles: ['admin', 'doctor', 'staff'],
-      children: [
-        { id: 'billing-home', label: t('billing.title'), icon: Receipt, href: '/billing', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'billing-new', label: t('billing.addNewInvoice'), icon: Plus, href: '/billing/invoices/new', roles: ['admin', 'doctor', 'staff'] },
-        { id: 'service-items', label: t('navigation.serviceItems'), icon: List, href: '/billing/service-items', roles: ['admin', 'doctor', 'staff'] }
-      ]
-    },
-    { id: 'notifications', label: t('navigation.notifications') || 'Notifications', icon: Bell, href: '/notifications', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'wallet', label: 'Wallet', icon: Wallet, href: '/wallet', roles: ['doctor', 'staff'] },
-    { id: 'ai-treatment-recommendations', label: t('navigation.aiTreatmentRecommendations'), icon: Stethoscope, href: '/ai-treatment-recommendations', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-drug-interaction', label: t('navigation.aiDrugInteraction'), icon: Pill, href: '/ai-drug-interaction', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-medical-image', label: t('navigation.aiMedicalImage'), icon: Camera, href: '/ai-medical-image', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-appointment-optimizer', label: t('navigation.aiAppointmentOptimizer'), icon: Calendar, href: '/ai-appointment-optimizer', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-risk-assessment', label: t('navigation.aiRiskAssessment'), icon: Shield, href: '/ai-risk-assessment', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-health-trends', label: t('navigation.aiHealthTrends'), icon: LineChart, href: '/ai-health-trends', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-voice-input', label: t('navigation.aiVoiceInput'), icon: Mic, href: '/ai-voice-input', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-health-analytics', label: t('navigation.aiHealthAnalytics'), icon: TrendingUp, href: '/ai-health-analytics', roles: ['admin', 'doctor', 'staff'] },
-    { id: 'ai-assistant', label: t('navigation.aiAssistant'), icon: Stethoscope, href: '/ai-assistant', roles: ['admin', 'doctor', 'staff'] }
+    { id: 'clinical-notes', label: 'Consultation notes', icon: ClipboardList, href: '/clinical-notes', roles: ['doctor'] },
+    { id: 'wallet', label: 'Earnings & wallet', icon: Wallet, href: '/wallet', roles: ['doctor'] },
+    { id: 'my-fee', label: 'My fee & profile', icon: Stethoscope, href: '/profile', roles: ['doctor'] },
+
+    // Pharmacy (e-prescriptions in, medicine out)
+    { id: 'pharmacy-overview', label: 'Overview', icon: Home, href: '/pharmacy', exact: true, roles: ['pharmacy'] },
+    { id: 'pharmacy-prescription-queue', label: 'E-prescriptions', icon: ClipboardList, href: '/pharmacy/prescription-queue', exact: true, roles: ['pharmacy'] },
+    { id: 'pharmacy-orders', label: 'Orders', icon: ShoppingCart, href: '/pharmacy/orders', exact: true, roles: ['pharmacy'] },
+    { id: 'pharmacy-inventory', label: 'Inventory', icon: Package, href: '/pharmacy/inventory', roles: ['pharmacy'] },
+    { id: 'pharmacy-deliveries', label: 'Deliveries', icon: Truck, href: '/pharmacy/deliveries', exact: true, roles: ['pharmacy'] },
+    { id: 'pharmacy-billing-wallet', label: 'Earnings & wallet', icon: Wallet, href: '/pharmacy/billing-wallet', exact: true, roles: ['pharmacy'] },
+    { id: 'pharmacy-reports', label: 'Reports', icon: BarChart3, href: '/pharmacy/reports', exact: true, roles: ['pharmacy'] },
+    { id: 'pharmacy-settings', label: 'Settings', icon: Settings, href: '/pharmacy/settings', exact: true, roles: ['pharmacy'] },
+
+    // Everyone
+    { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/messages', roles: ['admin', 'doctor', 'pharmacy'] },
+    { id: 'notifications', label: t('navigation.notifications') || 'Notifications', icon: Bell, href: '/notifications', roles: ['admin', 'doctor'] },
+    { id: 'settings', label: 'Settings', icon: Settings, href: '/settings', roles: ['admin'] },
   ].filter(item => {
     // Filter parent items
     if (!item.roles.includes(currentRole)) return false;
