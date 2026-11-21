@@ -8,6 +8,8 @@ import { Building2, CreditCard, Loader2, Phone, Plus, Send, Star, Trash2 } from 
 export default function WalletPage() {
   const [wallet, setWallet] = useState<any>(null);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [ledger, setLedger] = useState<any[]>([]);
+  const [fin, setFin] = useState<any>(null);
   const [payoutMethods, setPayoutMethods] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,6 +44,8 @@ export default function WalletPage() {
     if (response.ok) {
       setWallet(data.wallet);
       setWithdrawals(data.withdrawals || []);
+      setLedger(data.ledger || []);
+      setFin(data.settings || null);
     } else {
       setMessage(data.error || 'Unable to load wallet');
     }
@@ -139,6 +143,8 @@ export default function WalletPage() {
     setSaving(false);
   };
 
+  const cur = wallet?.currency || 'GHS';
+
   return (
     <ProtectedRoute>
       <SidebarLayout title="Wallet" description="Doctor and staff earnings wallet" dense>
@@ -149,18 +155,41 @@ export default function WalletPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                  <p className="text-xs font-medium text-gray-500">On hold (safety window)</p>
+                  <p className="mt-2 text-2xl font-bold text-gray-900">{cur} {Number(wallet?.heldBalance || 0).toFixed(2)}</p>
+                </div>
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                   <p className="text-xs font-medium text-gray-500">Available</p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900">GHS {wallet?.availableBalance?.toFixed?.(2) || '0.00'}</p>
+                  <p className="mt-2 text-2xl font-bold text-gray-900">{cur} {wallet?.availableBalance?.toFixed?.(2) || '0.00'}</p>
                 </div>
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                   <p className="text-xs font-medium text-gray-500">Pending withdrawals</p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900">GHS {wallet?.pendingBalance?.toFixed?.(2) || '0.00'}</p>
+                  <p className="mt-2 text-2xl font-bold text-gray-900">{cur} {wallet?.pendingBalance?.toFixed?.(2) || '0.00'}</p>
                 </div>
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                   <p className="text-xs font-medium text-gray-500">Lifetime earnings</p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900">GHS {wallet?.lifetimeEarnings?.toFixed?.(2) || '0.00'}</p>
+                  <p className="mt-2 text-2xl font-bold text-gray-900">{cur} {wallet?.lifetimeEarnings?.toFixed?.(2) || '0.00'}</p>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-purple-200 bg-white p-4 text-xs text-gray-600 shadow-sm">
+                Earnings are held for {fin?.holdHours ?? 48}h after a completed consultation, then become available. Qwesi keeps {fin?.commissionPercent ?? 15}% commission. If a patient disputes a consultation, that earning is frozen until it is reviewed. Withdrawals require verified credentials and a payout account saved at least {fin?.payoutMethodCooldownHours ?? 24}h ago; the account name should match your registered name.
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-gray-900">Activity</h2>
+                <div className="divide-y divide-gray-100">
+                  {ledger.length === 0 ? <p className="py-3 text-sm text-gray-500">No activity yet.</p> : ledger.map((t) => (
+                    <div key={t._id} className="flex items-start justify-between gap-3 py-2 text-sm">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-gray-900">{String(t.type).replace(/_/g, ' ')}</p>
+                        <p className="truncate text-xs text-gray-500">{t.note || ''} · {new Date(t.createdAt).toLocaleDateString()}{t.status === 'held' ? ' · on hold' : t.status === 'disputed' ? ' · disputed' : ''}</p>
+                      </div>
+                      <span className={`shrink-0 font-semibold ${t.amount < 0 ? 'text-red-600' : 'text-gray-900'}`}>{t.amount > 0 ? '+' : ''}{Number(t.amount).toFixed(2)}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -249,7 +278,7 @@ export default function WalletPage() {
                       ) : (
                         withdrawals.map((request) => (
                           <tr key={request._id}>
-                            <td className="py-2 pr-4 font-medium">GHS {Number(request.amount).toFixed(2)}</td>
+                            <td className="py-2 pr-4 font-medium">{request.currency || cur} {Number(request.amount).toFixed(2)}</td>
                             <td className="py-2 pr-4 capitalize">{request.payoutMethod.replace('_', ' ')}</td>
                             <td className="py-2 pr-4">{request.accountName}</td>
                             <td className="py-2 pr-4 capitalize">{request.status}</td>

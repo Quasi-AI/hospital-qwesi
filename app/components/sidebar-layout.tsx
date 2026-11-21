@@ -159,6 +159,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor'] },
     { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor'] },
     { id: 'payments', label: 'Payments', icon: Receipt, href: '/billing', roles: ['admin'] },
+    { id: 'finance', label: 'Payouts & refunds', icon: Wallet, href: '/finance', roles: ['admin'] },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytical-reports/financial', roles: ['admin'] },
 
     // Doctor / herbalist
