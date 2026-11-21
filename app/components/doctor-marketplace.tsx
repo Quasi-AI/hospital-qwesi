@@ -6,12 +6,13 @@ import { DoctorCard, DoctorCardSkeleton, type PublicDoctor } from './doctor-card
 
 type Sort = 'recommended' | 'price-asc' | 'price-desc' | 'rating' | 'experience';
 
-export function usePublicDoctors() {
-  const [doctors, setDoctors] = useState<PublicDoctor[]>([]);
-  const [loading, setLoading] = useState(true);
+export function usePublicDoctors(initial?: PublicDoctor[]) {
+  const [doctors, setDoctors] = useState<PublicDoctor[]>(initial ?? []);
+  const [loading, setLoading] = useState(!initial);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (initial) return; // already rendered from the server
     let cancelled = false;
     fetch('/api/public/booking/doctors')
       .then(async (res) => {
@@ -24,7 +25,7 @@ export function usePublicDoctors() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initial]);
 
   return { doctors, loading, error };
 }
