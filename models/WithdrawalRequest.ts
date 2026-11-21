@@ -7,7 +7,7 @@ export interface IWithdrawalRequest {
   ownerRole: 'doctor' | 'staff';
   ownerName: string;
   amount: number;
-  currency: 'GHS';
+  currency: string;
   payoutMethod: 'mobile_money' | 'bank';
   accountName: string;
   accountNumber: string;
@@ -16,6 +16,8 @@ export interface IWithdrawalRequest {
   mobileMoneyProvider?: string;
   status: 'pending' | 'approved' | 'paid' | 'rejected';
   notes?: string;
+  payoutReference?: string;
+  nameMatchesProfile?: boolean;
   reviewedBy?: string;
   reviewedAt?: Date;
   createdAt: Date;
@@ -29,7 +31,7 @@ const withdrawalRequestSchema = new mongoose.Schema<IWithdrawalRequest>(
     ownerRole: { type: String, enum: ['doctor', 'staff'], required: true },
     ownerName: { type: String, required: true, trim: true },
     amount: { type: Number, required: true, min: 1 },
-    currency: { type: String, enum: ['GHS'], default: 'GHS' },
+    currency: { type: String, default: 'GHS' },
     payoutMethod: { type: String, enum: ['mobile_money', 'bank'], required: true },
     accountName: { type: String, required: true, trim: true },
     accountNumber: { type: String, required: true, trim: true },
@@ -43,6 +45,8 @@ const withdrawalRequestSchema = new mongoose.Schema<IWithdrawalRequest>(
       index: true,
     },
     notes: { type: String, trim: true },
+    payoutReference: { type: String, trim: true },
+    nameMatchesProfile: { type: Boolean },
     reviewedBy: { type: String, trim: true },
     reviewedAt: { type: Date },
   },

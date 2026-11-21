@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../auth/[...nextauth]/route';
+import { markConsultationCompleted } from '@/lib/finance';
 import dbConnect from '@/lib/mongodb';
 import TelemedicineSession from '@/models/TelemedicineSession';
 import User from '@/models/User';
@@ -159,6 +160,11 @@ export async function PUT(
     });
 
     await telemedicineSession.save();
+
+    // Doctor finished the consultation: start the payout safety window for the earning
+    if (statusChanged && data.status === 'completed') {
+      try { await markConsultationCompleted(id); } catch (e) { console.error('markConsultationCompleted', e); }
+    }
 
     // Populate and return
     const populatedSession = await TelemedicineSession.findById(id)

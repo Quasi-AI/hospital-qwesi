@@ -93,6 +93,15 @@ export interface ISettings {
       callbackUrl: string;
     };
   };
+  /** Marketplace money rules. Paystack collects everything; Qwesi keeps the commission and pays practitioners out. */
+  finance?: {
+    commissionPercent: number;
+    holdHours: number;
+    minWithdrawal: number;
+    payoutMethodCooldownHours: number;
+    refundWindowDays: number;
+    noShowGraceMinutes: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -251,6 +260,14 @@ const settingsSchema = new mongoose.Schema<ISettings>(
         secretKey: { type: String, default: '' },
         callbackUrl: { type: String, default: '' },
       },
+    },
+    finance: {
+      commissionPercent: { type: Number, default: 10, min: 0, max: 60 },
+      holdHours: { type: Number, default: 24, min: 0, max: 720 },
+      minWithdrawal: { type: Number, default: 10, min: 0 },
+      payoutMethodCooldownHours: { type: Number, default: 24, min: 0, max: 720 },
+      refundWindowDays: { type: Number, default: 7, min: 1, max: 60 },
+      noShowGraceMinutes: { type: Number, default: 15, min: 5, max: 120 },
     },
   },
   {

@@ -2,6 +2,7 @@ import { normalizeCurrency, type Currency } from '@/lib/practitioner-currency';
 import mongoose from 'mongoose';
 import Appointment from '@/models/Appointment';
 import PatientSubscription from '@/models/PatientSubscription';
+import { recordConsultationEarning } from '@/lib/finance';
 import PaystackTransaction from '@/models/PaystackTransaction';
 import TelemedicineSession from '@/models/TelemedicineSession';
 import User from '@/models/User';
@@ -214,5 +215,12 @@ export async function consumePatientPaygCredit(params: {
         ? { 'metadata.consumedByTelemedicineSessionId': params.telemedicineSessionId }
         : {}),
     },
+  });
+
+  // Credit the practitioner's wallet (held, net of commission) - idempotent
+  await recordConsultationEarning({
+    transactionId: params.transactionId,
+    appointmentId: params.appointmentId,
+    sessionId: params.telemedicineSessionId,
   });
 }
