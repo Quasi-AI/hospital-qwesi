@@ -47,7 +47,8 @@ export async function createBridgeAppointment(patient: any, req: BookingRequest)
   if (!access.allowed) return { ok: false, status: 402, error: access.message || 'Payment required', needsPayment: true };
 
   const reason = String(req.reason || '').trim().slice(0, 4000) || 'Consultation booked via WhatsApp/Facebook';
-  const title = doctor.practitionerType === 'herbalist' ? '' : 'Dr. ';
+  const cleanName = String(doctor.name || '').replace(/^dr\.?\s+/i, '');
+  const shownName = doctor.practitionerType === 'herbalist' ? doctor.name : `Dr. ${cleanName}`;
   const appointment = await Appointment.create({
     patientId: String(patient._id),
     patientName: patient.name,
@@ -116,5 +117,5 @@ export async function createBridgeAppointment(patient: any, req: BookingRequest)
     metadata: { appointmentId: String(appointment._id), telemedicineSessionId: String(session._id), billingCover: access.source },
   }).catch((e: unknown) => console.error('notify doctor', e));
 
-  return { ok: true, appointmentId: String(appointment._id), sessionId: String(session._id), doctorName: `${title}${doctor.name}`, date: req.date, time };
+  return { ok: true, appointmentId: String(appointment._id), sessionId: String(session._id), doctorName: shownName, date: req.date, time };
 }

@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (configError) return NextResponse.json({ success: false, error: configError }, { status: 400 });
 
     const reference = `QWESI-${Date.now()}-${randomUUID().slice(0, 8).toUpperCase()}`;
-    const itemName = `Consultation with ${doctor.practitionerType === 'herbalist' ? '' : 'Dr. '}${doctor.name}`;
+    const itemName = `Consultation with ${doctor.practitionerType === 'herbalist' ? doctor.name : `Dr. ${String(doctor.name).replace(/^dr\.?\s+/i, '')}`}`;
     const metadata = {
       paygId: 'doctor-virtual-consultation',
       serviceName: itemName,
