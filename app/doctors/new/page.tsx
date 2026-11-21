@@ -414,7 +414,7 @@ function NewDoctorForm() {
 
                     <div>
                       <label htmlFor="consultationFee" className="mb-1 block text-sm font-medium text-gray-700">
-                        Consultation fee (GHS)
+                        Consultation fee
                       </label>
                       <input
                         type="number"

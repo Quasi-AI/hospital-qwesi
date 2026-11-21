@@ -156,7 +156,7 @@ export function DoctorProfile({ id, portal = false }: { id: string; portal?: boo
                   <Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" /> Pick a live slot from their calendar
                 </li>
                 <li className="flex gap-3">
-                  <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" /> Pay securely with mobile money or card
+                  <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" /> Pay securely by card or local payment method
                 </li>
               </ul>
               <div className="hidden lg:block">

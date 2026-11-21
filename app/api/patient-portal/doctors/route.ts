@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         role: 'doctor',
         approvalStatus: { $ne: 'rejected' },
       })
-        .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience consultationFee rating ratingCount bio phone address gender')
+        .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience consultationFee currency practitionerType rating ratingCount bio phone address gender')
         .lean();
 
       if (!doctor) {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       role: 'doctor',
       approvalStatus: { $ne: 'rejected' },
     })
-      .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience consultationFee rating ratingCount bio phone')
+      .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience consultationFee currency practitionerType rating ratingCount bio phone')
       .sort({ name: 1 })
       .lean();
 

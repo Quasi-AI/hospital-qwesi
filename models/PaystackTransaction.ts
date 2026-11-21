@@ -12,7 +12,7 @@ export interface IPaystackTransaction {
   itemId: string;
   itemName: string;
   amount: number;
-  currency: 'GHS' | 'USD';
+  currency: 'GHS' | 'USD' | 'NGN' | 'KES' | 'ZAR';
   status: 'pending' | 'success' | 'failed' | 'abandoned';
   paystackStatus?: string;
   paystackTransactionId?: string;
@@ -34,7 +34,7 @@ const paystackTransactionSchema = new mongoose.Schema<IPaystackTransaction>(
     itemId: { type: String, required: true, trim: true },
     itemName: { type: String, required: true, trim: true },
     amount: { type: Number, required: true, min: 0 },
-    currency: { type: String, enum: ['GHS', 'USD'], required: true },
+    currency: { type: String, enum: ['GHS', 'USD', 'NGN', 'KES', 'ZAR'], required: true },
     status: {
       type: String,
       enum: ['pending', 'success', 'failed', 'abandoned'],

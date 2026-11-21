@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
+import { normalizeCurrency } from '@/lib/practitioner-currency';
 import User from '@/models/User';
 
 type SignupRole = 'patient' | 'doctor' | 'herbalist' | 'pharmacy';
@@ -132,6 +133,7 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
       // Herbalists are practitioners too: same 'doctor' account type, flagged by practitionerType
       role: role === 'herbalist' ? 'doctor' : role,
+      currency: normalizeCurrency(body.currency),
       practitionerType: role === 'herbalist' ? 'herbalist' : role === 'doctor' ? 'doctor' : undefined,
       phone: phone || undefined,
       department: cleanText(body.department) || (role === 'pharmacy' ? 'Pharmacy' : undefined),

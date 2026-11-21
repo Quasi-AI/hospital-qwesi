@@ -119,14 +119,14 @@ export interface WebsiteContentData {
 }
 
 export const defaultWebsiteContent: WebsiteContentData = {
-  heroBadge: 'Doctors online · pay only for the consult you book',
-  heroTitle: 'See a verified doctor today — from wherever you are',
+  heroBadge: 'Virtual care for the world · pay only for the consult you book',
+  heroTitle: 'See a doctor or herbalist today — from anywhere in the world',
   heroSubtitle:
-    'Browse licensed doctors, compare their consultation fees up front, pick a time that suits you, and pay securely to confirm your video, audio or chat appointment.',
+    'Browse doctors and herbalists from around the world, compare their consultation fees up front, pick a time that suits you, and pay securely to confirm your video, audio or chat appointment.',
   heroBullets: [
     'Every doctor shows their own fee — no surprises at checkout',
     'Licence-verified doctors across general practice and specialties',
-    'Pay securely with mobile money or card, then join from your phone',
+    'Pay securely by card or local payment method, then join from anywhere',
     'Prescriptions, lab requests and records live in your patient portal',
   ],
   heroImageUrl: '',
@@ -151,7 +151,7 @@ export const defaultWebsiteContent: WebsiteContentData = {
   trustPillars: [
     { title: 'Upfront fees', subtitle: 'Price shown on every doctor' },
     { title: 'Verified licences', subtitle: 'Reviewed before going live' },
-    { title: 'Secure payment', subtitle: 'Mobile money & card via Paystack' },
+    { title: 'Secure payment', subtitle: 'Cards & local payment methods via Paystack' },
     { title: 'Private by design', subtitle: 'Your data stays yours' },
   ],
   highlightsEyebrow: 'Why Qwesi',
@@ -200,7 +200,7 @@ export const defaultWebsiteContent: WebsiteContentData = {
   careJourneySteps: [
     { title: 'Find your doctor', body: 'Search by name or specialty and compare fees, experience, languages and ratings.' },
     { title: 'Pick a time', body: 'Choose an available slot from the doctor’s live calendar.' },
-    { title: 'Pay to book', body: 'Pay the doctor’s consultation fee securely with mobile money or card.' },
+    { title: 'Pay to book', body: 'Pay the doctor’s consultation fee securely by card or local payment method.' },
     { title: 'Meet online', body: 'Join your video, audio or chat consultation, then find your notes and prescriptions in your portal.' },
   ],
   visitEyebrow: '',
@@ -232,7 +232,7 @@ export const defaultWebsiteContent: WebsiteContentData = {
   faqItems: [
     { question: 'How does booking work?', answer: 'Find a doctor, choose a free time slot, and pay the consultation fee shown on their profile. Your appointment is confirmed as soon as payment succeeds.' },
     { question: 'How much does a consultation cost?', answer: 'Each doctor sets their own fee, and it is shown on their card and profile before you book. There are no hidden charges.' },
-    { question: 'What can I pay with?', answer: 'Mobile money and cards are supported through Paystack. Payments are processed securely and we never see your card details.' },
+    { question: 'What can I pay with?', answer: 'Cards and local payment methods (including mobile money where available) are supported through Paystack, in the currency each practitioner charges in. Payments are processed securely and we never see your card details.' },
     { question: 'How do I join my consultation?', answer: 'Open your patient portal at your appointment time and join the video, audio or chat room. You will also get a reminder.' },
     { question: 'Are your doctors licensed?', answer: 'Yes. Doctors upload their licence number and certificate, which are reviewed before their profile appears on the platform.' },
     { question: 'Is this for emergencies?', answer: 'No. If you think you are having a medical emergency, call your local emergency number or go to the nearest emergency facility immediately.' },

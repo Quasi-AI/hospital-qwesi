@@ -25,6 +25,7 @@ type Doctor = {
   specialization?: string;
   department?: string;
   consultationFee?: number;
+  currency?: string;
   yearsOfExperience?: number;
   rating?: number;
 };
@@ -40,7 +41,7 @@ type ConsultationAccess = {
   previousConsultationCount: number;
   hasActiveSubscription: boolean;
   amountDue?: number;
-  doctor?: { id: string; name: string; consultationFee: number; currency: 'GHS' };
+  doctor?: { id: string; name: string; consultationFee: number; currency: string };
   message: string;
   activeSubscription?: {
     planName: string;
@@ -50,7 +51,7 @@ type ConsultationAccess = {
     reference: string;
     itemName: string;
     amount: number;
-    currency: 'GHS' | 'USD';
+    currency: string;
   };
 };
 
@@ -354,7 +355,7 @@ function NewPatientAppointmentPageContent() {
                   className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-teal-700 px-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50"
                 >
                   {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                  {access.amountDue ? `Pay GHS ${access.amountDue}` : 'Pay to book'}
+                  {access.amountDue ? `Pay ${access.doctor?.currency || 'GHS'} ${access.amountDue}` : 'Pay to book'}
                 </button>
                 <Link
                   href="/patient-portal/subscriptions"
@@ -385,7 +386,7 @@ function NewPatientAppointmentPageContent() {
               <option key={doctor._id} value={doctor._id}>
                 {doctor.name}
                 {doctor.specialization || doctor.department ? ` - ${doctor.specialization || doctor.department}` : ''}
-                {(doctor.consultationFee ?? 0) > 0 ? ` (GHS ${doctor.consultationFee})` : ''}
+                {(doctor.consultationFee ?? 0) > 0 ? ` (${doctor.currency || 'GHS'} ${doctor.consultationFee})` : ''}
               </option>
             ))}
           </select>
@@ -393,7 +394,7 @@ function NewPatientAppointmentPageContent() {
             <div className="mt-3 rounded-md border border-teal-100 bg-teal-50 px-3 py-2 text-sm text-teal-900">
               <p className="font-semibold">{selectedDoctor.name}</p>
               <p className="text-xs">{selectedDoctor.specialization || selectedDoctor.department || 'Doctor'}</p>
-              <p className="mt-1 text-sm font-bold">{(selectedDoctor.consultationFee ?? 0) > 0 ? `GHS ${selectedDoctor.consultationFee} per consultation` : 'Free consultation'}</p>
+              <p className="mt-1 text-sm font-bold">{(selectedDoctor.consultationFee ?? 0) > 0 ? `${selectedDoctor.currency || 'GHS'} ${selectedDoctor.consultationFee} per consultation` : 'Free consultation'}</p>
             </div>
           ) : null}
         </section>
@@ -536,7 +537,7 @@ function NewPatientAppointmentPageContent() {
                     : access?.source === 'payg'
                       ? 'Fee paid ✓'
                       : (selectedDoctor?.consultationFee ?? 0) > 0
-                        ? `Fee: GHS ${selectedDoctor?.consultationFee}`
+                        ? `Fee: ${selectedDoctor?.currency || 'GHS'} ${selectedDoctor?.consultationFee}`
                         : 'Free consultation'}
                 </p>
               </div>
@@ -559,7 +560,7 @@ function NewPatientAppointmentPageContent() {
               className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-              {access.amountDue ? `Pay GHS ${access.amountDue} & confirm` : 'Pay & confirm'}
+              {access.amountDue ? `Pay ${access.doctor?.currency || 'GHS'} ${access.amountDue} & confirm` : 'Pay & confirm'}
             </button>
           ) : (
             <button

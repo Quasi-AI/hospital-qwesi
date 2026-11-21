@@ -1,3 +1,4 @@
+import { normalizeCurrency } from '@/lib/practitioner-currency';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
@@ -51,6 +52,7 @@ export async function PUT(request: NextRequest) {
       licenseCertificateFileType,
       languages,
       consultationFee,
+      currency,
       bio,
     } = await request.json();
 
@@ -145,6 +147,7 @@ export async function PUT(request: NextRequest) {
       ...(image !== undefined ? { image: nextImage, hasImage: Boolean(nextImage) } : {}),
       ...(licenseNumber !== undefined ? { licenseNumber: nextLicenseNumber } : {}),
       ...(nextLanguages !== undefined ? { languages: nextLanguages } : {}),
+      ...(isProvider && currency !== undefined ? { currency: normalizeCurrency(currency) } : {}),
       ...(isProvider && consultationFee !== undefined
         ? { consultationFee: Math.min(100000, Math.max(0, Number(consultationFee) || 0)) }
         : {}),

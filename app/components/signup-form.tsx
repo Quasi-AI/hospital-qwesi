@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { CURRENCIES, CURRENCY_LABELS } from '@/lib/practitioner-currency';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -64,7 +65,7 @@ const copy: Record<
     subtitle: 'Receive e-prescriptions and dispense to patients. Your licence is reviewed before your account is activated.',
     icon: Pill,
     submit: 'Submit for approval',
-    points: ['Receive prescriptions digitally', 'Manage your medicine stock', 'Reach patients across Ghana'],
+    points: ['Receive prescriptions digitally', 'Manage your medicine stock', 'Reach patients around the world'],
     other: [
       { href: '/signup/patient', label: 'I’m a patient' },
       { href: '/signup/doctor', label: 'I’m a doctor' },
@@ -85,6 +86,7 @@ const emptyForm = {
   licenseNumber: '',
   yearsOfExperience: '',
   consultationFee: '',
+  currency: 'USD',
   address: '',
   accepted: false,
   signedName: '',
@@ -218,7 +220,19 @@ export default function SignupForm({ role }: { role: SignupRole }) {
                   <Field label="Specialization" value={form.specialization} onChange={(v) => update('specialization', v)} placeholder={role === 'herbalist' ? 'e.g. Herbal medicine' : 'e.g. Cardiology'} required />
                   <Field label={role === 'herbalist' ? 'Registration / licence number' : 'Licence number'} value={form.licenseNumber} onChange={(v) => update('licenseNumber', v)} required />
                   <Field label="Years of experience" value={form.yearsOfExperience} onChange={(v) => update('yearsOfExperience', v)} type="number" />
-                  <Field label="Consultation fee (GHS)" value={form.consultationFee} onChange={(v) => update('consultationFee', v)} type="number" placeholder="e.g. 150" required />
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-medium text-gray-700">Currency</span>
+                    <select
+                      value={form.currency}
+                      onChange={(e) => update('currency', e.target.value)}
+                      className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c} value={c}>{CURRENCY_LABELS[c]}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <Field label="Consultation fee" value={form.consultationFee} onChange={(v) => update('consultationFee', v)} type="number" placeholder="e.g. 150" required />
                 </div>
                 <p className="-mt-1 text-xs text-gray-600">Patients pay this fee up front to book you. You can change it later in your profile.</p>
               </>
