@@ -8,13 +8,13 @@ const sans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans", di
 const display = Fraunces({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Qwesi Virtual Hospital - Find a doctor & book online",
+  title: "Qwesi AI - Virtual care for the world",
   description:
     "Browse verified doctors, see their consultation fees up front, and pay to book a video, audio or chat appointment - from anywhere.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [{ url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" }, { url: "/favicon.ico" }],
     shortcut: "/favicon.ico",
-    apple: "/logo.png",
+    apple: "/brand/icon-512.png",
   },
 };
 

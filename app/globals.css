@@ -84,17 +84,41 @@
   --color-teal-900: #3b2584;
   --color-teal-950: #1d1245;
 
-  --color-emerald-50: #ecfdf3;
-  --color-emerald-100: #d1fae0;
-  --color-emerald-200: #a6f4c5;
-  --color-emerald-300: #6ce9a6;
-  --color-emerald-400: #32d583;
-  --color-emerald-500: #12b76a;
-  --color-emerald-600: #039855;
-  --color-emerald-700: #027a48;
-  --color-emerald-800: #05603a;
-  --color-emerald-900: #054f31;
-  --color-emerald-950: #022c1c;
+  --color-emerald-50: #f4f1ff;
+  --color-emerald-100: #e9e4ff;
+  --color-emerald-200: #d6ccff;
+  --color-emerald-300: #bba9fb;
+  --color-emerald-400: #9a82f5;
+  --color-emerald-500: #8062f1;
+  --color-emerald-600: #6949ed;
+  --color-emerald-700: #5736cc;
+  --color-emerald-800: #482ba6;
+  --color-emerald-900: #3b2584;
+  --color-emerald-950: #1d1245;
+
+  /* no green anywhere: success/"green" states use the brand purple */
+  --color-green-50: #f4f1ff;
+  --color-green-100: #e9e4ff;
+  --color-green-200: #d6ccff;
+  --color-green-300: #bba9fb;
+  --color-green-400: #9a82f5;
+  --color-green-500: #8062f1;
+  --color-green-600: #6949ed;
+  --color-green-700: #5736cc;
+  --color-green-800: #482ba6;
+  --color-green-900: #3b2584;
+  --color-green-950: #1d1245;
+  --color-lime-50: #f4f1ff;
+  --color-lime-100: #e9e4ff;
+  --color-lime-200: #d6ccff;
+  --color-lime-300: #bba9fb;
+  --color-lime-400: #9a82f5;
+  --color-lime-500: #8062f1;
+  --color-lime-600: #6949ed;
+  --color-lime-700: #5736cc;
+  --color-lime-800: #482ba6;
+  --color-lime-900: #3b2584;
+  --color-lime-950: #1d1245;
 
   /* Indigo/violet/purple become a calm slate-violet so multi-colour icons stay distinct */
   --color-indigo-50: #f3f2fd;

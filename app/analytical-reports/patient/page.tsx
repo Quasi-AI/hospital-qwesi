@@ -52,7 +52,7 @@ export default function PatientAnalyticsPage() {
     }
   };
 
-  const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#64748b'];
+  const PIE_COLORS = ['#2563eb', '#6949ed', '#f59e0b', '#ef4444', '#8b5cf6', '#9a82f5', '#64748b'];
 
   const ageChartData = Object.entries(data?.ageGroups || {}).map(([name, value]) => ({
     name,
@@ -250,7 +250,7 @@ export default function PatientAnalyticsPage() {
                       <Tooltip />
                       <Legend />
                       <Line type="monotone" dataKey="visits" name="Visits" stroke="#2563eb" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="newPatients" name="New Patients" stroke="#16a34a" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="newPatients" name="New Patients" stroke="#6949ed" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (

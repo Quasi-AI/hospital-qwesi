@@ -54,7 +54,7 @@ export default function OperationalAnalyticsPage() {
     }
   };
 
-  const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#64748b'];
+  const PIE_COLORS = ['#2563eb', '#6949ed', '#f59e0b', '#ef4444', '#8b5cf6', '#9a82f5', '#64748b'];
   const statusChartData = Object.entries(data?.appointmentStatusBreakdown || {}).map(([name, value]) => ({
     name,
     value: typeof value === 'number' ? value : Number(value || 0),
@@ -225,7 +225,7 @@ export default function OperationalAnalyticsPage() {
                       <Tooltip />
                       <Legend />
                       <Line type="monotone" dataKey="totalAppointments" name="Total" stroke="#2563eb" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="completedAppointments" name="Completed" stroke="#16a34a" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="completedAppointments" name="Completed" stroke="#6949ed" strokeWidth={2} dot={false} />
                       <Line type="monotone" dataKey="cancelledAppointments" name="Cancelled" stroke="#ef4444" strokeWidth={2} dot={false} />
                     </ReLineChart>
                   </ResponsiveContainer>

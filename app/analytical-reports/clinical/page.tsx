@@ -53,7 +53,7 @@ export default function ClinicalAnalyticsPage() {
     }
   };
 
-  const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#64748b'];
+  const PIE_COLORS = ['#2563eb', '#6949ed', '#f59e0b', '#ef4444', '#8b5cf6', '#9a82f5', '#64748b'];
 
   const reportTypeChartData = Object.entries(data?.diseaseTrends || {}).map(([name, value]) => ({
     name,
@@ -230,7 +230,7 @@ export default function ClinicalAnalyticsPage() {
                       <Tooltip />
                       <Legend />
                       <Line type="monotone" dataKey="totalReports" name="Total Reports" stroke="#2563eb" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="completedReports" name="Completed" stroke="#16a34a" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="completedReports" name="Completed" stroke="#6949ed" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (

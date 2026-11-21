@@ -393,7 +393,7 @@ export default function LabTestDetailPage() {
                         textAlign: 'center', 
                         fontSize: '10pt', 
                         fontWeight: '700',
-                        color: result.status === 'critical' ? '#dc2626' : result.status === 'abnormal' ? '#ea580c' : '#059669',
+                        color: result.status === 'critical' ? '#dc2626' : result.status === 'abnormal' ? '#ea580c' : '#5736cc',
                         borderBottom: '1px solid #e5e7eb',
                         background: result.status === 'critical' ? '#fef2f2' : result.status === 'abnormal' ? '#fffbeb' : 'transparent'
                       }}>
@@ -407,7 +407,7 @@ export default function LabTestDetailPage() {
                       </td>
                       <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: '9pt', borderBottom: '1px solid #e5e7eb' }}>
                         {result.status === 'normal' ? (
-                          <span style={{ color: '#059669', fontWeight: '500' }}>✓</span>
+                          <span style={{ color: '#5736cc', fontWeight: '500' }}>✓</span>
                         ) : result.status === 'abnormal' ? (
                           <span style={{ color: '#ea580c', fontWeight: '700' }}>H/L</span>
                         ) : (
@@ -431,7 +431,7 @@ export default function LabTestDetailPage() {
               border: '1px solid #e5e7eb',
               marginBottom: '20px'
             }}>
-              <span><strong style={{ color: '#059669' }}>✓</strong> Normal</span>
+              <span><strong style={{ color: '#5736cc' }}>✓</strong> Normal</span>
               <span><strong style={{ color: '#ea580c' }}>H</strong> High</span>
               <span><strong style={{ color: '#ea580c' }}>L</strong> Low</span>
               <span><strong style={{ color: '#dc2626' }}>⚠ C</strong> Critical - Immediate attention required</span>

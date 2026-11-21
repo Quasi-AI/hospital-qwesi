@@ -53,7 +53,7 @@ export default function AppointmentAnalyticsPage() {
     }
   };
 
-  const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#64748b'];
+  const PIE_COLORS = ['#2563eb', '#6949ed', '#f59e0b', '#ef4444', '#8b5cf6', '#9a82f5', '#64748b'];
   const typeChartData = Object.entries(data?.typeDistribution || {}).map(([name, value]) => ({
     name,
     value: typeof value === 'number' ? value : Number(value || 0),
@@ -224,7 +224,7 @@ export default function AppointmentAnalyticsPage() {
                       <Tooltip />
                       <Legend />
                       <Line type="monotone" dataKey="total" name="Total" stroke="#2563eb" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="completed" name="Completed" stroke="#16a34a" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="completed" name="Completed" stroke="#6949ed" strokeWidth={2} dot={false} />
                       <Line type="monotone" dataKey="cancelled" name="Cancelled" stroke="#ef4444" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>

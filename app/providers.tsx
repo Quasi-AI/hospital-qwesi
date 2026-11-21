@@ -24,7 +24,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               success: {
                 duration: 3000,
                 iconTheme: {
-                  primary: '#10B981',
+                  primary: '#6949ED',
                   secondary: '#fff',
                 },
               },

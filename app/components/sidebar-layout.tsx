@@ -1,5 +1,6 @@
 'use client';
 
+import { LogoLink } from './logo';
 import { useCallback, useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -374,31 +375,19 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
+          className="fixed inset-0 bg-brand-950/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0
+        fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col bg-white shadow-xl shadow-brand-900/10 transform transition-transform duration-300 ease-in-out lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Stethoscope className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                {settings?.systemTitle || ''}
-              </h1>
-              <p className="text-xs text-gray-700">
-                {settings?.systemDescription || ''}
-              </p>
-            </div>
-          </div>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-brand-100">
+          <LogoLink href="/dashboard" className="h-8" priority />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600"
@@ -427,8 +416,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                       className={`
                         w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors
                         ${isActive
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                          : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                         }
                       `}
                     >
@@ -451,8 +440,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                             className={`
                               flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                               ${isActiveRoute(child.href, child.exact)
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                                : 'text-gray-600 hover:bg-brand-50 hover:text-brand-800'
                               }
                             `}
                             onClick={() => setSidebarOpen(false)}
@@ -470,8 +459,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
               className={`
                 flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                       ${isActive
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                  : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                 }
               `}
               onClick={() => setSidebarOpen(false)}
@@ -487,14 +476,14 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
 
         {/* General Settings - Admin Only */}
         {isAdmin && (
-          <div className="px-3 py-4 border-t border-gray-200">
+          <div className="px-3 py-4 border-t border-brand-100">
             <div className="space-y-1">
               <Link
                 href="/settings"
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActiveRoute('/settings', true)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -505,8 +494,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 href="/settings/hospital-website"
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActiveRoute('/settings/hospital-website', true)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -517,8 +506,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 href="/settings/ai-chat"
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActiveRoute('/settings/ai-chat', true)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -529,8 +518,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 href="/settings/notifications"
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActiveRoute('/settings/notifications', true)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -541,8 +530,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 href="/settings/languages"
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActiveRoute('/settings/languages', true)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -553,8 +542,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 href="/ai-settings"
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActiveRoute('/ai-settings', true)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-800'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -566,7 +555,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
         )}
 
         {/* Quick Actions */}
-        <div className="px-3 py-4 border-t border-gray-200">
+        <div className="px-3 py-4 border-t border-brand-100">
           <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3 px-3">
             {t('ai.quickActions.title')}
           </h3>
@@ -575,15 +564,15 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
               <>
                 <Link
                   href="/pharmacy/medicines/new"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-800 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <Plus className="h-4 w-4 text-emerald-600" />
+                  <Plus className="h-4 w-4 text-brand-600" />
                   <span>Add Medicine</span>
                 </Link>
                 <Link
                   href="/pharmacy/dispensing"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-800 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <ClipboardList className="h-4 w-4 text-blue-600" />
@@ -591,10 +580,10 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 </Link>
                 <Link
                   href="/pharmacy/inventory"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-800 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <Package className="h-4 w-4 text-amber-600" />
+                  <Package className="h-4 w-4 text-brand-600" />
                   <span>Inventory</span>
                 </Link>
               </>
@@ -602,7 +591,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
               <>
                 <Link
                   href="/patients/new"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-800 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <Plus className="h-4 w-4 text-blue-600" />
@@ -610,17 +599,17 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 </Link>
                 <Link
                   href="/appointments/new"
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-800 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <Plus className="h-4 w-4 text-green-600" />
+                  <Plus className="h-4 w-4 text-brand-600" />
                   <span>{t('ai.quickActions.newAppointment')}</span>
                 </Link>
                 {isAdmin && (
                   <>
                     <Link
                       href="/doctors/new"
-                      className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                      className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-800 transition-colors"
                       onClick={() => setSidebarOpen(false)}
                     >
                       <UserPlus className="h-4 w-4 text-purple-600" />
@@ -628,10 +617,10 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                     </Link>
                     <Link
                       href="/pharmacy"
-                      className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                      className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-800 transition-colors"
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <Pill className="h-4 w-4 text-emerald-600" />
+                      <Pill className="h-4 w-4 text-brand-600" />
                       <span>Pharmacy</span>
                     </Link>
                   </>
@@ -642,20 +631,20 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
         </div>
 
         {/* Language Switcher */}
-        <div className="px-3 py-4 border-t border-gray-200">
+        <div className="px-3 py-4 border-t border-brand-100">
           <div className="px-3">
             <LanguageSwitcher />
           </div>
         </div>
 
         {/* User Profile */}
-        <div className="px-3 py-4 border-t border-gray-200">
+        <div className="px-3 py-4 border-t border-brand-100">
           <div className="relative" ref={profileMenuRef}>
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+              <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-full flex items-center justify-center text-white font-semibold">
                 {session?.user?.name?.charAt(0) || 'D'}
               </div>
               <div className="flex-1 min-w-0 text-left">
@@ -700,7 +689,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       {/* Main Content */}
       <div className="flex min-h-0 flex-1 min-w-0 flex-col lg:ml-64">
         {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 lg:hidden">
+        <header className="bg-white shadow-sm border-b border-brand-100 lg:hidden">
           <div className="flex items-center justify-between h-16 px-4">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -728,7 +717,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                   onClick={() => setMobileProfileMenuOpen(!mobileProfileMenuOpen)}
                   className="flex items-center space-x-2 p-2 text-gray-400 hover:text-gray-600"
                 >
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                     {session?.user?.name?.charAt(0) || 'D'}
                   </div>
                   <ChevronDown className={`h-4 w-4 transition-transform ${mobileProfileMenuOpen ? 'rotate-180' : ''}`} />
@@ -738,7 +727,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
                 {mobileProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="py-1">
-                      <div className="px-4 py-2 border-b border-gray-200">
+                      <div className="px-4 py-2 border-b border-brand-100">
                         <p className="text-sm font-medium text-gray-900">{session?.user?.name || t('auth.doctor')}</p>
                         <p className="text-xs text-gray-600">{session?.user?.email || 'doctor@aidoc.com'}</p>
                       </div>

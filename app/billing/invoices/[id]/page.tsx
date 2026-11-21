@@ -305,14 +305,14 @@ export default function InvoiceDetailPage() {
                 <p style={{ 
                   fontSize: '10pt', 
                   fontWeight: '700', 
-                  color: invoice.status === 'paid' ? '#166534' : invoice.status === 'pending' ? '#d97706' : '#111827', 
+                  color: invoice.status === 'paid' ? '#3b2584' : invoice.status === 'pending' ? '#d97706' : '#111827', 
                   margin: '2px 0 0 0',
                   textTransform: 'uppercase'
                 }}>{invoice.status}</p>
               </div>
               <div style={{ background: '#f9fafb', padding: '12px 14px' }}>
                 <p style={{ fontSize: '7pt', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Amount Due</p>
-                <p style={{ fontSize: '11pt', fontWeight: '700', color: remaining > 0 ? '#dc2626' : '#166534', margin: '2px 0 0 0' }}>
+                <p style={{ fontSize: '11pt', fontWeight: '700', color: remaining > 0 ? '#dc2626' : '#3b2584', margin: '2px 0 0 0' }}>
                   {formatCurrency(remaining > 0 ? remaining : 0)}
                 </p>
               </div>

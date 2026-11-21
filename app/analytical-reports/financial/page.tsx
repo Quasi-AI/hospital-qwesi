@@ -61,7 +61,7 @@ export default function FinancialReportsPage() {
     value: typeof value === 'number' ? value : Number(value || 0),
   }));
 
-  const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#64748b'];
+  const PIE_COLORS = ['#2563eb', '#6949ed', '#f59e0b', '#ef4444', '#8b5cf6', '#9a82f5', '#64748b'];
 
   const handleExport = () => {
     if (!data) return;
@@ -261,7 +261,7 @@ export default function FinancialReportsPage() {
                       <Tooltip />
                       <Legend />
                       <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#2563eb" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="paid" name="Paid" stroke="#16a34a" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="paid" name="Paid" stroke="#6949ed" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
