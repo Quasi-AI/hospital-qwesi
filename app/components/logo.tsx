@@ -5,8 +5,8 @@ import Link from 'next/link';
  * Qwesi AI logo.
  *  - variant "full": brain mark + "QWESI AI" wordmark
  *  - variant "mark": brain only (compact spots)
- *  - tone "dark": white wordmark, for dark / purple backgrounds
- * The PNGs have transparent backgrounds (public/brand).
+ *  - tone "dark": for dark / purple backgrounds — the original logo is shown on
+ *    its white background, as a rounded white badge.
  */
 export function Logo({
   variant = 'full',
@@ -19,9 +19,10 @@ export function Logo({
   className?: string;
   priority?: boolean;
 }) {
-  const src = variant === 'mark' ? '/brand/qwesi-mark.png' : tone === 'dark' ? '/brand/qwesi-logo-white.png' : '/brand/qwesi-logo.png';
-  const ratio = variant === 'mark' ? 98 / 97 : 419 / 97;
-  return (
+  const onDark = tone === 'dark';
+  const src = onDark ? '/brand/qwesi-logo-original.png' : variant === 'mark' ? '/brand/qwesi-mark.png' : '/brand/qwesi-logo.png';
+  const ratio = onDark ? 436 / 130 : variant === 'mark' ? 98 / 97 : 419 / 97;
+  const img = (
     <img
       src={src}
       alt="Qwesi AI"
@@ -33,6 +34,8 @@ export function Logo({
       draggable={false}
     />
   );
+  // original artwork has a white background: keep it, as a clean rounded white badge
+  return onDark ? <span className="inline-flex overflow-hidden rounded-xl bg-white shadow-lg shadow-black/20 ring-1 ring-white/40">{img}</span> : img;
 }
 
 export function LogoLink({ href = '/', ...props }: { href?: string } & React.ComponentProps<typeof Logo>) {
