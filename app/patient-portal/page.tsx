@@ -32,16 +32,16 @@ type DashboardPayload = {
 };
 
 const statMeta: Record<string, { label: string; href: string; icon: React.ElementType; tone: string }> = {
-  upcomingAppointments: { label: 'Upcoming bookings', href: '/patient-portal/appointments', icon: Calendar, tone: 'bg-brand-50 text-brand-700' },
-  pendingLabTests: { label: 'Tests pending', href: '/patient-portal/reports', icon: FlaskConical, tone: 'bg-indigo-50 text-indigo-600' },
-  activePrescriptions: { label: 'Prescriptions', href: '/patient-portal/prescriptions', icon: Pill, tone: 'bg-accent-50 text-accent-600' },
-  reportsGenerated: { label: 'Reports', href: '/patient-portal/reports', icon: FileText, tone: 'bg-brand-50 text-brand-700' },
+  upcomingAppointments: { label: 'Upcoming bookings', href: '/patient-portal/appointments', icon: Calendar, tone: 'from-brand-500 to-brand-700' },
+  pendingLabTests: { label: 'Tests pending', href: '/patient-portal/reports', icon: FlaskConical, tone: 'from-indigo-500 to-brand-600' },
+  activePrescriptions: { label: 'Prescriptions', href: '/patient-portal/prescriptions', icon: Pill, tone: 'from-violet-400 to-brand-600' },
+  reportsGenerated: { label: 'Reports', href: '/patient-portal/reports', icon: FileText, tone: 'from-brand-500 to-brand-700' },
 };
 
 function Panel({ title, href, children }: { title: string; href?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-3.5">
+    <section className="qw-card overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-brand-100/70 px-5 py-3.5">
         <h2 className="font-semibold text-gray-900">{title}</h2>
         {href && (
           <Link href={href} className="text-xs font-semibold text-brand-700 hover:text-brand-900">
@@ -94,7 +94,7 @@ export default function PatientPortalDashboard() {
         <div className="mt-5 flex flex-col gap-2 sm:flex-row">
           <Link
             href="/patient-portal/doctors"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-400 px-6 py-3 font-semibold text-brand-950 shadow-lg transition hover:bg-accent-300"
+            className="inline-flex items-center justify-center gap-2 rounded-full !bg-white px-6 py-3 font-semibold text-brand-800 shadow-lg transition hover:!bg-brand-50"
           >
             <Search className="h-4 w-4" /> Find a doctor
           </Link>
@@ -109,7 +109,7 @@ export default function PatientPortalDashboard() {
 
       {/* Stats */}
       {stats.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="reveal-stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
           {stats.map((stat) => {
             const meta = statMeta[stat.name];
             const Icon = meta.icon;
@@ -117,9 +117,9 @@ export default function PatientPortalDashboard() {
               <Link
                 key={stat.name}
                 href={meta.href}
-                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-brand-300 hover:shadow-md"
+                className="qw-card p-4 transition hover:-translate-y-0.5 hover:shadow-xl"
               >
-                <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${meta.tone}`}>
+                <span className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg shadow-brand-600/20 ${meta.tone}`}>
                   <Icon className="h-5 w-5" />
                 </span>
                 <p className="mt-3 text-3xl font-bold text-gray-900">{stat.value}</p>
@@ -149,7 +149,7 @@ export default function PatientPortalDashboard() {
                   <li key={a.id}>
                     <Link
                       href="/patient-portal/appointments"
-                      className="flex items-center gap-4 rounded-xl bg-gray-50 p-3.5 transition hover:bg-brand-50"
+                      className="flex items-center gap-4 rounded-xl bg-white/60 p-3.5 ring-1 ring-brand-100 transition hover:bg-brand-50"
                     >
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
                         {a.type === 'telemedicine' ? <Video className="h-5 w-5" /> : <Stethoscope className="h-5 w-5" />}
@@ -229,9 +229,9 @@ export default function PatientPortalDashboard() {
                 <Link
                   key={label}
                   href={href}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-gray-100 p-3 text-center text-xs font-medium text-gray-700 transition hover:border-brand-200 hover:bg-brand-50"
+                  className="group flex flex-col items-center gap-2 rounded-2xl bg-white/60 p-3 text-center text-xs font-semibold text-gray-800 ring-1 ring-brand-100 transition hover:-translate-y-0.5 hover:bg-brand-600 hover:text-white hover:shadow-lg hover:shadow-brand-600/25"
                 >
-                  <Icon className="h-5 w-5 text-brand-600" />
+                  <Icon className="h-5 w-5 text-brand-600 transition group-hover:text-white" />
                   {label}
                 </Link>
               ))}
@@ -240,7 +240,7 @@ export default function PatientPortalDashboard() {
 
           <Link
             href="/patient-portal/subscriptions"
-            className="flex items-center gap-3 rounded-2xl border border-accent-200 bg-accent-50 p-4 transition hover:border-accent-400"
+            className="qw-card flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-xl"
           >
             <WalletCards className="h-6 w-6 shrink-0 text-accent-600" />
             <span className="min-w-0 flex-1">
