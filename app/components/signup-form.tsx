@@ -143,7 +143,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[0.8fr_1.2fr]">
+    <div className="grid grid-cols-1 min-h-screen lg:grid-cols-[0.8fr_1.2fr]">
       {/* Brand panel */}
       <aside className="qw-hero-bg relative hidden flex-col justify-between overflow-hidden text-white lg:sticky lg:top-0 lg:flex lg:h-screen">
         <div className="relative z-10 border-b border-brand-100 !bg-white px-10 py-4">
@@ -181,7 +181,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
           <h1 className="font-display hidden text-2xl font-semibold text-brand-950 lg:block">{c.title}</h1>
 
           <form onSubmit={submit} className="mt-5 space-y-3 lg:mt-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
               <Field wrap="lg:col-span-3" label="Full name" value={form.name} onChange={(v) => update('name', v)} icon={User} required />
               <Field wrap="lg:col-span-3" label="Email" value={form.email} onChange={(v) => update('email', v)} type="email" icon={Mail} required />
               <Field wrap="lg:col-span-3" label="Phone" value={form.phone} onChange={(v) => update('phone', v)} icon={Phone} required={role === 'patient'} />
@@ -236,7 +236,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
             </div>
 
             {/* Compact agreement */}
-            <section className="grid gap-3 rounded-2xl border border-brand-100 bg-brand-50/60 p-3 sm:p-4 lg:grid-cols-2 lg:items-start">
+            <section className="grid grid-cols-1 gap-3 rounded-2xl border border-brand-100 bg-brand-50/60 p-3 sm:p-4 lg:grid-cols-2 lg:items-start">
               <div>
               <label className="flex items-start gap-3 text-sm text-gray-800">
                 <input

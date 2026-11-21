@@ -88,7 +88,7 @@ export default function PatientSubscriptionsPage() {
   return (
     <div className="space-y-5">
       <section className="overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm">
-        <div className="grid gap-4 bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-700 p-5 text-white lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
+        <div className="grid grid-cols-1 gap-4 bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-700 p-5 text-white lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
           <div>
             <p className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold">
               <ShieldCheck className="h-3.5 w-3.5" />
@@ -131,7 +131,7 @@ export default function PatientSubscriptionsPage() {
             <h2 className="text-lg font-semibold text-gray-950">Patient plans</h2>
           </div>
         </div>
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {qwesiSubscriptionPlans.map((plan, index) => (
             <article key={plan.id} className="flex min-h-[18rem] flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
@@ -180,7 +180,7 @@ export default function PatientSubscriptionsPage() {
             <h2 className="text-base font-semibold text-gray-950">PAYG services</h2>
           </div>
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {qwesiPaygItems.map((item) => (
             <article key={item.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div className="flex items-start justify-between gap-3">

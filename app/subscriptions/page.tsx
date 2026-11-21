@@ -16,7 +16,7 @@ export default function PublicSubscriptionsPage() {
             <Stethoscope className="h-4 w-4" />
             Qwesi Care
           </Link>
-          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
             <div className="max-w-3xl">
               <p className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -47,7 +47,7 @@ export default function PublicSubscriptionsPage() {
           <CreditCard className="h-5 w-5 text-blue-700" />
           <h2 className="text-xl font-semibold text-slate-950">PAYG services</h2>
         </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {qwesiPaygItems.map((item) => (
             <article key={item.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
@@ -70,7 +70,7 @@ export default function PublicSubscriptionsPage() {
 
       <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-6 lg:px-8">
         <h2 className="text-xl font-semibold text-slate-950">Monthly patient subscriptions</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           {qwesiSubscriptionPlans.map((plan) => (
             <article key={plan.id} className="flex min-h-[18rem] flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <h3 className="text-base font-semibold text-slate-950">{plan.name}</h3>

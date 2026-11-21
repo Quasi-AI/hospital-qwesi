@@ -175,7 +175,7 @@ export function PublicFooter({
   const phone = settings?.address?.phone?.trim();
   return (
     <footer className="border-t border-brand-100 !bg-white text-gray-600">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)] lg:px-8">
+      <div className="mx-auto grid grid-cols-1 max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)] lg:px-8">
         <div>
           <BrandMark settings={settings} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-gray-600">{content.footerTagline}</p>

@@ -462,7 +462,7 @@ export function LandingKnowledgeBaseEditor() {
             <h4 className="text-sm font-semibold text-gray-900">New entry</h4>
           </div>
           <div className="space-y-4 p-4 sm:p-5">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-gray-800">Title</label>
                 <input
@@ -626,7 +626,7 @@ export function LandingKnowledgeBaseEditor() {
                       </div>
                     ) : (
                       <div className="mx-auto max-w-3xl space-y-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-                        <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
                             <label className="text-xs font-semibold text-gray-800">Title</label>
                             <input

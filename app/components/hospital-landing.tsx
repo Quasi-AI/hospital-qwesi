@@ -87,10 +87,10 @@ export function HospitalLanding({
       {/* ───────── Hero ───────── */}
       <section className="qw-hero-bg relative overflow-hidden text-white">
         <PublicHeader settings={settings} tone="dark" />
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:pb-28 lg:pt-20">
+        <div className="mx-auto grid grid-cols-1 max-w-7xl items-center gap-12 px-4 pb-20 pt-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:pb-28 lg:pt-20">
           <div className="hero-in">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold text-brand-100 backdrop-blur sm:text-sm">
-              <span className="pulse-ring h-2 w-2 rounded-full bg-accent-300" /> {content.heroBadge}
+            <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold text-brand-100 backdrop-blur sm:text-sm">
+              <span className="pulse-ring h-2 w-2 shrink-0 rounded-full bg-accent-300" /> {content.heroBadge}
             </span>
             <h1 className="font-display mt-6 text-balance text-4xl font-semibold leading-[1.08] sm:text-5xl lg:text-6xl">
               {content.heroTitle}
@@ -119,7 +119,7 @@ export function HospitalLanding({
               </button>
             </form>
 
-            <ul className="mt-7 grid max-w-xl gap-x-6 gap-y-2.5 sm:grid-cols-2">
+            <ul className="mt-7 grid grid-cols-1 max-w-xl gap-x-6 gap-y-2.5 sm:grid-cols-2">
               {content.heroBullets.slice(0, 4).map((b) => (
                 <li key={b} className="flex items-start gap-2.5 text-sm text-white/80">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" />
@@ -206,7 +206,7 @@ export function HospitalLanding({
               See all doctors <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="reveal-stagger mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="reveal-stagger mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {loading
               ? [0, 1, 2].map((i) => <DoctorCardSkeleton key={i} />)
               : featured.map((d) => <DoctorCard key={d.id} doctor={d} />)}
@@ -258,7 +258,7 @@ export function HospitalLanding({
             <h2 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">{content.careJourneyTitle}</h2>
             <p className="mt-3 text-white/70">{content.careJourneySubtitle}</p>
           </div>
-          <ol className="reveal-stagger mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="reveal-stagger mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {content.careJourneySteps.slice(0, 4).map((step, i) => {
               const Icon = STEP_ICONS[i % STEP_ICONS.length];
               return (
@@ -286,7 +286,7 @@ export function HospitalLanding({
 
       {/* ───────── Why Qwesi ───────── */}
       <section className="py-16 sm:py-20">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+        <div className="mx-auto grid grid-cols-1 max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
           <div>
             <Eyebrow>{content.highlightsEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.highlightsTitle}</h2>
@@ -300,7 +300,7 @@ export function HospitalLanding({
               ))}
             </dl>
           </div>
-          <div className="reveal-stagger grid gap-4 sm:grid-cols-2">
+          <div className="reveal-stagger grid grid-cols-1 gap-4 sm:grid-cols-2">
             {content.highlights.map((h) => (
               <div key={h.title} className="qw-card p-6">
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
@@ -316,7 +316,7 @@ export function HospitalLanding({
 
       {/* ───────── Doctors: join ───────── */}
       <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
-        <div className="reveal qw-hero-bg mx-auto grid max-w-7xl items-center gap-8 overflow-hidden rounded-[2rem] p-8 text-white sm:p-12 lg:grid-cols-[1.4fr_1fr]">
+        <div className="reveal qw-hero-bg mx-auto grid grid-cols-1 max-w-7xl items-center gap-8 overflow-hidden rounded-[2rem] p-8 text-white sm:p-12 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <Eyebrow light>For doctors</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">Set your own fee. See patients from anywhere.</h2>
@@ -343,7 +343,7 @@ export function HospitalLanding({
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.subscriptionsTitle}</h2>
             <p className="mt-3 text-gray-600">{content.subscriptionsSubtitle}</p>
           </div>
-          <div className="reveal-stagger mt-10 grid gap-5 md:grid-cols-3">
+          <div className="reveal-stagger mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
             {content.subscriptions.map((plan, i) => (
               <div
                 key={plan.name}
@@ -391,7 +391,7 @@ export function HospitalLanding({
             <Eyebrow>{content.testimonialsEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.testimonialsTitle}</h2>
           </div>
-          <div className="reveal-stagger mt-10 grid gap-5 md:grid-cols-3">
+          <div className="reveal-stagger mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
             {content.testimonials.slice(0, 3).map((t) => (
               <figure key={t.quote} className="qw-card flex h-full flex-col p-6">
                 <Quote className="h-7 w-7 text-accent-400" />
@@ -438,7 +438,7 @@ export function HospitalLanding({
 
       {/* ───────── Contact + CTA ───────── */}
       <section id="contact" className="cv-auto scroll-mt-20 py-16 sm:py-20">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <div className="mx-auto grid grid-cols-1 max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div className="glass rounded-[2rem] p-8 sm:p-10">
             <Eyebrow>{content.contactEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950">{content.contactTitle}</h2>

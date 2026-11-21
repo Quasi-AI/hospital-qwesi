@@ -208,7 +208,7 @@ export default function PatientProfilePage() {
 
         {/* Profile Details */}
         <div className="p-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Email (read-only) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -290,7 +290,7 @@ export default function PatientProfilePage() {
               <AlertCircle className="h-4 w-4 text-red-500" />
               {t('patientPortal.profile.emergencyContact')}
             </h3>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('patientPortal.profile.contactName')}

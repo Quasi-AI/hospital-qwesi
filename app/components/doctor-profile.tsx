@@ -69,7 +69,7 @@ export function DoctorProfile({ id, portal = false }: { id: string; portal?: boo
         <ArrowLeft className="h-4 w-4" /> All doctors
       </Link>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
         <div className="space-y-6">
           <section className="qw-card !transform-none p-6 sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -109,7 +109,7 @@ export function DoctorProfile({ id, portal = false }: { id: string; portal?: boo
           )}
 
           {(doctor.qualifications.length > 0 || doctor.languages.length > 0) && (
-            <section className="qw-card !transform-none grid gap-6 p-6 sm:grid-cols-2 sm:p-8">
+            <section className="qw-card !transform-none grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 sm:p-8">
               {doctor.qualifications.length > 0 && (
                 <div>
                   <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">

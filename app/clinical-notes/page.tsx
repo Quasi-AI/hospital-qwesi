@@ -72,7 +72,7 @@ export default function ClinicalNotesPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
@@ -105,7 +105,7 @@ export default function ClinicalNotesPage() {
               </Link>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
               <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div className="border-b border-slate-100 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

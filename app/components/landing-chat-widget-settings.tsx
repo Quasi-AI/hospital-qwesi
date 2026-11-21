@@ -124,7 +124,7 @@ export function LandingChatWidgetSettings() {
         <span className="text-sm font-medium text-gray-900">Show chat widget on landing page</span>
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <label htmlFor="landing-chat-title" className="text-xs font-semibold text-gray-800">
             Button label

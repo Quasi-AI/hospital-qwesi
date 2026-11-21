@@ -249,7 +249,7 @@ export function DoctorMarketplace({ initialSpecialty = '', portal = false }: { i
       {error ? (
         <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700">{error}</div>
       ) : (
-        <div className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <DoctorCardSkeleton key={i} />)
             : results.map((d) => <DoctorCard key={d.id} doctor={d} portal={portal} />)}

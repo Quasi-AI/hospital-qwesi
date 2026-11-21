@@ -147,9 +147,9 @@ export default function WalletPage() {
             <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
           </div>
         ) : (
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                   <p className="text-xs font-medium text-gray-500">Available</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900">GHS {wallet?.availableBalance?.toFixed?.(2) || '0.00'}</p>
@@ -171,7 +171,7 @@ export default function WalletPage() {
                     <h2 className="text-sm font-semibold text-gray-900">Saved payment methods</h2>
                   </div>
                 </div>
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {payoutMethods.length === 0 ? (
                     <p className="rounded-lg border border-dashed border-gray-200 p-4 text-sm text-gray-500 md:col-span-2">
                       Add a Mobile Money or bank account so the admin team can pay your approved withdrawals.

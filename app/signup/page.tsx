@@ -69,7 +69,7 @@ export default async function SignupChooser({
         <h1 className="font-display text-3xl font-semibold text-brand-950 sm:text-4xl">Create your account</h1>
         <p className="mt-2 text-gray-600">Choose how you’ll use Qwesi.</p>
       </div>
-      <div className="reveal-stagger mt-10 grid w-full max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="reveal-stagger mt-10 grid grid-cols-1 w-full max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {options.map(({ href, title, text, cta, icon: Icon, note }) => (
           <Link key={href} href={`${href}${href === '/signup/patient' ? suffix : ''}`} className="qw-card group flex flex-col p-6">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">

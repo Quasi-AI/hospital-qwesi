@@ -339,7 +339,7 @@ export default function HospitalWebsiteCMSPage() {
       <SidebarLayout title={t('settings.hospitalWebsite')} description={t('settings.hospitalWebsiteDescription')} dense wide>
         <div className="space-y-4">
           <section className="overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm">
-            <div className="grid gap-4 bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 p-5 text-white lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="grid grid-cols-1 gap-4 bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 p-5 text-white lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
               <div>
                 <Link
                   href="/settings"
@@ -396,7 +396,7 @@ export default function HospitalWebsiteCMSPage() {
             </div>
           )}
 
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
               <div className="flex gap-2.5">
                 <Shield className="mt-0.5 h-4 w-4 flex-shrink-0" />
@@ -509,7 +509,7 @@ export default function HospitalWebsiteCMSPage() {
                     onChange={(v) => update({ heroImageUrl: v })}
                     hint="Optional. HTTPS image URL for the hero panel."
                   />
-                  <div className="grid md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <Field
                       label="Primary CTA"
                       value={form.heroCtaPrimary}
@@ -574,7 +574,7 @@ export default function HospitalWebsiteCMSPage() {
                   {(form.trustPillars ?? []).map((pillar, i) => (
                     <div
                       key={i}
-                      className="grid md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
                     >
                       <Field
                         label={`Pillar ${i + 1} title`}
@@ -618,7 +618,7 @@ export default function HospitalWebsiteCMSPage() {
                   {form.highlights.map((h, i) => (
                     <div
                       key={i}
-                      className="grid md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
                     >
                       <Field
                         label={`Card ${i + 1} title`}
@@ -655,7 +655,7 @@ export default function HospitalWebsiteCMSPage() {
                   {form.values.map((v, i) => (
                     <div
                       key={i}
-                      className="grid md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
                     >
                       <Field
                         label={`Value ${i + 1} title`}
@@ -682,7 +682,7 @@ export default function HospitalWebsiteCMSPage() {
                     hint="Leave empty to hide the line above the dark stats strip."
                   />
                   {form.stats.map((s, i) => (
-                    <div key={i} className="grid md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                       <Field label={`Stat ${i + 1} label`} value={s.label} onChange={(x) => updateStat(i, 'label', x)} />
                       <Field label={`Stat ${i + 1} value`} value={s.value} onChange={(x) => updateStat(i, 'value', x)} />
                     </div>
@@ -711,7 +711,7 @@ export default function HospitalWebsiteCMSPage() {
                   {form.services.map((s, i) => (
                     <div
                       key={i}
-                      className="grid md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
                     >
                       <Field
                         label={`Service ${i + 1} title`}
@@ -753,7 +753,7 @@ export default function HospitalWebsiteCMSPage() {
                   />
                   {(form.subscriptions ?? []).slice(0, 3).map((plan, i) => (
                     <div key={i} className="space-y-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
-                      <div className="grid gap-3 md:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                         <Field label={`Plan ${i + 1} name`} value={plan.name} onChange={(v) => updateSubscription(i, 'name', v)} />
                         <Field label="Price" value={plan.price} onChange={(v) => updateSubscription(i, 'price', v)} />
                         <Field label="Cadence" value={plan.cadence} onChange={(v) => updateSubscription(i, 'cadence', v)} />
@@ -802,7 +802,7 @@ export default function HospitalWebsiteCMSPage() {
                   {form.departments.map((s, i) => (
                     <div
                       key={i}
-                      className="grid md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
                     >
                       <Field
                         label={`Department ${i + 1} title`}
@@ -872,7 +872,7 @@ export default function HospitalWebsiteCMSPage() {
                           Remove
                         </button>
                       </div>
-                      <div className="grid gap-5 xl:grid-cols-[18rem_minmax(0,1fr)]">
+                      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[18rem_minmax(0,1fr)]">
                         <div className="space-y-3">
                           <div className="aspect-[4/3] overflow-hidden rounded-lg border border-slate-200 bg-white">
                             {provider.imageUrl?.trim() ? (
@@ -918,7 +918,7 @@ export default function HospitalWebsiteCMSPage() {
                               Add the provider name, role, and bio shown in the Care team section.
                             </p>
                           </div>
-                          <div className="grid gap-3 md:grid-cols-2">
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                             <Field
                               label="Provider name"
                               value={provider.name}
@@ -1028,7 +1028,7 @@ export default function HospitalWebsiteCMSPage() {
                   {form.visitRows.map((row, i) => (
                     <div
                       key={i}
-                      className="grid md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
                     >
                       <Field
                         label={`Row ${i + 1} label`}
@@ -1069,7 +1069,7 @@ export default function HospitalWebsiteCMSPage() {
                         onChange={(x) => updateTestimonial(i, 'quote', x)}
                         multiline
                       />
-                      <div className="grid md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <Field
                           label="Author or initials"
                           value={story.author}

@@ -566,7 +566,7 @@ function NewDoctorForm() {
                     </div>
 
                     {formData.role === 'doctor' && (
-                      <div className="grid gap-2 md:col-span-2 md:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-2 md:col-span-2 md:grid-cols-2">
                         <label htmlFor="rating" className="mb-1 block text-sm font-medium text-gray-700">
                           Doctor rating
                           <div className="relative mt-1">
