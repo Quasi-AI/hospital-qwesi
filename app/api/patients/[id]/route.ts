@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
+import { canSeePatient, forbidden, getPatientScope, unauthorized } from '@/lib/patient-access';
 
 const BLOOD_TYPES = new Set(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']);
 const GENDERS = new Set(['male', 'female', 'other', 'prefer-not-to-say']);
@@ -10,9 +11,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
+    const { user, scope } = await getPatientScope();
+    if (!user) return unauthorized();
     const { id } = await params;
-    const patient = await Patient.findById(id);
+    const patient = await Patient.findById(id).select('-password');
     
     if (!patient) {
       return NextResponse.json(
@@ -20,6 +22,8 @@ export async function GET(
         { status: 404 }
       );
     }
+    // A doctor can only open patients assigned to them
+    if (!canSeePatient(scope, patient)) return forbidden();
     
     return NextResponse.json(patient);
   } catch (error) {
@@ -36,7 +40,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
+    const { user, scope } = await getPatientScope();
+    if (!user) return unauthorized();
+    if (scope.kind === 'none') return forbidden();
     const body = (await request.json()) as Record<string, unknown>;
     const { id } = await params;
 
@@ -44,6 +50,7 @@ export async function PUT(
     if (!patient) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
     }
+    if (!canSeePatient(scope, patient)) return forbidden();
 
     if (typeof body.name === 'string' && body.name.trim()) {
       patient.name = body.name.trim();
@@ -124,7 +131,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
+    const { user, scope } = await getPatientScope();
+    if (!user) return unauthorized();
+    if (scope.kind !== 'all') return forbidden(); // deleting a patient is admin/staff only
     const { id } = await params;
     const patient = await Patient.findByIdAndDelete(id);
     

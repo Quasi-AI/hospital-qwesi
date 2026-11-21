@@ -1,3 +1,4 @@
+import { scopeRecordsByPatient } from '@/lib/patient-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import connectDB from '../../../lib/mongodb';
@@ -6,10 +7,8 @@ import LabTest from '../../../models/LabTest';
 // GET - List all lab tests
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const scoped = await scopeRecordsByPatient('patientId');
+    if (scoped instanceof NextResponse) return scoped;
 
     await connectDB();
 
@@ -24,26 +23,26 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
 
     // Build query
-    const query: any = {};
+    const userQuery: any = {};
 
     if (status && status !== 'all') {
-      query.status = status;
+      userQuery.status = status;
     }
 
     if (priority && priority !== 'all') {
-      query.priority = priority;
+      userQuery.priority = priority;
     }
 
     if (category && category !== 'all') {
-      query.testCategory = category;
+      userQuery.testCategory = category;
     }
 
     if (patientId) {
-      query.patientId = patientId;
+      userQuery.patientId = patientId;
     }
 
     if (search) {
-      query.$or = [
+      userQuery.$or = [
         { testNumber: { $regex: search, $options: 'i' } },
         { patientName: { $regex: search, $options: 'i' } },
         { testType: { $regex: search, $options: 'i' } },
@@ -52,18 +51,18 @@ export async function GET(request: NextRequest) {
     }
 
     if (isCritical === 'true') {
-      query.isCritical = true;
+      userQuery.isCritical = true;
     }
 
     const skip = (page - 1) * limit;
 
     const [labTests, total] = await Promise.all([
-      LabTest.find(query)
+      LabTest.find({ $and: [userQuery, scoped.filter] })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      LabTest.countDocuments(query),
+      LabTest.countDocuments({ $and: [userQuery, scoped.filter] }),
     ]);
 
     return NextResponse.json({

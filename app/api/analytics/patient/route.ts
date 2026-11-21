@@ -105,6 +105,10 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    // Whole-platform patient analytics: admin/staff only (doctors see their own dashboard instead)
+    if (!['admin', 'staff', 'nurse'].includes(String(session.user.role))) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     await dbConnect();
 
