@@ -33,6 +33,7 @@ import { PublicHeader, PublicFooter } from './public-shell';
 const PublicChat = dynamic(() => import('./public-shell').then((m) => m.PublicChat), { ssr: false });
 import { DoctorCard, DoctorCardSkeleton, DoctorAvatar, doctorTitle, formatFee } from './doctor-card';
 import { usePublicDoctors } from './doctor-marketplace';
+import type { PublicDoctor } from './doctor-card';
 
 export type { LandingSettingsSnapshot };
 
@@ -50,12 +51,14 @@ function Eyebrow({ children, light = false }: { children: React.ReactNode; light
 export function HospitalLanding({
   content,
   settings,
+  initialDoctors,
 }: {
   content: WebsiteContentData;
   settings: LandingSettingsSnapshot;
+  initialDoctors?: PublicDoctor[];
 }) {
   const router = useRouter();
-  const { doctors, loading } = usePublicDoctors();
+  const { doctors, loading } = usePublicDoctors(initialDoctors);
   const [query, setQuery] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
