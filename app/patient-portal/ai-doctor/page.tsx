@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, PhoneOff, Video, Camera, ShieldAlert, Loader2, ExternalLink } from 'lucide-react';
 
-type Phase = 'idle' | 'starting' | 'listening' | 'thinking' | 'speaking' | 'blocked' | 'ended';
+type Phase = 'idle' | 'starting' | 'listening' | 'thinking' | 'speaking' | 'ended';
 type Cfg = { enabled: boolean; avatarUrl: string; doctorName: string; cameraEnabled: boolean };
 
 const TOPUPS = [10, 20, 50, 100];
@@ -43,6 +43,9 @@ export default function AiDoctorPage() {
   const [suggest, setSuggest] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [topupBusy, setTopupBusy] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [custom, setCustom] = useState('');
+  const [linked, setLinked] = useState('');
 
   const frame = useRef<HTMLIFrameElement>(null);
   const video = useRef<HTMLVideoElement>(null);
@@ -94,9 +97,9 @@ export default function AiDoctorPage() {
       setHeard(r.transcript || ''); setUrgent(Boolean(r.urgent));
       setLinks(r.links || []); setSuggest((r.choices || []).map((c: any) => c.text));
       if (r.end) refs.current.endAfter = true;
-      if (r.blocked) setPh('blocked');
+      setBlocked(Boolean(r.blocked));
       play(r);
-      if (!r.audio) setPh(r.blocked ? 'blocked' : 'listening');
+      if (!r.audio) setPh('listening');
     } catch (e: any) { setError(e.message); setPh('listening'); }
   }
 
@@ -152,7 +155,7 @@ export default function AiDoctorPage() {
       refs.current.stream = stream;
       if (useCamera && video.current) { video.current.srcObject = stream; await video.current.play().catch(() => {}); setCameraOn(true); startLooking(); }
       const s = await api('session');
-      setBalance(s.balance);
+      setBalance(s.balance); setLinked(s.linkedPhone || ''); setBlocked(false);
       await startListening(stream);
       for (let i = 0; i < 100 && !refs.current.avatarReady; i += 1) await new Promise((r) => setTimeout(r, 150));
       const g = await api('speak', { text: s.greeting });
@@ -178,7 +181,7 @@ export default function AiDoctorPage() {
   }
 
   const live = !['idle', 'ended'].includes(phase);
-  const status = { idle: '', starting: 'Connecting…', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…', blocked: 'Out of credits', ended: 'Consultation ended' }[phase];
+  const status = { idle: '', starting: 'Connecting…', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…', ended: 'Consultation ended' }[phase];
 
   if (!cfg) return <div className="p-8 text-center text-sm text-gray-500"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>;
   if (!cfg.enabled) return (
@@ -202,7 +205,7 @@ export default function AiDoctorPage() {
           <span className="rounded-full bg-black/35 px-3 py-1 backdrop-blur">{cfg.doctorName} · AI</span>
           <span className="flex items-center gap-2">
             {cameraOn && <span className="flex items-center gap-1 rounded-full bg-black/35 px-3 py-1 backdrop-blur"><Camera className="h-3 w-3" /> Camera on</span>}
-            {balance !== null && <span className="rounded-full bg-black/35 px-3 py-1 backdrop-blur">{balance} credits</span>}
+            {balance !== null && <span className="rounded-full bg-black/35 px-3 py-1 backdrop-blur">{balance} credits{linked ? ` · ••••${linked}` : ''}</span>}
           </span>
         </div>
 
@@ -214,6 +217,7 @@ export default function AiDoctorPage() {
 
         {/* captions + chips */}
         <div className="absolute inset-x-0 bottom-0 space-y-2 bg-gradient-to-t from-black/70 to-transparent p-3 pt-16 text-white">
+          {blocked && <div className="text-center text-xs uppercase tracking-wide text-amber-200">Out of credits</div>}
           {status && <div className="text-center text-xs uppercase tracking-wide text-white/80">{status}</div>}
           {heard && <p className="text-center text-xs italic text-white/70">“{heard}”</p>}
           {caption && <p className="mx-auto max-w-xl text-center text-sm leading-snug">{caption}</p>}
@@ -223,14 +227,18 @@ export default function AiDoctorPage() {
               {links.map((l) => <a key={l} href={l} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-[#6949ED]"><ExternalLink className="h-3 w-3" /> Open link</a>)}
             </div>
           )}
-          {phase === 'blocked' && (
+          {blocked && (
             <div className="rounded-2xl bg-white/95 p-3 text-center text-black">
               <p className="mb-2 text-sm font-medium">Choose an amount to top up (GH₵)</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {TOPUPS.map((a) => <button key={a} disabled={topupBusy} onClick={() => topUp(a)} className="rounded-xl bg-[#6949ED] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">GH₵{a}</button>)}
               </div>
-              <p className="mt-2 text-xs text-gray-500">After paying, just keep talking. Your credits are added automatically.</p>
-              <button onClick={() => setPh('listening')} className="mt-1 text-xs text-[#6949ED] underline">I have paid, continue</button>
+              <form onSubmit={(e) => { e.preventDefault(); const n = Math.floor(Number(custom)); if (n >= 1) topUp(n); }} className="mt-2 flex items-center justify-center gap-2">
+                <input value={custom} onChange={(e) => setCustom(e.target.value.replace(/\D/g, '').slice(0, 4))} inputMode="numeric" placeholder="Other amount" className="h-9 w-32 rounded-xl border border-gray-300 px-3 text-sm text-black" />
+                <button type="submit" disabled={topupBusy || !custom} className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Pay</button>
+              </form>
+              <p className="mt-2 text-xs text-gray-500">Credits are added to {linked ? `the number ending ${linked}` : 'your phone number'} (the same as on WhatsApp). After paying, tap below and keep talking.</p>
+              <button onClick={() => setBlocked(false)} className="mt-1 text-xs text-[#6949ED] underline">I have paid, continue</button>
             </div>
           )}
           {error && <p className="rounded-xl bg-white/90 p-2 text-center text-xs text-red-700">{error}</p>}
