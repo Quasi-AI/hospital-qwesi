@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -75,13 +76,13 @@ export default function AISettingsPage() {
       const success = await aiConfigManager.setActiveModel(modelId);
       if (success) {
         await loadModels();
-        alert('Model activated successfully!');
+        notify('Model activated successfully!');
       } else {
-        alert('Failed to set active model');
+        notify('Failed to set active model');
       }
     } catch (error) {
       console.error('Error setting active model:', error);
-      alert('Failed to set active model');
+      notify('Failed to set active model');
     }
   };
 
@@ -112,7 +113,7 @@ export default function AISettingsPage() {
 
   const saveModelConfig = async () => {
     if (!configuringModel || !config.apiKey.trim()) {
-      alert('Please provide an API key to save the configuration.');
+      notify('Please provide an API key to save the configuration.');
       return;
     }
 
@@ -144,10 +145,10 @@ export default function AISettingsPage() {
           setShowConfigModal(false);
           setConfiguringModel(null);
           setConfig({ apiKey: '', temperature: 0.3, maxTokens: 4000 });
-          alert(`✅ ${configuringModel.name} configuration updated successfully!`);
+          notify(`✅ ${configuringModel.name} configuration updated successfully!`);
         } else {
           console.error('Failed to update model');
-          alert(`❌ Error updating configuration. Please check the console for details.`);
+          notify(`❌ Error updating configuration. Please check the console for details.`);
         }
       } else {
         // Create new model
@@ -185,11 +186,11 @@ export default function AISettingsPage() {
         setConfig({ apiKey: '', temperature: 0.3, maxTokens: 4000 });
         
         // Show success feedback
-        alert(`✅ ${configuringModel.name} configured successfully!`);
+        notify(`✅ ${configuringModel.name} configured successfully!`);
       }
     } catch (error) {
       console.error('Error saving model config:', error);
-      alert(`❌ Error saving configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      notify(`❌ Error saving configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
@@ -209,10 +210,10 @@ export default function AISettingsPage() {
       try {
         await aiConfigManager.deleteModel(id);
         await loadModels();
-        alert('Model configuration removed successfully!');
+        notify('Model configuration removed successfully!');
       } catch (error) {
         console.error('Error deleting model:', error);
-        alert('Failed to delete model configuration');
+        notify('Failed to delete model configuration');
       }
     }
   };
@@ -222,10 +223,10 @@ export default function AISettingsPage() {
       try {
         await aiConfigManager.clearAllModels();
         await loadModels();
-        alert('All AI model configurations have been cleared.');
+        notify('All AI model configurations have been cleared.');
       } catch (error) {
         console.error('Error clearing models:', error);
-        alert('Failed to clear models from database');
+        notify('Failed to clear models from database');
       }
     }
   };

@@ -1,5 +1,6 @@
 'use client';
 
+import { useFlashToast } from '@/lib/useFlashToast';
 import { Logo } from '@/app/components/logo';
 import { useEffect, useState } from 'react';
 import { getSession, signIn, signOut } from 'next-auth/react';
@@ -17,6 +18,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [error, setError] = useState('');
+  useFlashToast(error);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -93,12 +95,6 @@ export default function AdminLoginPage() {
               </button>
             </div>
           </label>
-
-          {error && (
-            <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              <AlertCircle className="h-4 w-4 shrink-0" /> {error}
-            </div>
-          )}
 
           <button disabled={loading} className="h-12 w-full rounded-full bg-brand-600 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 hover:bg-brand-700 disabled:opacity-60">
             {loading ? 'Signing in…' : 'Sign in'}

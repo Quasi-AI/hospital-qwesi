@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -59,7 +60,7 @@ export default function AppointmentReschedulePage() {
     e.preventDefault();
     
     if (!formData.appointmentDate || !formData.appointmentTime) {
-      alert('Please select both date and time');
+      notify('Please select both date and time');
       return;
     }
 
@@ -80,15 +81,15 @@ export default function AppointmentReschedulePage() {
       });
 
       if (response.ok) {
-        alert('Appointment rescheduled successfully!');
+        notify('Appointment rescheduled successfully!');
         router.push(`/appointments/${params.id}`);
       } else {
         const errorData = await response.json();
-        alert(`Error: ${errorData.error || 'Failed to reschedule appointment'}`);
+        notify(`Error: ${errorData.error || 'Failed to reschedule appointment'}`);
       }
     } catch (error) {
       console.error('Error rescheduling appointment:', error);
-      alert('Error rescheduling appointment. Please try again.');
+      notify('Error rescheduling appointment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

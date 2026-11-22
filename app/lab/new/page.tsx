@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -106,12 +107,12 @@ function NewLabTestPageContent() {
     e.preventDefault();
 
     if (!selectedPatient) {
-      alert(t('lab.selectPatient'));
+      notify(t('lab.selectPatient'));
       return;
     }
 
     if (!formData.testType) {
-      alert(t('lab.fillRequiredFields'));
+      notify(t('lab.fillRequiredFields'));
       return;
     }
 
@@ -136,11 +137,11 @@ function NewLabTestPageContent() {
         router.push('/lab');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to create lab test order');
+        notify(data.error || 'Failed to create lab test order');
       }
     } catch (error) {
       console.error('Error creating lab test:', error);
-      alert('Failed to create lab test order');
+      notify('Failed to create lab test order');
     } finally {
       setLoading(false);
     }

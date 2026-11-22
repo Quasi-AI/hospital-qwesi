@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -85,11 +86,11 @@ export default function BillingPage() {
         fetchInvoices();
       } else {
         const error = await response.json();
-        alert(error.error || t('common.error'));
+        notify(error.error || t('common.error'));
       }
     } catch (error) {
       console.error('Error deleting invoice:', error);
-      alert(t('common.error'));
+      notify(t('common.error'));
     }
   };
 

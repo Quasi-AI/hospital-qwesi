@@ -1,5 +1,6 @@
 'use client';
 
+import { useFlashToast } from '@/lib/useFlashToast';
 import { LogoLink } from '@/app/components/logo';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  useFlashToast(error, success);
   const [isDemo, setIsDemo] = useState(false);
   const router = useRouter();
 
@@ -237,19 +239,6 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
-
-                {error && (
-                  <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3" role="alert">
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
-                    <span className="text-sm text-red-700">{error}</span>
-                  </div>
-                )}
-                {success && (
-                  <div className="flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-3">
-                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-                    <span className="text-sm text-green-700">{success}</span>
-                  </div>
-                )}
 
                 <button
                   type="submit"

@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -147,7 +148,7 @@ function SessionsListContent() {
   const handleDeleteClick = (session: Session) => {
     const canDelete = ['scheduled', 'waiting', 'cancelled', 'completed'].includes(session.status);
     if (!canDelete) {
-      alert('Only scheduled, waiting, cancelled, or completed sessions can be deleted.');
+      notify('Only scheduled, waiting, cancelled, or completed sessions can be deleted.');
       return;
     }
     setSessionToDelete(session);
@@ -160,7 +161,7 @@ function SessionsListContent() {
       const res = await fetch(`/api/telemedicine/sessions/${sessionToDelete._id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        alert(data.error || 'Failed to delete session.');
+        notify(data.error || 'Failed to delete session.');
         return;
       }
       setSessions(prev => prev.filter(s => s._id !== sessionToDelete._id));
@@ -168,7 +169,7 @@ function SessionsListContent() {
       setSessionToDelete(null);
     } catch (err) {
       console.error(err);
-      alert('Failed to delete session.');
+      notify('Failed to delete session.');
     } finally {
       setDeleting(false);
     }

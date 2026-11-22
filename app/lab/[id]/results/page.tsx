@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -123,7 +124,7 @@ export default function EnterResultsPage() {
     // Validate that all results have at least test name and value
     const validResults = results.filter((r) => r.testName && r.value);
     if (validResults.length === 0) {
-      alert(t('lab.fillAllResults'));
+      notify(t('lab.fillAllResults'));
       return;
     }
 
@@ -153,11 +154,11 @@ export default function EnterResultsPage() {
         router.push(`/lab/${params.id}`);
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to save results');
+        notify(data.error || 'Failed to save results');
       }
     } catch (error) {
       console.error('Error saving results:', error);
-      alert('Failed to save results');
+      notify('Failed to save results');
     } finally {
       setSaving(false);
     }

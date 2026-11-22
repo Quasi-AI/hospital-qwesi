@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState } from 'react';
 import Link from 'next/link';
 import { 
@@ -67,14 +68,14 @@ export default function NewPatientPage() {
     
     // Validate required fields: name, email, birthdate, phone, and gender
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.dateOfBirth || !formData.phone || !formData.gender) {
-      alert(t('patients.newPatient.validation.requiredFields'));
+      notify(t('patients.newPatient.validation.requiredFields'));
       setIsSubmitting(false);
       return;
     }
     
     // If password is provided, validate it
     if (formData.password && formData.password.length < 6) {
-      alert('Password must be at least 6 characters long');
+      notify('Password must be at least 6 characters long');
       setIsSubmitting(false);
       return;
     }
@@ -131,7 +132,7 @@ export default function NewPatientPage() {
       });
 
       if (response.ok) {
-        alert(t('patients.newPatient.success.patientAdded'));
+        notify(t('patients.newPatient.success.patientAdded'));
         // Reset form
         setFormData({
           firstName: '',
@@ -172,11 +173,11 @@ export default function NewPatientPage() {
           errorMessage = `Server error: ${response.status} ${response.statusText}`;
         }
         console.error('Error response status:', response.status, 'Message:', errorMessage);
-        alert(`Error: ${errorMessage}`);
+        notify(`Error: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Error adding patient:', error);
-      alert(t('patients.newPatient.errors.genericError'));
+      notify(t('patients.newPatient.errors.genericError'));
     } finally {
       setIsSubmitting(false);
     }

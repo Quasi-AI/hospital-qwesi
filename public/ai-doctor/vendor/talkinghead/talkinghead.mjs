@@ -960,7 +960,19 @@ class TalkingHead {
     this.audioAnalyzerNode.connect(this.audioSpeechGainNode);
     this.audioSpeechGainNode.connect(this.audioReverbNode);
     this.audioStreamGainNode.connect(this.audioReverbNode);
-    this.audioReverbNode.connect(this.audioCtx.destination);
+    // Qwesi: phones play WebAudio quietly (especially while the microphone is open), so boost the voice and
+    // protect against clipping with a limiter-style compressor.
+    this.audioLoudNode = this.audioCtx.createGain();
+    this.audioLoudNode.gain.value = 3.2;
+    this.audioLimiterNode = this.audioCtx.createDynamicsCompressor();
+    this.audioLimiterNode.threshold.value = -8;
+    this.audioLimiterNode.knee.value = 6;
+    this.audioLimiterNode.ratio.value = 12;
+    this.audioLimiterNode.attack.value = 0.003;
+    this.audioLimiterNode.release.value = 0.15;
+    this.audioReverbNode.connect(this.audioLoudNode);
+    this.audioLoudNode.connect(this.audioLimiterNode);
+    this.audioLimiterNode.connect(this.audioCtx.destination);
     
     // Apply reverb and mixer settings
     this.setReverb(this.currentReverb || null);

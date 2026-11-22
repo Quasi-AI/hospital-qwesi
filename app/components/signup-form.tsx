@@ -1,9 +1,12 @@
 'use client';
 
+import { useFlashToast } from '@/lib/useFlashToast';
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { LogoLink } from './logo';
+import PhoneInput from './phone-input';
 import { CURRENCIES, CURRENCY_LABELS } from '@/lib/practitioner-currency';
 import {
   ArrowLeft,
@@ -95,12 +98,14 @@ const emptyForm = {
 
 export default function SignupForm({ role }: { role: SignupRole }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const c = copy[role];
   const Icon = c.icon;
   const [form, setForm] = useState({ ...emptyForm, phone: searchParams.get('phone') || '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  useFlashToast(error, message);
 
   const nextParam = searchParams.get('next') || '';
   const loginHref = nextParam.startsWith('/patient-portal') ? `/login?next=${encodeURIComponent(nextParam)}` : '/login';
@@ -134,6 +139,16 @@ export default function SignupForm({ role }: { role: SignupRole }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || 'Signup failed');
       setMessage(data.message || 'Signup submitted.');
+      // Sign the new account in straight away (no separate login step).
+      // Patients go to their portal; doctors, herbalists and pharmacies go to their profile to finish verification.
+      const result = await signIn('credentials', { email: form.email.trim().toLowerCase(), password: form.password, redirect: false });
+      if (result?.ok && !result.error) {
+        setMessage(role === 'patient' ? 'Account created. Signing you in…' : 'Account created. Signing you in to finish your profile…');
+        const patientTarget = nextParam.startsWith('/patient-portal') && !nextParam.startsWith('//') ? nextParam : '/patient-portal';
+        router.push(role === 'patient' ? patientTarget : `/profile?verificationRequired=1&returnTo=${encodeURIComponent(role === 'pharmacy' ? '/pharmacy' : '/dashboard')}`);
+        router.refresh();
+        return;
+      }
       setForm({ ...emptyForm });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
@@ -184,7 +199,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
               <Field wrap="lg:col-span-3" label="Full name" value={form.name} onChange={(v) => update('name', v)} icon={User} required />
               <Field wrap="lg:col-span-3" label="Email" value={form.email} onChange={(v) => update('email', v)} type="email" icon={Mail} required />
-              <Field wrap="lg:col-span-3" label="Phone" value={form.phone} onChange={(v) => update('phone', v)} icon={Phone} required={role === 'patient'} />
+              <div className="lg:col-span-3"><PhoneInput label="Phone" value={form.phone} onChange={(v) => update('phone', v)} required={role === 'patient'} /></div>
               <Field wrap="lg:col-span-3" label="Password" value={form.password} onChange={(v) => update('password', v)} type="password" icon={Lock} required />
 
               {role === 'patient' && (
@@ -275,13 +290,6 @@ export default function SignupForm({ role }: { role: SignupRole }) {
                 />
               </label>
             </section>
-
-            {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-            {message && (
-              <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /> {message}
-              </div>
-            )}
 
             <button
               disabled={loading || !form.accepted || !form.signedName.trim()}

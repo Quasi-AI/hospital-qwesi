@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -230,16 +231,16 @@ export default function PatientViewPage() {
       if (response.ok) {
         // Remove from local state
         setAiResults(aiResults.filter(result => result._id !== resultId));
-        alert('✅ AI result deleted successfully!');
+        notify('✅ AI result deleted successfully!');
         // Refresh the data to update counts
         await fetchAIResults();
       } else {
         const errorData = await response.json();
-        alert(`❌ Failed to delete: ${errorData.message || 'Unknown error'}`);
+        notify(`❌ Failed to delete: ${errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting AI result:', error);
-      alert('❌ Error deleting AI result: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      notify('❌ Error deleting AI result: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 

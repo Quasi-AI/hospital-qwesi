@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -68,11 +69,11 @@ export default function StaffPage() {
       });
 
       if (response.ok) {
-        alert(t('staff.deletedSuccess'));
+        notify(t('staff.deletedSuccess'));
         fetchStaff();
       } else {
         const errorData = await response.json();
-        alert(
+        notify(
           t('staff.deleteFailed', {
             error: errorData.error || t('staff.unknownDeleteError'),
           })
@@ -80,7 +81,7 @@ export default function StaffPage() {
       }
     } catch (error) {
       console.error('Error deleting staff:', error);
-      alert(t('staff.deleteError'));
+      notify(t('staff.deleteError'));
     }
   };
 
@@ -94,12 +95,12 @@ export default function StaffPage() {
       });
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || 'Failed to update approval status');
+        notify(data.error || 'Failed to update approval status');
         return;
       }
       fetchStaff();
     } catch {
-      alert('Failed to update approval status');
+      notify('Failed to update approval status');
     }
   };
 

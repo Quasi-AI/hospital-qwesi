@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -67,15 +68,15 @@ export default function AdminsPage() {
       });
 
       if (response.ok) {
-        alert('Admin deleted successfully!');
+        notify('Admin deleted successfully!');
         fetchAdmins();
       } else {
         const errorData = await response.json();
-        alert(`Failed to delete: ${errorData.error || 'Unknown error'}`);
+        notify(`Failed to delete: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting admin:', error);
-      alert('Error deleting admin');
+      notify('Error deleting admin');
     }
   };
 

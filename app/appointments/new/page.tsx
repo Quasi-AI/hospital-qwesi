@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -431,7 +432,7 @@ function NewAppointmentPageContent() {
       if (response.ok) {
         const data = await response.json();
         if (data.telemedicineSkipped && data.telemedicineReason) {
-          alert(`${data.telemedicineReason}\n\nAppointment was created successfully.`);
+          notify(`${data.telemedicineReason}\n\nAppointment was created successfully.`);
         }
         router.push('/appointments');
       } else {

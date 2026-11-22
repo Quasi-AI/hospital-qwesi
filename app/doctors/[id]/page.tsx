@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -142,7 +143,7 @@ export default function DoctorDetailPage() {
       load();
     } else {
       const data = await res.json();
-      alert(data.error || 'Failed to update approval status');
+      notify(data.error || 'Failed to update approval status');
     }
   };
 

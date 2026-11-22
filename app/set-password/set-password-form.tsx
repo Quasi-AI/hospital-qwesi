@@ -1,5 +1,6 @@
 'use client';
 
+import { useFlashToast } from '@/lib/useFlashToast';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -12,6 +13,7 @@ export function SetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  useFlashToast(error);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -57,7 +59,6 @@ export function SetPasswordForm() {
           </div>
           <input type="password" autoComplete="new-password" placeholder="New password (8+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} className={field} />
           <input type="password" autoComplete="new-password" placeholder="Confirm password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={field} />
-          {error && <p role="alert" className="text-sm font-medium text-red-600">{error}</p>}
           <button disabled={busy} className="h-12 w-full rounded-full bg-brand-600 font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60">
             {busy ? 'Saving…' : 'Save password'}
           </button>

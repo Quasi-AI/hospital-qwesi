@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -65,12 +66,12 @@ export default function RecordPaymentPage() {
 
     const numericAmount = parseFloat(amount);
     if (Number.isNaN(numericAmount) || numericAmount <= 0) {
-      alert(t('billing.paymentAmount'));
+      notify(t('billing.paymentAmount'));
       return;
     }
 
     if (numericAmount > remaining) {
-      alert(t('billing.paymentAmount') + ' ' + t('billing.remaining'));
+      notify(t('billing.paymentAmount') + ' ' + t('billing.remaining'));
       return;
     }
 
@@ -90,15 +91,15 @@ export default function RecordPaymentPage() {
       });
 
       if (response.ok) {
-        alert(t('billing.paymentRecorded'));
+        notify(t('billing.paymentRecorded'));
         router.push(`/billing/invoices/${params.id}`);
       } else {
         const error = await response.json();
-        alert(error.error || t('common.error'));
+        notify(error.error || t('common.error'));
       }
     } catch (error) {
       console.error('Error recording payment:', error);
-      alert(t('common.error'));
+      notify(t('common.error'));
     } finally {
       setSubmitting(false);
     }

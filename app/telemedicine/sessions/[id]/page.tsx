@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -332,11 +333,11 @@ export default function SessionDetailPage() {
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || 'Failed to update status');
+        notify(err.error || 'Failed to update status');
       }
     } catch (e) {
       console.error(e);
-      alert('Failed to update status');
+      notify('Failed to update status');
     } finally {
       setUpdatingStatus(false);
     }
