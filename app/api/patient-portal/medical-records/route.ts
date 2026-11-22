@@ -1,3 +1,4 @@
+import { toE164, phoneTakenMessage } from '@/lib/phone';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
@@ -64,6 +65,14 @@ export async function PUT(request: NextRequest) {
       address: body.address,
       emergencyContact: body.emergencyContact,
     };
+
+    if (typeof allowedUpdates.phone === 'string' && allowedUpdates.phone.trim()) {
+      const e164 = toE164(allowedUpdates.phone);
+      if (!e164) return NextResponse.json({ error: 'Enter a valid phone number for the selected country.' }, { status: 400 });
+      const taken = await phoneTakenMessage(e164, patientEmail || undefined);
+      if (taken) return NextResponse.json({ error: taken }, { status: 409 });
+      allowedUpdates.phone = e164;
+    }
 
     // Remove undefined values
     Object.keys(allowedUpdates).forEach(key => {

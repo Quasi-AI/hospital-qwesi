@@ -1,3 +1,4 @@
+import { toE164, phoneTakenMessage } from '@/lib/phone';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
@@ -59,7 +60,11 @@ export async function PUT(
       patient.email = body.email.trim().toLowerCase();
     }
     if (typeof body.phone === 'string' && body.phone.trim()) {
-      patient.phone = body.phone.trim();
+      const e164 = toE164(body.phone);
+      if (!e164) return NextResponse.json({ error: 'Enter a valid phone number including the country code.' }, { status: 400 });
+      const taken = await phoneTakenMessage(e164, patient.email);
+      if (taken) return NextResponse.json({ error: taken }, { status: 409 });
+      patient.phone = e164;
     }
     if (body.dateOfBirth) {
       const d = new Date(String(body.dateOfBirth));
