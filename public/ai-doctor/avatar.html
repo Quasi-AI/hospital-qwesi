@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qwesi AI Doctor avatar</title>
+<style>
+  html,body{margin:0;height:100%;background:transparent;overflow:hidden}
+  #avatar{position:absolute;inset:0}
+  #msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font:500 14px system-ui,sans-serif;text-align:center;padding:24px}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/three.module.js",
+  "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+</head>
+<body>
+<div id="avatar"></div>
+<div id="msg">Loading your doctor…</div>
+<script type="module">
+import { TalkingHead } from './vendor/talkinghead/talkinghead.mjs';
+
+const msg = document.getElementById('msg');
+const say = (t) => { if (t) { msg.textContent = t; msg.style.display = 'flex'; } else msg.style.display = 'none'; };
+const post = (m) => parent.postMessage({ source: 'ai-doctor-avatar', ...m }, location.origin);
+let head = null; let speakingTimer = null;
+
+/** Spread the words of the reply over the audio length (OpenAI gives no word timings). */
+function wordTimings(text, ms) {
+  const words = String(text).replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
+  const weights = words.map((w) => Math.max(2, w.replace(/[^\p{L}\p{N}]/gu, '').length) + (/[,.;:!?]$/.test(w) ? 3 : 0));
+  const total = weights.reduce((a, b) => a + b, 0) || 1;
+  let t = 0; const wtimes = []; const wdurations = [];
+  const usable = Math.max(400, ms - 150);
+  weights.forEach((w) => { const d = usable * w / total; wtimes.push(Math.round(t)); wdurations.push(Math.round(d)); t += d; });
+  return { words, wtimes, wdurations };
+}
+
+async function load(url) {
+  try {
+    say('Loading your doctor…');
+    head = new TalkingHead(document.getElementById('avatar'), {
+      lipsyncModules: ['en'], lipsyncLang: 'en', cameraView: 'upper', cameraRotateEnable: false,
+      cameraPanEnable: false, cameraZoomEnable: false, avatarIdleEyeContact: 0.5, avatarSpeakingEyeContact: 0.7,
+      avatarSpeakingHeadMove: 0.6, avatarMood: 'neutral', lightAmbientIntensity: 2.2, lightDirectIntensity: 18,
+    });
+    await head.showAvatar({ url, body: 'M', avatarMood: 'neutral', lipsyncLang: 'en' }, (e) => {
+      if (e && e.lengthComputable) say('Loading your doctor… ' + Math.round(e.loaded / e.total * 100) + '%');
+    });
+    say('');
+    post({ type: 'ready' });
+  } catch (err) {
+    console.error(err);
+    say('The doctor avatar could not be loaded. Please tell the hospital admin to check the avatar file.');
+    post({ type: 'error', message: String(err && err.message || err) });
+  }
+}
+
+async function speak({ audio, text, mood }) {
+  if (!head) return;
+  try {
+    if (mood) head.setMood(mood);
+    const bin = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));
+    await head.audioCtx.resume();
+    const buf = await head.audioCtx.decodeAudioData(bin.buffer);
+    const ms = buf.duration * 1000;
+    head.speakAudio({ audio: buf, ...wordTimings(text, ms) }, { lipsyncLang: 'en' });
+    post({ type: 'speaking', value: true });
+    clearTimeout(speakingTimer);
+    speakingTimer = setTimeout(() => { post({ type: 'speaking', value: false }); if (head) head.setMood('neutral'); }, ms + 350);
+  } catch (err) { console.error(err); post({ type: 'error', message: String(err && err.message || err) }); }
+}
+
+addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data || e.data.target !== 'ai-doctor-avatar') return;
+  const d = e.data;
+  if (d.type === 'load') load(d.url);
+  else if (d.type === 'speak') speak(d);
+  else if (d.type === 'mood' && head) head.setMood(d.mood || 'neutral');
+  else if (d.type === 'stop' && head) { head.stopSpeaking(); clearTimeout(speakingTimer); post({ type: 'speaking', value: false }); }
+});
+post({ type: 'loaded' });
+</script>
+</body>
+</html>
