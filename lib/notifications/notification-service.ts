@@ -311,7 +311,7 @@ export async function getUserNotifications(
   try {
     await dbConnect();
     
-    const query: any = { recipientId: userId };
+    const query: any = { recipientId: userId, $or: [{ scheduledFor: { $exists: false } }, { scheduledFor: null }, { scheduledFor: { $lte: new Date() } }] };
     if (options.status) query.status = options.status;
     if (options.type) query.type = options.type;
     
@@ -816,59 +816,99 @@ export async function sendFollowUpReminder(appointmentId: string): Promise<Notif
 export async function scheduleAppointmentReminder(appointmentId: string, reminderMinutes?: number): Promise<NotificationResult> {
   try {
     await dbConnect();
-    
+
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) {
       return { success: false, error: 'Appointment not found' };
     }
-    
-    const settings = await getSettings();
-    const minutes = reminderMinutes || settings?.reminderTime || 30;
-    
-    // Calculate scheduled time
-    const appointmentDate = new Date(appointment.appointmentDate).toISOString().slice(0, 10);
-    const appointmentDateTime = new Date(`${appointmentDate}T${appointment.appointmentTime}`);
-    const scheduledFor = new Date(appointmentDateTime.getTime() - minutes * 60 * 1000);
-    
-    // Don't schedule if the time has already passed
-    if (scheduledFor <= new Date()) {
-      return { success: false, error: 'Reminder time has already passed' };
+    if (['cancelled', 'completed'].includes(String(appointment.status))) {
+      return { success: false, error: 'Appointment is not active' };
     }
-    
-    const patient = await findPatientForAppointment(
-      appointment.patientId?.toString(),
-      appointment.patientEmail
-    );
-    const clinicInfo = await getClinicInfo();
-    
-    const templateData: TemplateData = {
-      patientName: appointment.patientName || patient?.name,
-      doctorName: appointment.doctorName,
-      appointmentDate: new Date(appointment.appointmentDate).toLocaleDateString(),
-      appointmentTime: appointment.appointmentTime,
-      location: appointment.location,
-      ...clinicInfo,
-    };
-    
-    const template = getTemplate('appointment_reminder', templateData);
-    
-    return createNotification({
-      type: 'appointment_reminder',
-      recipientId: String(patient?._id || appointment.patientId || appointment.patientEmail),
-      recipientType: 'patient',
-      recipientEmail: appointment.patientEmail || patient?.email,
-      recipientPhone: appointment.patientPhone || patient?.phone,
-      title: template.subject,
-      message: template.sms,
-      scheduledFor,
-      relatedEntity: { type: 'appointment', id: appointmentId },
-      metadata: {
-        emailHtml: template.html,
-        smsText: template.sms,
-        appointmentId,
-      },
-      sendImmediately: false,
+
+    const settings = await getSettings();
+    const appointmentDay = new Date(appointment.appointmentDate).toISOString().slice(0, 10);
+    const startsAt = new Date(`${appointmentDay}T${appointment.appointmentTime}`);
+    if (Number.isNaN(startsAt.getTime())) return { success: false, error: 'Invalid appointment time' };
+
+    // Reminder lead times: 24 hours, 1 hour, and the clinic's configured lead (default 15 min) before the consultation.
+    const leads = Array.from(new Set([24 * 60, 60, reminderMinutes || settings?.reminderTime || 15]))
+      .filter((m) => m > 0)
+      .sort((x, y) => y - x);
+    const now = Date.now();
+    const due = leads.map((m) => ({ minutes: m, at: new Date(startsAt.getTime() - m * 60 * 1000) })).filter((l) => l.at.getTime() > now + 30 * 1000);
+    if (!due.length) return { success: false, error: 'Reminder time has already passed' };
+
+    // Re-booking / rescheduling replaces earlier pending reminders
+    await Notification.deleteMany({
+      status: 'pending',
+      'relatedEntity.type': 'appointment',
+      'relatedEntity.id': appointmentId,
+      'metadata.reminderKind': 'consultation_reminder',
     });
+
+    const patient = await findPatientForAppointment(appointment.patientId?.toString(), appointment.patientEmail);
+    const doctor = appointment.doctorId ? await User.findById(appointment.doctorId).select('name email phone') : null;
+    const clinicInfo = await getClinicInfo();
+    const isVideo = Boolean(appointment.telemedicineSessionId) || appointment.appointmentType === 'telemedicine';
+    const when = `${startsAt.toLocaleDateString()} at ${appointment.appointmentTime}`;
+    const patientLink = appointment.telemedicineSessionId ? `/patient-portal/telemedicine/${appointment.telemedicineSessionId}` : '/patient-portal/appointments';
+    const doctorLink = appointment.telemedicineSessionId ? `/telemedicine/sessions/${appointment.telemedicineSessionId}` : '/appointments';
+
+    const label = (m: number) => (m >= 1440 ? 'tomorrow' : m >= 60 ? `in ${Math.round(m / 60)} hour${m >= 120 ? 's' : ''}` : `in ${m} minutes`);
+    let first: NotificationResult = { success: true };
+    let created = 0;
+    for (const lead of due) {
+      const patientMsg = `Reminder: your ${isVideo ? 'video consultation' : 'appointment'} with ${appointment.doctorName ? `Dr. ${String(appointment.doctorName).replace(/^Dr\.?\s*/i, '')}` : 'your doctor'} is ${label(lead.minutes)} (${when}).`;
+      const doctorMsg = `Reminder: you have a ${isVideo ? 'video consultation' : 'appointment'} with ${appointment.patientName || 'a patient'} ${label(lead.minutes)} (${when}).`;
+      const tpl = getTemplate('appointment_reminder', {
+        patientName: appointment.patientName || patient?.name,
+        doctorName: appointment.doctorName,
+        appointmentDate: startsAt.toLocaleDateString(),
+        appointmentTime: appointment.appointmentTime,
+        location: appointment.location,
+        ...clinicInfo,
+      });
+      const targets: Parameters<typeof createNotification>[0][] = [
+        {
+          type: 'appointment_reminder',
+          recipientId: String(patient?._id || appointment.patientId || appointment.patientEmail),
+          recipientType: 'patient',
+          recipientEmail: appointment.patientEmail || patient?.email,
+          recipientPhone: appointment.patientPhone || patient?.phone,
+          title: `Consultation reminder - ${when}`,
+          message: patientMsg,
+          channels: channelsForEmail(appointment.patientEmail || patient?.email),
+          priority: 'high',
+          scheduledFor: lead.at,
+          relatedEntity: { type: 'appointment', id: appointmentId },
+          metadata: { emailHtml: tpl.html, smsText: patientMsg, appointmentId, reminderKind: 'consultation_reminder', reminderLeadMinutes: lead.minutes, link: patientLink },
+          sendImmediately: false,
+        },
+      ];
+      if (doctor?._id) {
+        targets.push({
+          type: 'appointment_reminder',
+          recipientId: String(doctor._id),
+          recipientType: 'user',
+          recipientEmail: doctor.email,
+          recipientPhone: doctor.phone,
+          title: `Consultation reminder - ${when}`,
+          message: doctorMsg,
+          channels: channelsForEmail(doctor.email),
+          priority: 'high',
+          scheduledFor: lead.at,
+          relatedEntity: { type: 'appointment', id: appointmentId },
+          metadata: { smsText: doctorMsg, appointmentId, reminderKind: 'consultation_reminder', reminderLeadMinutes: lead.minutes, link: doctorLink },
+          sendImmediately: false,
+        });
+      }
+      for (const t of targets) {
+        const r = await createNotification(t);
+        if (r.success) created++;
+        if (!first.notificationId && r.success) first = r;
+      }
+    }
+    return created ? first : { success: false, error: 'No reminders created' };
   } catch (error: any) {
     console.error('Schedule appointment reminder error:', error);
     return { success: false, error: error.message };

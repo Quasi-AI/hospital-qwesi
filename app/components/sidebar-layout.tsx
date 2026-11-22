@@ -307,7 +307,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
   }
 
   return (
-    <div className="h-screen overflow-hidden flex">
+    <div className="flex h-dvh overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -318,7 +318,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col bg-white shadow-xl shadow-brand-900/10 transform transition-transform duration-300 ease-in-out lg:translate-x-0
+        fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-col bg-white shadow-xl shadow-brand-900/10 transform transition-transform duration-300 ease-in-out lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
@@ -694,7 +694,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
         </header>
 
         {/* Page Content */}
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div
             className={
               dense
