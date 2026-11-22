@@ -140,7 +140,7 @@ export function DoctorProfile({ id, portal = false }: { id: string; portal?: boo
           )}
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="lg:sticky lg:top-4 lg:self-start">
           <div className="qw-card !transform-none overflow-hidden">
             <div className="bg-gradient-to-br from-brand-700 to-brand-900 p-6 text-white">
               <p className="text-xs font-semibold uppercase tracking-wider text-brand-200">Consultation fee</p>

@@ -137,7 +137,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex h-dvh overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -148,7 +148,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 flex w-64 max-h-screen flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out lg:translate-x-0
+        fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
@@ -240,7 +240,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
       </div>
 
       {/* Main Content */}
-      <div className="flex min-h-screen flex-col lg:pl-64">
+      <div className="flex h-dvh min-h-0 min-w-0 flex-1 flex-col lg:pl-64">
         {/* Mobile Header */}
         <header className="border-b border-gray-200 bg-white shadow-sm lg:hidden">
           <div className="flex h-12 items-center justify-between px-3 sm:px-4">
@@ -300,7 +300,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto max-w-[1480px] px-3 py-4 sm:px-5 lg:px-6">
             {children}
           </div>
