@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { LogoLink } from './logo';
 import { CURRENCIES, CURRENCY_LABELS } from '@/lib/practitioner-currency';
@@ -95,6 +96,7 @@ const emptyForm = {
 
 export default function SignupForm({ role }: { role: SignupRole }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const c = copy[role];
   const Icon = c.icon;
   const [form, setForm] = useState({ ...emptyForm, phone: searchParams.get('phone') || '' });
@@ -134,6 +136,16 @@ export default function SignupForm({ role }: { role: SignupRole }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || 'Signup failed');
       setMessage(data.message || 'Signup submitted.');
+      // Patients are approved instantly: sign them in and go straight to their portal (no separate login step).
+      if (role === 'patient') {
+        const result = await signIn('credentials', { email: form.email.trim().toLowerCase(), password: form.password, redirect: false });
+        if (result?.ok && !result.error) {
+          setMessage('Account created. Signing you in…');
+          router.push(nextParam.startsWith('/patient-portal') && !nextParam.startsWith('//') ? nextParam : '/patient-portal');
+          router.refresh();
+          return;
+        }
+      }
       setForm({ ...emptyForm });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
