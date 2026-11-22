@@ -1,3 +1,4 @@
+import { toE164, phoneTakenMessage } from '@/lib/phone';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
@@ -52,6 +53,14 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
+    {
+      const e164 = toE164(cleanedData.phone);
+      if (!e164) return NextResponse.json({ error: 'Invalid phone number', details: 'Enter a valid phone number including the country code.' }, { status: 400 });
+      const taken = await phoneTakenMessage(e164, String(cleanedData.email || ''));
+      if (taken) return NextResponse.json({ error: taken, details: taken }, { status: 409 });
+      cleanedData.phone = e164;
+    }
+
     const temporaryPassword = body.password?.trim() || generateTemporaryPassword();
     if (temporaryPassword.length < 6) {
       return NextResponse.json({

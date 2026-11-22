@@ -4,6 +4,7 @@ import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
 import { normalizeCurrency } from '@/lib/practitioner-currency';
 import User from '@/models/User';
+import { toE164, phoneTakenMessage } from '@/lib/phone';
 
 type SignupRole = 'patient' | 'doctor' | 'herbalist' | 'pharmacy';
 const AGREEMENT_VERSION = 'health-platform-agreement-2026-06';
@@ -26,7 +27,11 @@ export async function POST(request: NextRequest) {
     const name = cleanText(body.name);
     const email = cleanText(body.email).toLowerCase();
     const password = cleanText(body.password);
-    const phone = cleanText(body.phone);
+    const rawPhone = cleanText(body.phone);
+    const phone = rawPhone ? toE164(rawPhone) : '';
+    if (rawPhone && !phone) {
+      return NextResponse.json({ error: 'Enter a valid phone number for the selected country.' }, { status: 400 });
+    }
     const agreement = body.agreement || {};
     const signedName = cleanText(agreement.signedName);
 
@@ -74,6 +79,11 @@ export async function POST(request: NextRequest) {
     ]);
     if (existingUser || existingPatient) {
       return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 400 });
+    }
+
+    if (phone) {
+      const taken = await phoneTakenMessage(phone, email);
+      if (taken) return NextResponse.json({ error: taken }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);

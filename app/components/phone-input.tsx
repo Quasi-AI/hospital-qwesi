@@ -56,7 +56,19 @@ export default function PhoneInput({
         <input
           type="tel" inputMode="tel" autoComplete="tel-national" required={required}
           value={national ? new AsYouType(country).input(national.replace(/\D/g, '')) : ''}
-          onChange={(e) => setNational(e.target.value.replace(/[^\d\s()-]/g, ''))}
+          onChange={(e) => {
+            const v = e.target.value;
+            // A pasted/typed full international number (+233..., 00233..., or +2330...) picks the country by itself
+            if (/^\s*(\+|00)/.test(v)) {
+              const p = parsePhoneNumberFromString(v.replace(/^\s*00/, '+'));
+              if (p?.country) { setCountry(p.country); setNational(String(p.nationalNumber)); return; }
+            }
+            let d = v.replace(/[^\d\s()-]/g, '');
+            const cc = getCountryCallingCode(country);
+            const digits = d.replace(/\D/g, '');
+            if (digits.startsWith(cc) && digits.length > cc.length + 7) d = digits.slice(cc.length);   // country code typed again
+            setNational(d);
+          }}
           placeholder="Phone number" className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
         />
       </div>
