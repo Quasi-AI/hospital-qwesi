@@ -136,15 +136,15 @@ export default function SignupForm({ role }: { role: SignupRole }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || 'Signup failed');
       setMessage(data.message || 'Signup submitted.');
-      // Patients are approved instantly: sign them in and go straight to their portal (no separate login step).
-      if (role === 'patient') {
-        const result = await signIn('credentials', { email: form.email.trim().toLowerCase(), password: form.password, redirect: false });
-        if (result?.ok && !result.error) {
-          setMessage('Account created. Signing you in…');
-          router.push(nextParam.startsWith('/patient-portal') && !nextParam.startsWith('//') ? nextParam : '/patient-portal');
-          router.refresh();
-          return;
-        }
+      // Sign the new account in straight away (no separate login step).
+      // Patients go to their portal; doctors, herbalists and pharmacies go to their profile to finish verification.
+      const result = await signIn('credentials', { email: form.email.trim().toLowerCase(), password: form.password, redirect: false });
+      if (result?.ok && !result.error) {
+        setMessage(role === 'patient' ? 'Account created. Signing you in…' : 'Account created. Signing you in to finish your profile…');
+        const patientTarget = nextParam.startsWith('/patient-portal') && !nextParam.startsWith('//') ? nextParam : '/patient-portal';
+        router.push(role === 'patient' ? patientTarget : `/profile?verificationRequired=1&returnTo=${encodeURIComponent(role === 'pharmacy' ? '/pharmacy' : '/dashboard')}`);
+        router.refresh();
+        return;
       }
       setForm({ ...emptyForm });
     } catch (err) {
