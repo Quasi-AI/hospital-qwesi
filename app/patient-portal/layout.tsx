@@ -72,6 +72,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     { id: 'appointments', label: 'My Appointments', icon: Calendar, href: '/patient-portal/appointments' },
     { id: 'telemedicine', label: 'My Consultations', icon: Video, href: '/patient-portal/telemedicine' },
     { id: 'refunds', label: 'Refunds & problems', icon: Receipt, href: '/patient-portal/refunds' },
+    { id: 'ai-doctor', label: 'My AI Doctor (video)', icon: Video, href: '/patient-portal/ai-doctor' },
     { id: 'assistant', label: 'AI Health Assistant', icon: Bot, href: '/patient-portal/assistant' },
     { id: 'prescriptions', label: 'Prescriptions', icon: Pill, href: '/patient-portal/prescriptions' },
     { id: 'medical-records', label: 'Medical Records', icon: FileText, href: '/patient-portal/medical-records' },
