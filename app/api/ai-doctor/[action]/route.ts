@@ -25,6 +25,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const phone = String(patient?.phone || '').replace(/\D/g, '');
   if (phone.length < 9) return NextResponse.json({ error: 'Please add your phone number in your profile first. Your credits are linked to it.' }, { status: 400 });
 
+  // A credit balance belongs to ONE phone number. If another patient account uses the same number, nobody can spend
+  // those credits through the web until the admin sorts out who owns the number.
+  const last9 = phone.slice(-9);
+  const sharing = await Patient.countDocuments({ email: { $ne: session.user.email }, phone: { $regex: `${last9}\\s*$` } });
+  if (sharing > 0) {
+    return NextResponse.json({ error: 'This phone number is already used by another account, so its credits cannot be used here. Please use your own phone number in your profile, or contact support.' }, { status: 409 });
+  }
+
   try {
     let res: Response;
     if (action === 'turn') {
