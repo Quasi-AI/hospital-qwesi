@@ -49,6 +49,7 @@ async function load(url) {
     await head.showAvatar({ url, body: 'M', avatarMood: 'neutral', lipsyncLang: 'en' }, (e) => {
       if (e && e.lengthComputable) say('Loading your doctor… ' + Math.round(e.loaded / e.total * 100) + '%');
     });
+    head.setView('upper', { cameraDistance: -0.1, cameraY: 0.28 });
     say('');
     post({ type: 'ready' });
   } catch (err) {
