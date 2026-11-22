@@ -1,5 +1,6 @@
 'use client';
 
+import { useFlashToast } from '@/lib/useFlashToast';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
@@ -103,6 +104,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  useFlashToast(error, message);
 
   const nextParam = searchParams.get('next') || '';
   const loginHref = nextParam.startsWith('/patient-portal') ? `/login?next=${encodeURIComponent(nextParam)}` : '/login';
@@ -287,13 +289,6 @@ export default function SignupForm({ role }: { role: SignupRole }) {
                 />
               </label>
             </section>
-
-            {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-            {message && (
-              <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /> {message}
-              </div>
-            )}
 
             <button
               disabled={loading || !form.accepted || !form.signedName.trim()}

@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -140,7 +141,7 @@ export default function PatientCasesPage() {
         
         if (!workflowId) {
           console.error('No workflow ID provided');
-          alert('Error: No workflow ID provided');
+          notify('Error: No workflow ID provided');
           return;
         }
         
@@ -157,15 +158,15 @@ export default function PatientCasesPage() {
           const result = await response.json();
           console.log('Delete result:', result);
           setWorkflows(workflows.filter(w => w.id !== workflowId));
-          alert('Workflow deleted successfully');
+          notify('Workflow deleted successfully');
         } else {
           const errorData = await response.json();
           console.error('Delete failed:', errorData);
-          alert(`Failed to delete workflow: ${errorData.error || 'Unknown error'}`);
+          notify(`Failed to delete workflow: ${errorData.error || 'Unknown error'}`);
         }
       } catch (error) {
         console.error('Error deleting workflow:', error);
-        alert('Error deleting workflow');
+        notify('Error deleting workflow');
       }
     }
   };

@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -88,11 +89,11 @@ export default function DoctorsPage() {
       });
 
       if (response.ok) {
-        alert(t('doctors.deletedSuccess'));
+        notify(t('doctors.deletedSuccess'));
         fetchDoctors();
       } else {
         const errorData = await response.json();
-        alert(
+        notify(
           t('doctors.deleteFailed', {
             error: errorData.error || t('doctors.unknownDeleteError'),
           })
@@ -100,7 +101,7 @@ export default function DoctorsPage() {
       }
     } catch (error) {
       console.error('Error deleting doctor:', error);
-      alert(t('doctors.deleteError'));
+      notify(t('doctors.deleteError'));
     }
   };
 
@@ -114,12 +115,12 @@ export default function DoctorsPage() {
       });
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || 'Failed to update approval status');
+        notify(data.error || 'Failed to update approval status');
         return;
       }
       fetchDoctors();
     } catch {
-      alert('Failed to update approval status');
+      notify('Failed to update approval status');
     }
   };
 

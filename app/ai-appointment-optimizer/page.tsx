@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -258,7 +259,7 @@ export default function AIAppointmentOptimizerPage() {
   // Function to perform AI appointment optimization
   const performAppointmentOptimization = async () => {
     if (!selectedPatientId) {
-      alert('Please select a patient before optimizing appointments.');
+      notify('Please select a patient before optimizing appointments.');
       return;
     }
     
@@ -351,7 +352,7 @@ The optimization considers: patient age (${patientInfo.age}), medical urgency ($
       }
     } catch (error) {
       console.error('Error during appointment optimization:', error);
-      alert('Optimization temporarily unavailable. Please try again later.');
+      notify('Optimization temporarily unavailable. Please try again later.');
     } finally {
       setIsOptimizing(false);
     }
@@ -395,7 +396,7 @@ The optimization considers: patient age (${patientInfo.age}), medical urgency ($
 
   // Function to book appointment
   const bookAppointment = (slot: AppointmentSlot) => {
-    alert(`Booking appointment with ${slot.doctorName} on ${new Date(slot.date).toLocaleDateString()} at ${slot.time}`);
+    notify(`Booking appointment with ${slot.doctorName} on ${new Date(slot.date).toLocaleDateString()} at ${slot.time}`);
     // Here you would integrate with your appointment booking system
   };
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
 import SearchablePatientSelect from '../components/SearchablePatientSelect';
@@ -222,17 +223,17 @@ export default function AIDrugInteractionPage() {
   // Function to perform AI drug interaction analysis
   const performDrugInteractionAnalysis = async () => {
     if (currentMedications.length === 0) {
-      alert(t('ai.drugInteraction.alertAddMedication'));
+      notify(t('ai.drugInteraction.alertAddMedication'));
       return;
     }
     
     if (!selectedPatientId) {
-      alert(t('ai.drugInteraction.alertSelectPatient'));
+      notify(t('ai.drugInteraction.alertSelectPatient'));
       return;
     }
 
     if (!activeModel) {
-      alert(t('ai.drugInteraction.alertNoActiveModel'));
+      notify(t('ai.drugInteraction.alertNoActiveModel'));
       return;
     }
     
@@ -354,7 +355,7 @@ export default function AIDrugInteractionPage() {
 
   const handleDownloadReport = async () => {
     if (!aiAnalysis) {
-      alert(t('ai.drugInteraction.completeAnalysisFirst'));
+      notify(t('ai.drugInteraction.completeAnalysisFirst'));
       return;
     }
 
@@ -410,13 +411,13 @@ export default function AIDrugInteractionPage() {
       doc.save(`drug-interaction-report-${patientName}-${date}.pdf`);
     } catch (error) {
       console.error('Failed to download drug interaction report:', error);
-      alert('Failed to download report. Please try again.');
+      notify('Failed to download report. Please try again.');
     }
   };
 
   const handleShareReport = async () => {
     if (!aiAnalysis) {
-      alert(t('ai.drugInteraction.completeAnalysisFirst'));
+      notify(t('ai.drugInteraction.completeAnalysisFirst'));
       return;
     }
 
@@ -431,14 +432,14 @@ export default function AIDrugInteractionPage() {
       }
 
       await navigator.clipboard.writeText(reportText);
-      alert('Drug interaction report copied to clipboard.');
+      notify('Drug interaction report copied to clipboard.');
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
       try {
         await navigator.clipboard.writeText(reportText);
-        alert('Drug interaction report copied to clipboard.');
+        notify('Drug interaction report copied to clipboard.');
       } catch {
-        alert('Failed to share report. Please try again.');
+        notify('Failed to share report. Please try again.');
       }
     }
   };

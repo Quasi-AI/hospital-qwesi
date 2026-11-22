@@ -13,28 +13,26 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <SettingsProvider>
           <RealtimeListener />
           {children}
-          <Toaster 
-            position="top-right"
+          <Toaster
+            position="top-center"
+            gutter={10}
+            containerStyle={{ top: 16, left: 12, right: 12 }}
             toastOptions={{
-              duration: 4000,
+              duration: 4500,
               style: {
-                background: '#363636',
-                color: '#fff',
+                background: '#ffffff',
+                color: '#1f1147',
+                border: '1px solid #e9e3ff',
+                borderRadius: '14px',
+                boxShadow: '0 12px 32px -8px rgba(73,48,170,0.28)',
+                padding: '12px 16px',
+                fontSize: '14px',
+                fontWeight: 500,
+                maxWidth: '440px',
+                lineHeight: 1.4,
               },
-              success: {
-                duration: 3000,
-                iconTheme: {
-                  primary: '#6949ED',
-                  secondary: '#fff',
-                },
-              },
-              error: {
-                duration: 4000,
-                iconTheme: {
-                  primary: '#EF4444',
-                  secondary: '#fff',
-                },
-              },
+              success: { duration: 3500, iconTheme: { primary: '#16a34a', secondary: '#fff' }, style: { borderLeft: '4px solid #16a34a' } },
+              error: { duration: 6000, iconTheme: { primary: '#dc2626', secondary: '#fff' }, style: { borderLeft: '4px solid #dc2626' }, ariaProps: { role: 'alert', 'aria-live': 'assertive' } },
             }}
           />
         </SettingsProvider>

@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -81,11 +82,11 @@ export default function ServiceItemsPage() {
       if (response.ok) {
         fetchServiceItems();
       } else {
-        alert(t('billing.serviceItems.deleteFailed'));
+        notify(t('billing.serviceItems.deleteFailed'));
       }
     } catch (error) {
       console.error('Error deleting service item:', error);
-      alert(t('billing.serviceItems.deleteFailed'));
+      notify(t('billing.serviceItems.deleteFailed'));
     }
   };
 

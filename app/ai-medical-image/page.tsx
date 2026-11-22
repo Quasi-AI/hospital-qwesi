@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -156,7 +157,7 @@ export default function AIMedicalImagePage() {
     if (!selectedImage) return;
     
     if (!activeModel) {
-      alert('No active AI model found. Please configure and activate a model in AI Settings first.');
+      notify('No active AI model found. Please configure and activate a model in AI Settings first.');
       return;
     }
     
@@ -212,11 +213,11 @@ export default function AIMedicalImagePage() {
         }
       } else {
         console.error('AI image analysis failed:', result.error);
-        alert('AI image analysis failed: ' + (result.error || 'Unknown error'));
+        notify('AI image analysis failed: ' + (result.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error during AI image analysis:', error);
-      alert('Error during AI image analysis: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      notify('Error during AI image analysis: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -1128,9 +1129,9 @@ export default function AIMedicalImagePage() {
                     // Share functionality - copy report to clipboard
                     const reportText = `Diagnostic Report\n\nPatient: ${selectedPatient?.name || 'N/A'}\nImage Type: ${aiAnalysisResult.imageType}\nDiagnosis: ${aiAnalysisResult.diagnosis}\nFindings: ${aiAnalysisResult.findings.join(', ')}\nRecommendations: ${aiAnalysisResult.recommendations.join(', ')}\nConfidence: ${aiAnalysisResult.confidence}%\nSeverity: ${aiAnalysisResult.severity}`;
                     navigator.clipboard.writeText(reportText).then(() => {
-                      alert('Report copied to clipboard!');
+                      notify('Report copied to clipboard!');
                     }).catch(() => {
-                      alert('Failed to copy report. Please try again.');
+                      notify('Failed to copy report. Please try again.');
                     });
                   }}
                   className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-green-600 bg-green-600 px-3 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
@@ -1142,7 +1143,7 @@ export default function AIMedicalImagePage() {
                   type="button"
                   onClick={() => {
                     // Schedule consultation - could navigate to appointments page or show modal
-                    alert('Consultation scheduling feature coming soon!');
+                    notify('Consultation scheduling feature coming soon!');
                   }}
                   className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-blue-600 bg-blue-600 px-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
                 >

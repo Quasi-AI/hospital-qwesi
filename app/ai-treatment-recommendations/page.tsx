@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -186,12 +187,12 @@ export default function AITreatmentRecommendationsPage() {
   // Function to generate AI treatment recommendations
   const generateAIAnalysis = async () => {
     if (patientSymptoms.length === 0) {
-      alert('Please provide symptoms before generating AI analysis.');
+      notify('Please provide symptoms before generating AI analysis.');
       return;
     }
     
     if (!activeModel) {
-      alert('No active AI model found. Please configure an AI model in Settings first.');
+      notify('No active AI model found. Please configure an AI model in Settings first.');
       return;
     }
     
@@ -262,18 +263,18 @@ Format your response for medical professionals to review and make final diagnosi
             if (saveResult?.success) {
               console.log('✅ Symptom analysis saved successfully!');
               // Show success message to user
-              alert('✅ Symptom analysis saved successfully! You can view it in the patient detail page.');
+              notify('✅ Symptom analysis saved successfully! You can view it in the patient detail page.');
             } else {
               console.error('Symptom analysis save failed:', saveResult);
-              alert('⚠️ Symptom analysis generated but save failed. Check console for details.');
+              notify('⚠️ Symptom analysis generated but save failed. Check console for details.');
             }
           } catch (error) {
             console.error('Error saving symptom analysis:', error);
-            alert('❌ Error saving symptom analysis: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            notify('❌ Error saving symptom analysis: ' + (error instanceof Error ? error.message : 'Unknown error'));
           }
         } else {
           console.warn('Cannot save symptom analysis: No patient selected. selectedPatientId:', selectedPatientId);
-          alert('⚠️ Warning: Symptom analysis generated but NOT saved because no patient was selected. Please select a patient and generate again to save.');
+          notify('⚠️ Warning: Symptom analysis generated but NOT saved because no patient was selected. Please select a patient and generate again to save.');
         }
         
         // Note: Treatment recommendations will be generated after doctor diagnosis
@@ -330,7 +331,7 @@ Format your response for medical professionals to review and make final diagnosi
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Failed to save AI result:', errorData);
-        alert(`Failed to save AI result: ${errorData.message || 'Unknown error'}`);
+        notify(`Failed to save AI result: ${errorData.message || 'Unknown error'}`);
         return { success: false, error: errorData };
       }
 
@@ -339,28 +340,28 @@ Format your response for medical professionals to review and make final diagnosi
       return { success: true, data: result };
     } catch (error) {
       console.error('Error saving AI result:', error);
-      alert(`Error saving AI result: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      notify(`Error saving AI result: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
   const generateTreatmentRecommendations = async () => {
     if (!aiAnalysis) {
-      alert('Please complete AI analysis before generating treatment recommendations.');
+      notify('Please complete AI analysis before generating treatment recommendations.');
       return;
     }
     
     if (!doctorDiagnosis) {
-      alert('Please enter your clinical diagnosis before generating treatment recommendations.');
+      notify('Please enter your clinical diagnosis before generating treatment recommendations.');
       return;
     }
     
     if (!activeModel) {
-      alert('No active AI model found. Please configure an AI model in Settings first.');
+      notify('No active AI model found. Please configure an AI model in Settings first.');
       return;
     }
 
     if (!selectedPatientId) {
-      alert('⚠️ WARNING: No patient selected! The treatment plan will be generated but NOT saved to the patient record. Please select a patient first.');
+      notify('⚠️ WARNING: No patient selected! The treatment plan will be generated but NOT saved to the patient record. Please select a patient first.');
       // Continue anyway, but warn the user
     }
     
@@ -427,18 +428,18 @@ Format your response in a clear, structured manner suitable for medical professi
             console.log('Save result:', saveResult);
             
             if (saveResult?.success) {
-              alert('✅ Treatment plan saved successfully! You can view it in the patient detail page.');
+              notify('✅ Treatment plan saved successfully! You can view it in the patient detail page.');
             } else {
               console.error('Save failed:', saveResult);
-              alert('⚠️ Treatment plan generated but save failed. Check console for details.');
+              notify('⚠️ Treatment plan generated but save failed. Check console for details.');
             }
           } catch (error) {
             console.error('Error during save:', error);
-            alert('❌ Error saving treatment plan: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            notify('❌ Error saving treatment plan: ' + (error instanceof Error ? error.message : 'Unknown error'));
           }
         } else {
           console.warn('Cannot save: No patient selected. selectedPatientId:', selectedPatientId);
-          alert('⚠️ Warning: Treatment plan generated but NOT saved because no patient was selected. Please select a patient and generate again to save.');
+          notify('⚠️ Warning: Treatment plan generated but NOT saved because no patient was selected. Please select a patient and generate again to save.');
         }
       } else {
         console.error('AI treatment recommendations failed:', result.error);
@@ -456,12 +457,12 @@ Format your response in a clear, structured manner suitable for medical professi
 
   const generatePrescription = async () => {
     if (!activeModel) {
-      alert('No active AI model found. Please configure an AI model in Settings first.');
+      notify('No active AI model found. Please configure an AI model in Settings first.');
       return;
     }
 
     if (!aiRecommendations) {
-      alert('Please complete treatment recommendations before generating prescription.');
+      notify('Please complete treatment recommendations before generating prescription.');
       return;
     }
 
@@ -551,18 +552,18 @@ Create a clean, professional prescription using only the actual information prov
             
             if (saveResult?.success) {
               console.log('✅ Prescription saved successfully!');
-              alert('✅ Prescription saved successfully! You can view it in the patient detail page.');
+              notify('✅ Prescription saved successfully! You can view it in the patient detail page.');
             } else {
               console.error('Prescription save failed:', saveResult);
-              alert('⚠️ Prescription generated but save failed. Check console for details.');
+              notify('⚠️ Prescription generated but save failed. Check console for details.');
             }
           } catch (error) {
             console.error('Error saving prescription:', error);
-            alert('❌ Error saving prescription: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            notify('❌ Error saving prescription: ' + (error instanceof Error ? error.message : 'Unknown error'));
           }
         } else {
           console.warn('Cannot save prescription: No patient selected. selectedPatientId:', selectedPatientId);
-          alert('⚠️ Warning: Prescription generated but NOT saved because no patient was selected. Please select a patient and generate again to save.');
+          notify('⚠️ Warning: Prescription generated but NOT saved because no patient was selected. Please select a patient and generate again to save.');
         }
       } else {
         console.error('Prescription generation failed:', result.error);
@@ -1699,7 +1700,7 @@ Create a clean, professional prescription using only the actual information prov
                               });
                             } else {
                               navigator.clipboard.writeText(prescription);
-                              alert('Prescription copied to clipboard');
+                              notify('Prescription copied to clipboard');
                             }
                           }}
                           className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center space-x-2 text-sm"
@@ -2004,7 +2005,7 @@ Create a clean, professional prescription using only the actual information prov
                             });
                           } else {
                             await navigator.clipboard.writeText(prescription);
-                            alert('Prescription copied to clipboard!');
+                            notify('Prescription copied to clipboard!');
                           }
                         } catch (error) {
                           console.error('Error sharing prescription:', error);

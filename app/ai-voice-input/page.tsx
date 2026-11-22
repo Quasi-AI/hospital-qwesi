@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -241,11 +242,11 @@ export default function AIVoiceInputPage() {
         setHasPermission(false);
         if (error instanceof Error) {
           if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-            alert('Microphone permission denied. Please allow microphone access in your browser settings and refresh the page.');
+            notify('Microphone permission denied. Please allow microphone access in your browser settings and refresh the page.');
           } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-            alert('No microphone found. Please connect a microphone and try again.');
+            notify('No microphone found. Please connect a microphone and try again.');
           } else {
-            alert(`Error accessing microphone: ${error.message}`);
+            notify(`Error accessing microphone: ${error.message}`);
           }
         }
       }
@@ -349,17 +350,17 @@ export default function AIVoiceInputPage() {
 
   const toggleRecording = () => {
     if (!activeModel) {
-      alert('No active AI model found. Please configure an AI model in Settings first.');
+      notify('No active AI model found. Please configure an AI model in Settings first.');
       return;
     }
 
     if (!hasPermission) {
-      alert('Microphone permission is required for voice recording. Please allow microphone access and refresh the page.');
+      notify('Microphone permission is required for voice recording. Please allow microphone access and refresh the page.');
       return;
     }
 
     if (!mediaRecorder) {
-      alert('Media recorder not available. Please refresh the page and try again.');
+      notify('Media recorder not available. Please refresh the page and try again.');
       return;
     }
 
@@ -379,7 +380,7 @@ export default function AIVoiceInputPage() {
       }
     } catch (error) {
       console.error('Error toggling recording:', error);
-      alert(`Error ${mediaRecorder.state === 'recording' ? 'stopping' : 'starting'} recording: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      notify(`Error ${mediaRecorder.state === 'recording' ? 'stopping' : 'starting'} recording: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -716,11 +717,11 @@ export default function AIVoiceInputPage() {
                         type="button"
                         onClick={async () => {
                           if (!transcription) {
-                            alert('No transcription to save.');
+                            notify('No transcription to save.');
                             return;
                           }
                           if (!selectedPatientId) {
-                            alert('Please select a patient first.');
+                            notify('Please select a patient first.');
                             return;
                           }
 
@@ -744,14 +745,14 @@ export default function AIVoiceInputPage() {
                             });
 
                             if (response.ok) {
-                              alert('Transcription saved successfully!');
+                              notify('Transcription saved successfully!');
                             } else {
                               const errorData = await response.json();
-                              alert(`Failed to save transcription: ${errorData.error || 'Unknown error'}`);
+                              notify(`Failed to save transcription: ${errorData.error || 'Unknown error'}`);
                             }
                           } catch (error) {
                             console.error('Error saving transcription:', error);
-                            alert('Error saving transcription. Please try again.');
+                            notify('Error saving transcription. Please try again.');
                           }
                         }}
                         disabled={!transcription || !selectedPatientId}

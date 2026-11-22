@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
@@ -123,13 +124,13 @@ export default function AppointmentsPage() {
                 : apt
             )
           );
-          alert(`Appointment for ${appointment.patientName} cancelled successfully`);
+          notify(`Appointment for ${appointment.patientName} cancelled successfully`);
         } else {
-          alert('Failed to cancel appointment. Please try again.');
+          notify('Failed to cancel appointment. Please try again.');
         }
       } catch (error) {
         console.error('Error cancelling appointment:', error);
-        alert('An error occurred while cancelling the appointment.');
+        notify('An error occurred while cancelling the appointment.');
       }
     }
   };

@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
@@ -251,7 +252,7 @@ export default function ReportsPage() {
       
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      notify('Failed to generate PDF. Please try again.');
     }
   };
 
@@ -264,13 +265,13 @@ export default function ReportsPage() {
   const handleShareReport = (report: any) => {
     setSelectedReport(report);
     console.log('Sharing report:', report);
-    alert(`Sharing report: ${report.reportType || 'Report'}`);
+    notify(`Sharing report: ${report.reportType || 'Report'}`);
   };
 
   const handleDeleteReport = (report: any) => {
     if (confirm(`Are you sure you want to delete the report "${report.reportType || 'Report'}"?`)) {
       console.log('Deleting report:', report);
-      alert(`Report "${report.reportType || 'Report'}" deleted successfully`);
+      notify(`Report "${report.reportType || 'Report'}" deleted successfully`);
     }
   };
 

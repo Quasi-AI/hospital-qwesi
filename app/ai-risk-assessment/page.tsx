@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -252,12 +253,12 @@ export default function AIRiskAssessmentPage() {
   // Function to perform AI risk assessment
   const performRiskAssessment = async () => {
     if (!selectedPatientId) {
-      alert('Please select a patient before performing risk assessment.');
+      notify('Please select a patient before performing risk assessment.');
       return;
     }
     
     if (!patientData.name || !patientData.age) {
-      alert('Patient information is incomplete. Please ensure patient is properly selected.');
+      notify('Patient information is incomplete. Please ensure patient is properly selected.');
       return;
     }
     

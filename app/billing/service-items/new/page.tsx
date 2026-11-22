@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -36,7 +37,7 @@ export default function NewServiceItemPage() {
     e.preventDefault();
 
     if (!formData.name || !formData.description || !formData.unitPrice) {
-      alert(t('billing.serviceItems.validation.required'));
+      notify(t('billing.serviceItems.validation.required'));
       return;
     }
 
@@ -58,11 +59,11 @@ export default function NewServiceItemPage() {
         router.push('/billing/service-items');
       } else {
         const error = await response.json();
-        alert(error.error || t('billing.serviceItems.createFailed'));
+        notify(error.error || t('billing.serviceItems.createFailed'));
       }
     } catch (error) {
       console.error('Error creating service item:', error);
-      alert(t('billing.serviceItems.createFailed'));
+      notify(t('billing.serviceItems.createFailed'));
     } finally {
       setIsSubmitting(false);
     }

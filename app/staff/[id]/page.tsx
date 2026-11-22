@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -95,15 +96,15 @@ function StaffDetailsContent() {
       });
 
       if (response.ok) {
-        alert('Staff member deleted successfully!');
+        notify('Staff member deleted successfully!');
         router.push('/staff');
       } else {
         const errorData = await response.json();
-        alert(`Failed to delete: ${errorData.error || 'Unknown error'}`);
+        notify(`Failed to delete: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting staff:', error);
-      alert('Error deleting staff member');
+      notify('Error deleting staff member');
     }
   };
 
@@ -119,7 +120,7 @@ function StaffDetailsContent() {
       fetchStaffDetails();
     } else {
       const data = await res.json();
-      alert(data.error || 'Failed to update approval status');
+      notify(data.error || 'Failed to update approval status');
     }
   };
 

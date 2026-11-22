@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -43,12 +44,12 @@ export default function EditServiceItemPage() {
           isActive: item.isActive !== undefined ? item.isActive : true,
         });
       } else {
-        alert(t('billing.serviceItems.notFound'));
+        notify(t('billing.serviceItems.notFound'));
         router.push('/billing/service-items');
       }
     } catch (error) {
       console.error('Error fetching service item:', error);
-      alert(t('billing.serviceItems.fetchFailed'));
+      notify(t('billing.serviceItems.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ export default function EditServiceItemPage() {
     e.preventDefault();
 
     if (!formData.name || !formData.description || !formData.unitPrice) {
-      alert(t('billing.serviceItems.validation.required'));
+      notify(t('billing.serviceItems.validation.required'));
       return;
     }
 
@@ -92,11 +93,11 @@ export default function EditServiceItemPage() {
         router.push('/billing/service-items');
       } else {
         const error = await response.json();
-        alert(error.error || t('billing.serviceItems.updateFailed'));
+        notify(error.error || t('billing.serviceItems.updateFailed'));
       }
     } catch (error) {
       console.error('Error updating service item:', error);
-      alert(t('billing.serviceItems.updateFailed'));
+      notify(t('billing.serviceItems.updateFailed'));
     } finally {
       setIsSubmitting(false);
     }

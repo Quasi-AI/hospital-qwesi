@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -193,7 +194,7 @@ export default function ReportDetailsPage() {
       
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      notify('Failed to generate PDF. Please try again.');
     }
   };
 
@@ -209,11 +210,11 @@ export default function ReportDetailsPage() {
         if (response.ok) {
           router.push('/reports');
         } else {
-          alert('Failed to delete report');
+          notify('Failed to delete report');
         }
       } catch (error) {
         console.error('Error deleting report:', error);
-        alert('An error occurred while deleting the report');
+        notify('An error occurred while deleting the report');
       }
     }
   };

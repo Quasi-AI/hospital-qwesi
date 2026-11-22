@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -160,12 +161,12 @@ export default function AISymptomAnalyzerPage() {
 
   const analyzeSymptoms = async () => {
     if (symptoms.length === 0) {
-      alert('Please add at least one symptom before analysis.');
+      notify('Please add at least one symptom before analysis.');
       return;
     }
     
     if (!selectedPatientId) {
-      alert('Please select a patient before analyzing symptoms.');
+      notify('Please select a patient before analyzing symptoms.');
       return;
     }
     
@@ -174,7 +175,7 @@ export default function AISymptomAnalyzerPage() {
     try {
       // Use the active model from state
       if (!activeModel) {
-        alert('No active AI model found. Please configure and activate a model in AI Settings first.');
+        notify('No active AI model found. Please configure and activate a model in AI Settings first.');
         setIsAnalyzing(false);
         return;
       }

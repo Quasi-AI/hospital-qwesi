@@ -1,5 +1,6 @@
 'use client';
 
+import { notify } from '@/lib/notify';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -164,12 +165,12 @@ function NewInvoicePageContent() {
 
   const handleSubmit = async (status: 'draft' | 'pending') => {
     if (!selectedPatient) {
-      alert(t('billing.validation.selectPatient'));
+      notify(t('billing.validation.selectPatient'));
       return;
     }
 
     if (items.some(item => !item.description || item.unitPrice <= 0)) {
-      alert(t('billing.validation.itemsRequired'));
+      notify(t('billing.validation.itemsRequired'));
       return;
     }
 
@@ -208,11 +209,11 @@ function NewInvoicePageContent() {
         router.push(`/billing/invoices/${data.invoice._id}`);
       } else {
         const error = await response.json();
-        alert(error.error || t('billing.validation.createFailed'));
+        notify(error.error || t('billing.validation.createFailed'));
       }
     } catch (error) {
       console.error('Error creating invoice:', error);
-      alert(t('billing.validation.createFailed'));
+      notify(t('billing.validation.createFailed'));
     } finally {
       setIsSubmitting(false);
     }
