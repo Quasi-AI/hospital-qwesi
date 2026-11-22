@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { LogoLink } from './logo';
+import PhoneInput from './phone-input';
 import { CURRENCIES, CURRENCY_LABELS } from '@/lib/practitioner-currency';
 import {
   ArrowLeft,
@@ -198,7 +199,7 @@ export default function SignupForm({ role }: { role: SignupRole }) {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
               <Field wrap="lg:col-span-3" label="Full name" value={form.name} onChange={(v) => update('name', v)} icon={User} required />
               <Field wrap="lg:col-span-3" label="Email" value={form.email} onChange={(v) => update('email', v)} type="email" icon={Mail} required />
-              <Field wrap="lg:col-span-3" label="Phone" value={form.phone} onChange={(v) => update('phone', v)} icon={Phone} required={role === 'patient'} />
+              <div className="lg:col-span-3"><PhoneInput label="Phone" value={form.phone} onChange={(v) => update('phone', v)} required={role === 'patient'} /></div>
               <Field wrap="lg:col-span-3" label="Password" value={form.password} onChange={(v) => update('password', v)} type="password" icon={Lock} required />
 
               {role === 'patient' && (

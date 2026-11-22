@@ -1,5 +1,6 @@
 'use client';
 
+import PhoneInput from '@/app/components/phone-input';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from '../../hooks/useTranslations';
@@ -228,12 +229,7 @@ export default function PatientProfilePage() {
                 {t('patientPortal.profile.phone')}
               </label>
               {editing ? (
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500"
-                />
+                <PhoneInput label="" value={formData.phone} onChange={(v) => setFormData((f) => ({ ...f, phone: v }))} />
               ) : (
                 <p className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
                   {patient.phone || '-'}
