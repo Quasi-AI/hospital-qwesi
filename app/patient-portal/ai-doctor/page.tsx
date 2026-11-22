@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, PhoneOff, Video, Camera, ShieldAlert, Loader2, ExternalLink } from 'lucide-react';
+import { Mic, MicOff, PhoneOff, Video, Camera, ShieldAlert, Loader2, ExternalLink, Coins, Info } from 'lucide-react';
 
-type Phase = 'idle' | 'starting' | 'listening' | 'thinking' | 'speaking' | 'blocked' | 'ended';
+type Phase = 'idle' | 'starting' | 'listening' | 'thinking' | 'speaking' | 'ended';
 type Cfg = { enabled: boolean; avatarUrl: string; doctorName: string; cameraEnabled: boolean };
 
 const TOPUPS = [10, 20, 50, 100];
@@ -43,6 +43,9 @@ export default function AiDoctorPage() {
   const [suggest, setSuggest] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [topupBusy, setTopupBusy] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [custom, setCustom] = useState('');
+  const [linked, setLinked] = useState('');
 
   const frame = useRef<HTMLIFrameElement>(null);
   const video = useRef<HTMLVideoElement>(null);
@@ -51,6 +54,9 @@ export default function AiDoctorPage() {
 
   useEffect(() => { fetch('/api/ai-doctor/config').then((r) => r.json()).then(setCfg).catch(() => setCfg({ enabled: false, avatarUrl: '', doctorName: '', cameraEnabled: false })); }, []);
   useEffect(() => { refs.current.muted = muted; }, [muted]);
+  // Show the credit balance (and which number it is linked to) before the call starts
+  useEffect(() => { if (!cfg?.enabled) return; api('session').then((s) => { setBalance(s.balance); setLinked(s.linkedPhone || ''); }).catch(() => {}); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg?.enabled]);
 
   const toAvatar = useCallback((m: any) => frame.current?.contentWindow?.postMessage({ target: 'ai-doctor-avatar', ...m }, location.origin), []);
 
@@ -94,9 +100,9 @@ export default function AiDoctorPage() {
       setHeard(r.transcript || ''); setUrgent(Boolean(r.urgent));
       setLinks(r.links || []); setSuggest((r.choices || []).map((c: any) => c.text));
       if (r.end) refs.current.endAfter = true;
-      if (r.blocked) setPh('blocked');
+      setBlocked(Boolean(r.blocked));
       play(r);
-      if (!r.audio) setPh(r.blocked ? 'blocked' : 'listening');
+      if (!r.audio) setPh('listening');
     } catch (e: any) { setError(e.message); setPh('listening'); }
   }
 
@@ -152,7 +158,7 @@ export default function AiDoctorPage() {
       refs.current.stream = stream;
       if (useCamera && video.current) { video.current.srcObject = stream; await video.current.play().catch(() => {}); setCameraOn(true); startLooking(); }
       const s = await api('session');
-      setBalance(s.balance);
+      setBalance(s.balance); setLinked(s.linkedPhone || ''); setBlocked(false);
       await startListening(stream);
       for (let i = 0; i < 100 && !refs.current.avatarReady; i += 1) await new Promise((r) => setTimeout(r, 150));
       const g = await api('speak', { text: s.greeting });
@@ -178,11 +184,12 @@ export default function AiDoctorPage() {
   }
 
   const live = !['idle', 'ended'].includes(phase);
-  const status = { idle: '', starting: 'Connecting…', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…', blocked: 'Out of credits', ended: 'Consultation ended' }[phase];
+  const status = { idle: '', starting: 'Connecting…', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…', ended: 'Consultation ended' }[phase];
+  const dot = phase === 'speaking' ? 'bg-[#a995ff]' : phase === 'listening' ? 'bg-white' : phase === 'thinking' ? 'bg-amber-300' : 'bg-white/40';
 
-  if (!cfg) return <div className="p-8 text-center text-sm text-gray-500"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>;
+  if (!cfg) return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-[#6949ED]" /></div>;
   if (!cfg.enabled) return (
-    <div className="mx-auto max-w-lg p-6 sm:p-10">
+    <div className="mx-auto max-w-lg p-4 sm:p-10">
       <div className="rounded-3xl border border-white/60 bg-white/70 p-8 text-center shadow-xl backdrop-blur-xl">
         <Video className="mx-auto mb-3 h-8 w-8 text-[#6949ED]" />
         <h1 className="text-xl font-semibold text-black">My AI Doctor</h1>
@@ -192,71 +199,115 @@ export default function AiDoctorPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-3xl p-3 sm:p-6">
-      <div className="relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-b from-[#6949ED]/90 to-[#2a1a6e] shadow-2xl" style={{ height: 'min(78vh, 720px)' }}>
-        <iframe ref={frame} src="/ai-doctor/avatar.html" title={cfg.doctorName} allow="autoplay" className="absolute inset-0 h-full w-full border-0" />
-        <video ref={video} playsInline muted className="pointer-events-none absolute h-px w-px opacity-0" />
-
-        {/* top bar */}
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 p-3 text-xs text-white">
-          <span className="rounded-full bg-black/35 px-3 py-1 backdrop-blur">{cfg.doctorName} · AI</span>
-          <span className="flex items-center gap-2">
-            {cameraOn && <span className="flex items-center gap-1 rounded-full bg-black/35 px-3 py-1 backdrop-blur"><Camera className="h-3 w-3" /> Camera on</span>}
-            {balance !== null && <span className="rounded-full bg-black/35 px-3 py-1 backdrop-blur">{balance} credits</span>}
-          </span>
-        </div>
-
-        {urgent && (
-          <div className="absolute inset-x-3 top-14 flex items-start gap-2 rounded-2xl bg-red-600/95 p-3 text-sm text-white shadow-lg">
-            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" /> This may be an emergency. Call your local emergency number now (112 in Ghana).
-          </div>
-        )}
-
-        {/* captions + chips */}
-        <div className="absolute inset-x-0 bottom-0 space-y-2 bg-gradient-to-t from-black/70 to-transparent p-3 pt-16 text-white">
-          {status && <div className="text-center text-xs uppercase tracking-wide text-white/80">{status}</div>}
-          {heard && <p className="text-center text-xs italic text-white/70">“{heard}”</p>}
-          {caption && <p className="mx-auto max-w-xl text-center text-sm leading-snug">{caption}</p>}
-          {(links.length > 0 || suggest.length > 0) && (
-            <div className="flex flex-wrap justify-center gap-2">
-              {suggest.map((s) => <span key={s} className="rounded-full bg-white/20 px-3 py-1 text-xs backdrop-blur">Say: “{s}”</span>)}
-              {links.map((l) => <a key={l} href={l} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-[#6949ED]"><ExternalLink className="h-3 w-3" /> Open link</a>)}
-            </div>
-          )}
-          {phase === 'blocked' && (
-            <div className="rounded-2xl bg-white/95 p-3 text-center text-black">
-              <p className="mb-2 text-sm font-medium">Choose an amount to top up (GH₵)</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {TOPUPS.map((a) => <button key={a} disabled={topupBusy} onClick={() => topUp(a)} className="rounded-xl bg-[#6949ED] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">GH₵{a}</button>)}
-              </div>
-              <p className="mt-2 text-xs text-gray-500">After paying, just keep talking. Your credits are added automatically.</p>
-              <button onClick={() => setPh('listening')} className="mt-1 text-xs text-[#6949ED] underline">I have paid, continue</button>
-            </div>
-          )}
-          {error && <p className="rounded-xl bg-white/90 p-2 text-center text-xs text-red-700">{error}</p>}
-        </div>
+    <div className="mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden p-3 sm:p-5 lg:p-6">
+      <div className="mb-4 min-w-0">
+        <h1 className="text-xl font-semibold text-black sm:text-2xl">My AI Doctor</h1>
+        <p className="text-sm text-gray-600">A private video consultation with {cfg.doctorName}. Just talk, as you would on a call.</p>
       </div>
 
-      {/* controls */}
-      <div className="mt-4 rounded-3xl border border-white/60 bg-white/70 p-4 shadow-xl backdrop-blur-xl">
-        {!live ? (
-          <div className="flex flex-col items-center gap-3 text-center">
-            {cfg.cameraEnabled && (
-              <label className="flex max-w-md cursor-pointer items-start gap-2 text-left text-sm text-gray-700">
-                <input type="checkbox" checked={useCamera} onChange={(e) => setUseCamera(e.target.checked)} className="mt-1 accent-[#6949ED]" />
-                <span>Let the doctor see me through my camera. A small picture is analysed now and then for visible signs such as tiredness or a rash. It is never saved, and it is not a diagnosis.</span>
-              </label>
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+        {/* ── Stage ─────────────────────────────────────────── */}
+        <div className="min-w-0">
+          <div
+            className="relative isolate overflow-hidden rounded-3xl border border-white/50 bg-gradient-to-b from-[#7457f0] via-[#5a3fd1] to-[#241567] shadow-2xl"
+            style={{ height: 'clamp(440px, 74dvh, 780px)', contain: 'layout paint', transform: 'translateZ(0)' }}
+          >
+            <iframe ref={frame} src="/ai-doctor/avatar.html" title={cfg.doctorName} allow="autoplay" className="absolute inset-0 h-full w-full border-0" />
+            <video ref={video} playsInline muted className="pointer-events-none absolute h-px w-px opacity-0" />
+
+            {/* top bar */}
+            <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-2 p-3 text-xs text-white">
+              <span className="flex min-w-0 items-center gap-2 rounded-full bg-black/35 px-3 py-1.5 backdrop-blur">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${dot} ${live ? 'animate-pulse' : ''}`} />
+                <span className="truncate">{live ? (status || 'Live') : 'Ready'} · AI doctor</span>
+              </span>
+              {cameraOn && <span className="flex shrink-0 items-center gap-1 rounded-full bg-black/35 px-3 py-1.5 backdrop-blur"><Camera className="h-3 w-3" /> Camera on</span>}
+            </div>
+
+            {urgent && (
+              <div className="absolute inset-x-3 top-14 z-20 flex items-start gap-2 rounded-2xl bg-red-600/95 p-3 text-sm text-white shadow-lg">
+                <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" /> This may be an emergency. Call your local emergency number now (112 in Ghana).
+              </div>
             )}
-            <button onClick={startConsult} className="flex items-center gap-2 rounded-2xl bg-[#6949ED] px-6 py-3 text-sm font-semibold text-white shadow-lg hover:opacity-90"><Video className="h-4 w-4" /> {phase === 'ended' ? 'Start another consultation' : 'Start video consultation'}</button>
-            <p className="max-w-md text-xs text-gray-500">This is an AI doctor for guidance, not a replacement for an in-person or human doctor. Each answer uses credits (5 for simple questions, 10 for health questions). In an emergency call 112.</p>
-            {error && <p className="text-xs text-red-600">{error}</p>}
+
+            {/* lobby: shown before the call starts */}
+            {!live && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#1b1050]/70 p-5 text-center text-white backdrop-blur-sm">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15"><Video className="h-7 w-7" /></div>
+                <div>
+                  <h2 className="text-lg font-semibold">{phase === 'ended' ? 'Consultation ended' : 'Ready when you are'}</h2>
+                  <p className="mx-auto mt-1 max-w-xs text-sm text-white/80">{phase === 'ended' ? 'Take care. You can start another consultation any time.' : 'Allow your microphone, then tell the doctor what has been bothering you.'}</p>
+                </div>
+                {cfg.cameraEnabled && (
+                  <label className="flex max-w-sm cursor-pointer items-start gap-2 rounded-2xl bg-white/10 p-3 text-left text-xs leading-relaxed text-white/90">
+                    <input type="checkbox" checked={useCamera} onChange={(e) => setUseCamera(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-white" />
+                    <span>Let the doctor see me through my camera. A small picture is analysed now and then for visible signs such as tiredness or a rash. It is never saved and is not a diagnosis.</span>
+                  </label>
+                )}
+                <button onClick={startConsult} disabled={phase === 'starting'} className="flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-[#4a2fc4] shadow-lg transition hover:scale-[1.02] disabled:opacity-60">
+                  <Video className="h-4 w-4" /> {phase === 'ended' ? 'Start another consultation' : 'Start video consultation'}
+                </button>
+                {error && <p className="max-w-xs rounded-xl bg-white/90 p-2 text-xs text-red-700">{error}</p>}
+              </div>
+            )}
+
+            {/* captions, top-up, call controls */}
+            {live && (
+              <div className="absolute inset-x-0 bottom-0 z-10 space-y-2 bg-gradient-to-t from-black/75 via-black/40 to-transparent p-3 pb-4 pt-20 text-white">
+                {heard && <p className="mx-auto max-w-xl truncate text-center text-xs italic text-white/70">“{heard}”</p>}
+                {caption && <p className="mx-auto max-h-24 max-w-xl overflow-y-auto text-center text-sm leading-snug [text-shadow:0_1px_6px_rgba(0,0,0,.6)]">{caption}</p>}
+                {(links.length > 0 || suggest.length > 0) && (
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {suggest.map((s) => <span key={s} className="max-w-full truncate rounded-full bg-white/20 px-3 py-1 text-xs backdrop-blur">Say: “{s}”</span>)}
+                    {links.map((l) => <a key={l} href={l} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-[#6949ED]"><ExternalLink className="h-3 w-3" /> Open link</a>)}
+                  </div>
+                )}
+                {blocked && (
+                  <div className="mx-auto max-w-md rounded-2xl bg-white/95 p-3 text-center text-black shadow-xl">
+                    <p className="mb-2 text-sm font-semibold">You are out of credits. Top up to continue (GH₵)</p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {TOPUPS.map((a) => <button key={a} disabled={topupBusy} onClick={() => topUp(a)} className="rounded-xl bg-[#6949ED] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">GH₵{a}</button>)}
+                    </div>
+                    <form onSubmit={(e) => { e.preventDefault(); const n = Math.floor(Number(custom)); if (n >= 1) topUp(n); }} className="mt-2 flex items-center justify-center gap-2">
+                      <input value={custom} onChange={(e) => setCustom(e.target.value.replace(/\D/g, '').slice(0, 4))} inputMode="numeric" placeholder="Other amount" className="h-9 w-32 rounded-xl border border-gray-300 px-3 text-sm text-black" />
+                      <button type="submit" disabled={topupBusy || !custom} className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Pay</button>
+                    </form>
+                    <p className="mt-2 text-xs text-gray-500">Credits go to {linked ? `the number ending ${linked}` : 'your phone number'}, the same as on WhatsApp. After paying, tap below and keep talking.</p>
+                    <button onClick={() => setBlocked(false)} className="mt-1 text-xs font-medium text-[#6949ED] underline">I have paid, continue</button>
+                  </div>
+                )}
+                {error && <p className="mx-auto max-w-md rounded-xl bg-white/90 p-2 text-center text-xs text-red-700">{error}</p>}
+                <div className="flex items-center justify-center gap-3 pt-1">
+                  <button onClick={() => setMuted((m) => !m)} className={`flex h-12 w-12 items-center justify-center rounded-full backdrop-blur transition ${muted ? 'bg-white text-gray-800' : 'bg-white/20 text-white hover:bg-white/30'}`} aria-label={muted ? 'Unmute microphone' : 'Mute microphone'}>{muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}</button>
+                  <button onClick={() => endConsult()} className="flex h-12 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white shadow-lg hover:bg-red-700"><PhoneOff className="h-4 w-4" /> End</button>
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="flex items-center justify-center gap-3">
-            <button onClick={() => setMuted((m) => !m)} className={`flex h-12 w-12 items-center justify-center rounded-full ${muted ? 'bg-gray-200 text-gray-700' : 'bg-[#6949ED] text-white'}`} aria-label={muted ? 'Unmute microphone' : 'Mute microphone'}>{muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}</button>
-            <button onClick={() => endConsult()} className="flex h-12 items-center gap-2 rounded-full bg-black px-5 text-sm font-medium text-white"><PhoneOff className="h-4 w-4" /> End</button>
+        </div>
+
+        {/* ── Side panel ───────────────────────────────────── */}
+        <aside className="min-w-0 space-y-3">
+          <div className="rounded-3xl border border-white/60 bg-white/75 p-4 shadow-lg backdrop-blur-xl">
+            <div className="flex items-center gap-2 text-sm font-semibold text-black"><Coins className="h-4 w-4 text-[#6949ED]" /> Credits</div>
+            <p className="mt-2 text-3xl font-bold text-[#6949ED]">{balance ?? '—'}</p>
+            <p className="mt-1 text-xs text-gray-500">{linked ? `Linked to the number ending ${linked}, the same account as WhatsApp.` : 'Linked to the phone number on your profile, the same account as WhatsApp.'}</p>
+            <p className="mt-2 text-xs text-gray-600">Each answer uses 5 credits (simple question) or 10 credits (health question).</p>
           </div>
-        )}
+          <div className="rounded-3xl border border-white/60 bg-white/75 p-4 shadow-lg backdrop-blur-xl">
+            <div className="flex items-center gap-2 text-sm font-semibold text-black"><Info className="h-4 w-4 text-[#6949ED]" /> Tips</div>
+            <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-gray-700">
+              <li>Speak normally and pause when you are done. The doctor answers after a short silence.</li>
+              <li>You can interrupt at any time by speaking.</li>
+              <li>Say “goodbye” to end the call.</li>
+              <li>Use headphones in a noisy place for better hearing.</li>
+            </ul>
+          </div>
+          <div className="rounded-3xl border border-amber-200 bg-amber-50/80 p-4 text-xs leading-relaxed text-amber-900 shadow-sm">
+            <div className="mb-1 flex items-center gap-2 text-sm font-semibold"><ShieldAlert className="h-4 w-4" /> Important</div>
+            This is an AI doctor for guidance, not a replacement for an in-person or human doctor. In an emergency, call 112 straight away.
+          </div>
+        </aside>
       </div>
     </div>
   );

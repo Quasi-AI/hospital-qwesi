@@ -250,15 +250,17 @@ export default function SignupForm({ role }: { role: SignupRole }) {
                   I accept the terms and conditions, data privacy notice, and telemedicine &amp; healthcare consent.
                 </span>
               </label>
-              <details className="mt-2 text-xs leading-relaxed text-gray-600">
-                <summary className="cursor-pointer font-semibold text-brand-700">Read the agreement</summary>
-                <ul className="mt-2 list-disc space-y-1.5 pl-4">
-                  <li>Qwesi collects identity, contact, clinical, appointment, prescription and billing information to provide care. It is handled as confidential medical information and shared only with authorised parties and regulators where required.</li>
-                  <li>The platform supports virtual care and does not replace emergency services. For chest pain, severe bleeding, trouble breathing, stroke signs, seizures or loss of consciousness, seek emergency care immediately.</li>
-                  <li>You agree to provide accurate information and to keep your login private. Access can be paused or rejected if licence, identity or safety requirements are not met.</li>
-                  <li>Virtual care has limits, such as network issues or the need for an in-person referral. Prescriptions and dispensing may require pharmacist review and local regulatory compliance.</li>
-                </ul>
-              </details>
+              <div className="mt-2">
+                <div className="mb-1 text-xs font-semibold text-brand-700">Agreement (scroll to read)</div>
+                <div tabIndex={0} role="region" aria-label="Agreement text" className="max-h-44 overflow-y-auto overscroll-contain rounded-xl border border-brand-100 bg-white/80 p-3 text-xs leading-relaxed text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-200 sm:max-h-56">
+                  <ul className="list-disc space-y-1.5 pl-4">
+                    <li>Qwesi collects identity, contact, clinical, appointment, prescription and billing information to provide care. It is handled as confidential medical information and shared only with authorised parties and regulators where required.</li>
+                    <li>The platform supports virtual care and does not replace emergency services. For chest pain, severe bleeding, trouble breathing, stroke signs, seizures or loss of consciousness, seek emergency care immediately.</li>
+                    <li>You agree to provide accurate information and to keep your login private. Access can be paused or rejected if licence, identity or safety requirements are not met.</li>
+                    <li>Virtual care has limits, such as network issues or the need for an in-person referral. Prescriptions and dispensing may require pharmacist review and local regulatory compliance.</li>
+                  </ul>
+                </div>
+              </div>
               </div>
               <label className="block">
                 <span className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-700">
