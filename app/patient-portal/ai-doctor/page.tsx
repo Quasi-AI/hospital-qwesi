@@ -35,6 +35,8 @@ export default function AiDoctorPage() {
   const [caption, setCaption] = useState('');
   const [heard, setHeard] = useState('');
   const [balance, setBalance] = useState<number | null>(null);
+  const [currency, setCurrency] = useState<'GHS' | 'USD'>('GHS');
+  const sym = currency === 'USD' ? '$' : 'GH₵';
   const [muted, setMuted] = useState(false);
   const [useCamera, setUseCamera] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
@@ -55,7 +57,7 @@ export default function AiDoctorPage() {
   useEffect(() => { fetch('/api/ai-doctor/config').then((r) => r.json()).then(setCfg).catch(() => setCfg({ enabled: false, avatarUrl: '', doctorName: '', cameraEnabled: false })); }, []);
   useEffect(() => { refs.current.muted = muted; }, [muted]);
   // Show the credit balance (and which number it is linked to) before the call starts
-  useEffect(() => { if (!cfg?.enabled) return; api('session').then((s) => { setBalance(s.balance); setLinked(s.linkedPhone || ''); }).catch(() => {}); // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!cfg?.enabled) return; api('session').then((s) => { setBalance(s.balance); if (s.currency) setCurrency(s.currency); setLinked(s.linkedPhone || ''); }).catch(() => {}); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cfg?.enabled]);
 
   const toAvatar = useCallback((m: any) => frame.current?.contentWindow?.postMessage({ target: 'ai-doctor-avatar', ...m }, location.origin), []);
@@ -158,7 +160,7 @@ export default function AiDoctorPage() {
       refs.current.stream = stream;
       if (useCamera && video.current) { video.current.srcObject = stream; await video.current.play().catch(() => {}); setCameraOn(true); startLooking(); }
       const s = await api('session');
-      setBalance(s.balance); setLinked(s.linkedPhone || ''); setBlocked(false);
+      setBalance(s.balance); if (s.currency) setCurrency(s.currency); setLinked(s.linkedPhone || ''); setBlocked(false);
       await startListening(stream);
       for (let i = 0; i < 100 && !refs.current.avatarReady; i += 1) await new Promise((r) => setTimeout(r, 150));
       const g = await api('speak', { text: s.greeting });
@@ -264,9 +266,9 @@ export default function AiDoctorPage() {
                 )}
                 {blocked && (
                   <div className="mx-auto max-w-md rounded-2xl bg-white/95 p-3 text-center text-black shadow-xl">
-                    <p className="mb-2 text-sm font-semibold">You are out of credits. Top up to continue (GH₵)</p>
+                    <p className="mb-2 text-sm font-semibold">You are out of credits. Top up to continue ({sym})</p>
                     <div className="flex flex-wrap justify-center gap-2">
-                      {TOPUPS.map((a) => <button key={a} disabled={topupBusy} onClick={() => topUp(a)} className="rounded-xl bg-[#6949ED] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">GH₵{a}</button>)}
+                      {TOPUPS.map((a) => <button key={a} disabled={topupBusy} onClick={() => topUp(a)} className="rounded-xl bg-[#6949ED] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{sym}{a}</button>)}
                     </div>
                     <form onSubmit={(e) => { e.preventDefault(); const n = Math.floor(Number(custom)); if (n >= 1) topUp(n); }} className="mt-2 flex items-center justify-center gap-2">
                       <input value={custom} onChange={(e) => setCustom(e.target.value.replace(/\D/g, '').slice(0, 4))} inputMode="numeric" placeholder="Other amount" className="h-9 w-32 rounded-xl border border-gray-300 px-3 text-sm text-black" />
