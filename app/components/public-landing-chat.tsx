@@ -174,7 +174,7 @@ export function PublicLandingChat({
   const send = () => void sendMessage(input);
 
   return (
-    <div className="pointer-events-none fixed bottom-0 right-0 z-[60] flex flex-col items-end gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pr-[max(1rem,env(safe-area-inset-right))]">
+    <div className="pointer-events-none fixed bottom-0 right-0 z-[70] flex flex-col items-end gap-3 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pr-[max(1rem,env(safe-area-inset-right))]">
       <div
         id="public-landing-chat-panel"
         className={`pointer-events-auto flex max-h-[min(420px,calc(100dvh-8rem))] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl bg-gray-50 text-gray-900 shadow-xl shadow-gray-900/12 transition-[opacity,transform] duration-200 ${
@@ -321,12 +321,15 @@ export function PublicLandingChat({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="pointer-events-auto flex items-center gap-2 rounded-full border border-teal-700/40 bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/30 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f8f7]"
+        className="pointer-events-auto group relative flex h-14 items-center gap-2 rounded-full bg-gradient-to-br from-violet-600 via-indigo-600 to-fuchsia-600 px-4 text-sm font-semibold text-white shadow-xl shadow-violet-900/40 ring-2 ring-white/80 transition hover:scale-105 hover:brightness-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-300 sm:px-5"
         aria-expanded={open}
         aria-controls="public-landing-chat-panel"
+        aria-label={open ? 'Close chat' : `Open chat: ${panelTitle}`}
       >
-        <MessageCircle className="h-5 w-5 shrink-0" aria-hidden />
-        <span>{panelTitle}</span>
+        {!open && <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-violet-500/40 [animation-duration:2.4s]" aria-hidden />}
+        {open ? <X className="h-6 w-6 shrink-0" aria-hidden /> : <MessageCircle className="h-6 w-6 shrink-0" aria-hidden />}
+        <span className={open ? 'hidden' : 'hidden sm:inline'}>{panelTitle}</span>
+        {!open && <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400" aria-hidden />}
       </button>
     </div>
   );

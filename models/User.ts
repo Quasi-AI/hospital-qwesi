@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 export interface IUser {
+  lastLoginAt?: Date;
+  profileReminderSentAt?: Date;
+  profileReminderCount?: number;
+  checkInEmailSentAt?: Date;
   _id: string;
   email: string;
   name: string;
@@ -213,7 +217,12 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       enum: ['male', 'female', 'other', 'prefer-not-to-say'],
     },
-  },
+      // Lifecycle emails (see lib/lifecycle.ts): when each reminder was last sent, so nobody is emailed twice.
+    lastLoginAt: { type: Date },
+    profileReminderSentAt: { type: Date },
+    profileReminderCount: { type: Number, default: 0 },
+    checkInEmailSentAt: { type: Date },
+},
   {
     timestamps: true,
   }

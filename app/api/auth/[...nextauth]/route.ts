@@ -83,6 +83,11 @@ export const authOptions: AuthOptions = {
                   // going on.
                   throw new Error('PENDING_APPROVAL');
                 }
+                {
+                  const now = new Date();
+                  User.updateOne({ _id: user._id }, { $set: { lastLoginAt: now } }).catch(() => {});
+                  if (safeRole === 'patient') Patient.updateOne({ email }, { $set: { lastLoginAt: now } }).catch(() => {});
+                }
                 return {
                   id: user._id.toString(),
                   email: user.email,
@@ -125,6 +130,7 @@ export const authOptions: AuthOptions = {
                   // a linked User record.
                   throw new Error('PENDING_APPROVAL');
                 }
+                Patient.updateOne({ _id: patient._id }, { $set: { lastLoginAt: new Date() } }).catch(() => {});
                 return {
                   id: patient._id.toString(),
                   email: patient.email,

@@ -1,6 +1,8 @@
 'use client';
 
 import { LogoLink } from '@/app/components/logo';
+import dynamic from 'next/dynamic';
+const PublicLandingChat = dynamic(() => import('@/app/components/public-landing-chat').then((m) => m.PublicLandingChat), { ssr: false });
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -303,6 +305,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto max-w-[1480px] px-3 py-4 sm:px-5 lg:px-6">
             {children}
+            <PublicLandingChat enabled title="Ask Qwesi" welcomeMessage="Hi! I'm Qwesi. Ask me about doctors, appointments, credits or how anything works." />
           </div>
         </main>
       </div>
