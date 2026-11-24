@@ -9,6 +9,7 @@ import TelemedicineSession from '@/models/TelemedicineSession';
 import User from '@/models/User';
 import { sendEmail } from './email-provider';
 import { sendSMS } from './sms-provider';
+import { sendWhatsApp } from '@/lib/whatsapp';
 import { getTemplate, TemplateData } from './templates';
 import { emitRealtimeEvent, notificationTargets } from '@/lib/realtime';
 
@@ -214,6 +215,20 @@ export async function sendNotification(notificationId: string): Promise<Notifica
       else hasFailure = true;
     }
     
+    // Also send reminders to patients on WhatsApp (once per notification)
+    if (
+      notification.recipientType === 'patient' &&
+      notification.recipientPhone &&
+      ['appointment_reminder', 'telemedicine', 'follow_up', 'medication_reminder'].includes(notification.type) &&
+      !notification.metadata?.whatsappSent
+    ) {
+      const waOk = await sendWhatsApp(notification.recipientPhone, notification.metadata?.smsText || notification.message);
+      if (waOk) {
+        await Notification.updateOne({ _id: notification._id }, { $set: { 'metadata.whatsappSent': true } });
+        hasSuccess = true;
+      }
+    }
+
     // Mark in-app as sent
     if (notification.channels.includes('in_app')) {
       deliveryStatus.inApp = {

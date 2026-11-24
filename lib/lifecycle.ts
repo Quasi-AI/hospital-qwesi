@@ -3,6 +3,7 @@ import User from '@/models/User';
 import Patient from '@/models/Patient';
 import Appointment from '@/models/Appointment';
 import { sendEmail } from '@/lib/notifications/email-provider';
+import { sendWhatsApp } from '@/lib/whatsapp';
 import { getEffectiveProviderApprovalStatus } from '@/lib/providerApproval';
 import Settings from '@/models/Settings';
 
@@ -17,6 +18,7 @@ import Settings from '@/models/Settings';
 const DAY = 24 * 60 * 60 * 1000;
 const num = (v: string | undefined, d: number) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : d);
 const appUrl = () => (process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
+const realEmail = (e?: string) => (e && !/@phone\.qwesi\.org$/i.test(e) ? e : '');
 const BATCH = num(process.env.LIFECYCLE_BATCH, 100);
 
 async function clinic(): Promise<string> {
@@ -119,7 +121,10 @@ export async function noticeMissedConsultations(): Promise<Counts> {
 <p>Please keep your availability up to date and join consultations on time, because patients pay for these slots. If something went wrong, you can reschedule it from your dashboard.</p>`;
       tried++; (await mail(provider.email, `Missed consultation on ${day}`, layout(brand, 'You missed a consultation', body, { label: 'Open my appointments', href: `${appUrl()}/appointments` }))) ? (out.sent++, delivered++) : out.failed++;
     }
-    if (a.patientEmail) {
+    if (a.patientPhone) {
+      tried++; (await sendWhatsApp(a.patientPhone, `Hello ${a.patientName || ''}, we are sorry: your consultation with ${a.doctorName || 'your doctor'} on ${when} did not take place. You can book a new time here: ${appUrl()}/patient-portal/doctors`)) ? (out.sent++, delivered++) : out.failed++;
+    }
+    if (realEmail(a.patientEmail)) {
       const body = `<p>Hello ${esc(a.patientName || '')},</p><p>We are sorry: your consultation with <strong>${esc(a.doctorName || 'your doctor')}</strong> on <strong>${esc(when)}</strong> did not take place.</p>
 <p>You can book a new time, or choose another practitioner, and we will make sure it is looked after.</p>`;
       tried++; (await mail(a.patientEmail, 'Sorry we missed you - let us rebook', layout(brand, 'Your consultation did not take place', body, { label: 'Book again', href: `${appUrl()}/patient-portal/doctors` }))) ? (out.sent++, delivered++) : out.failed++;
@@ -138,12 +143,12 @@ export async function checkInOnInactivePatients(): Promise<Counts> {
   const inactive = new Date(now - num(process.env.PATIENT_CHECKIN_AFTER_DAYS, 14) * DAY);
   const resend = new Date(now - num(process.env.PATIENT_CHECKIN_EVERY_DAYS, 30) * DAY);
   const rows = await Patient.find({
-    email: { $exists: true, $ne: '' },
     $and: [
+      { $or: [{ email: { $exists: true, $nin: ['', null], $not: /@phone\.qwesi\.org$/i } }, { phone: { $exists: true, $nin: ['', null] } }] },
       { $or: [{ lastLoginAt: { $lte: inactive } }, { lastLoginAt: { $exists: false }, createdAt: { $lte: inactive } }] },
       { $or: [{ checkInEmailSentAt: { $exists: false } }, { checkInEmailSentAt: null }, { checkInEmailSentAt: { $lte: resend } }] },
     ],
-  }).select('name email').limit(BATCH).lean();
+  }).select('name email phone').limit(BATCH).lean();
 
   for (const p of rows as any[]) {
     out.checked++;
@@ -155,7 +160,9 @@ export async function checkInOnInactivePatients(): Promise<Counts> {
     const first = String(p.name || '').split(' ')[0];
     const body = `<p>Hello ${esc(first)},</p><p>We have not seen you for a little while and wanted to check in: <strong>how are you feeling?</strong></p>
 <p>If anything is bothering you, a doctor is available by video, and Qwesi, our AI health assistant, can answer questions any time on WhatsApp. It also helps to keep your medication reminders and health records up to date.</p>`;
-    (await mail(p.email, `${first ? first + ', ' : ''}how are you feeling?`, layout(brand, 'Checking in on you', body, { label: 'Open my health portal', href: `${appUrl()}/patient-portal` }))) ? out.sent++ : (out.failed++, await Patient.updateOne({ _id: p._id }, claimed.checkInEmailSentAt ? { $set: { checkInEmailSentAt: claimed.checkInEmailSentAt } } : { $unset: { checkInEmailSentAt: 1 } }));
+    const okMail = realEmail(p.email) ? await mail(p.email, `${first ? first + ', ' : ''}how are you feeling?`, layout(brand, 'Checking in on you', body, { label: 'Open my health portal', href: `${appUrl()}/patient-portal` })) : false;
+    const okWa = p.phone ? await sendWhatsApp(p.phone, `Hello ${first}, we have not seen you for a while and wanted to check in: how are you feeling? If anything is bothering you, just reply here and Qwesi will help, or see a doctor by video: ${appUrl()}/patient-portal`) : false;
+    (okMail || okWa) ? out.sent++ : (out.failed++, await Patient.updateOne({ _id: p._id }, claimed.checkInEmailSentAt ? { $set: { checkInEmailSentAt: claimed.checkInEmailSentAt } } : { $unset: { checkInEmailSentAt: 1 } }));
   }
   return out;
 }
