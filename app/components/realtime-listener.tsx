@@ -10,6 +10,13 @@ type RealtimeEvent = {
   createdAt?: string;
 };
 
+/** Vercel can't host WebSockets: only connect when a realtime server URL is configured (or in local dev). */
+function realtimeAvailable() {
+  if (process.env.NEXT_PUBLIC_REALTIME_WS_URL) return true;
+  const h = window.location.hostname;
+  return h === 'localhost' || h === '127.0.0.1';
+}
+
 function websocketUrl(token: string) {
   const configured = process.env.NEXT_PUBLIC_REALTIME_WS_URL;
   if (configured) {
@@ -66,9 +73,10 @@ export default function RealtimeListener() {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (status !== 'authenticated') return;
+    if (status !== 'authenticated' || !realtimeAvailable()) return;
 
     let cancelled = false;
+    let failures = 0;
     let reconnectDelay = 1000;
 
     const connect = async () => {
@@ -82,6 +90,7 @@ export default function RealtimeListener() {
         socketRef.current = socket;
 
         socket.onopen = () => {
+          failures = 0;
           reconnectDelay = 1000;
         };
 
@@ -98,6 +107,7 @@ export default function RealtimeListener() {
 
         socket.onclose = () => {
           if (cancelled) return;
+          if (++failures >= 5) return; // give up quietly; the app still refreshes by polling
           reconnectTimerRef.current = setTimeout(connect, reconnectDelay);
           reconnectDelay = Math.min(reconnectDelay * 2, 30_000);
         };
