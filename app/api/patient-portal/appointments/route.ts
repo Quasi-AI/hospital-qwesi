@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'This doctor is not available for booking yet' }, { status: 403 });
     }
     if (isFreeUnfinishedProvider(doctor as { approvalStatus?: string; consultationFee?: number })) {
-      return NextResponse.json({ error: 'This doctor has not finished setting up their profile yet and is not available for booking.' }, { status: 403 });
+      return NextResponse.json({ error: 'This provider has not set a consultation fee or been verified yet, so they are not available for booking.' }, { status: 403 });
     }
 
     const appointmentDate = String(body.appointmentDate || '').trim();

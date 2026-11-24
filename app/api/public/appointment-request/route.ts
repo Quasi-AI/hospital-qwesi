@@ -131,6 +131,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'This provider is not available for booking' }, { status: 403 });
     }
 
+    if (!(Number((doctor as { consultationFee?: number }).consultationFee) > 0)) {
+      return NextResponse.json({ error: 'This provider has not set a consultation fee yet and is not available for booking' }, { status: 403 });
+    }
+
     const sched = await getEffectiveDoctorSchedule(doctorId);
     if (!sched.websiteBookingEnabled) {
       return NextResponse.json({ error: 'This provider is not accepting online bookings' }, { status: 403 });

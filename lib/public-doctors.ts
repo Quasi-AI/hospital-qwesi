@@ -6,17 +6,15 @@ import DoctorSchedule from '@/models/DoctorSchedule';
 const PUBLIC_FIELDS =
   '_id name email specialization department consultationFee rating ratingCount yearsOfExperience languages qualifications bio gender practitionerType approvalStatus currency';
 
-// Every doctor is listed (verified or not) except ones an admin has rejected.
-// A provider who is on a FREE consultation AND has not finished their profile is switched off for patients, so people do not
-// keep booking free consultations with unfinished profiles. They come back automatically once the profile is completed.
+// Every provider sets their own fee. One whose consultation is FREE (fee 0 / not set) has not finished setting up or been verified,
+// so patients cannot see or book them. They appear automatically once they set a fee above zero.
 export const FREE_UNFINISHED_PROVIDER = {
-  approvalStatus: 'pending_profile',
   $or: [{ consultationFee: { $lte: 0 } }, { consultationFee: { $exists: false } }, { consultationFee: null }],
 };
 export const APPROVED_DOCTOR = { role: 'doctor', approvalStatus: { $ne: 'rejected' }, $nor: [FREE_UNFINISHED_PROVIDER] };
 
 export const isFreeUnfinishedProvider = (u: { approvalStatus?: string; consultationFee?: number | null }) =>
-  u.approvalStatus === 'pending_profile' && !(Number(u.consultationFee) > 0);
+  !(Number(u.consultationFee) > 0);
 
 export type PublicDoctorDoc = {
   _id: { toString: () => string };
