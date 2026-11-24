@@ -1,3 +1,4 @@
+import { APPROVED_DOCTOR } from '@/lib/public-doctors';
 import mongoose from 'mongoose';
 import Appointment from '@/models/Appointment';
 import TelemedicineSession from '@/models/TelemedicineSession';
@@ -28,7 +29,7 @@ export type BookingResult =
  */
 export async function createBridgeAppointment(patient: any, req: BookingRequest): Promise<BookingResult> {
   if (!mongoose.Types.ObjectId.isValid(req.doctorId)) return { ok: false, status: 400, error: 'Unknown practitioner' };
-  const doctor = (await User.findOne({ _id: req.doctorId, role: 'doctor', approvalStatus: { $ne: 'rejected' } })
+  const doctor = (await User.findOne({ _id: req.doctorId, ...APPROVED_DOCTOR })
     .select('name email phone specialization practitionerType')
     .lean()) as any;
   if (!doctor) return { ok: false, status: 404, error: 'Practitioner not found' };

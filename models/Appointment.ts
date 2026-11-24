@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 export type AppointmentSource = 'staff' | 'website' | 'patient_portal';
 
 export interface IAppointment {
+  missedNoticeSentAt?: Date;
   _id: string;
   patientId?: string;
   patientName: string;
@@ -127,7 +128,8 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'TelemedicineSession',
     },
-  },
+      missedNoticeSentAt: { type: Date }, // provider/patient emailed about a missed consultation
+},
   {
     timestamps: true,
   }

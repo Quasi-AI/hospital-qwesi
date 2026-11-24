@@ -1,3 +1,4 @@
+import { isFreeUnfinishedProvider } from '@/lib/public-doctors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import mongoose from 'mongoose';
@@ -97,13 +98,16 @@ export async function POST(request: NextRequest) {
     }
 
     const doctor = await User.findById(doctorId)
-      .select('name email phone role specialization approvalStatus hasImage licenseNumber licenseCertificate')
+      .select('name email phone role specialization approvalStatus hasImage licenseNumber licenseCertificate consultationFee')
       .lean();
     if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
     if ((doctor as { approvalStatus?: string }).approvalStatus === 'rejected') {
       return NextResponse.json({ error: 'This doctor is not available for booking yet' }, { status: 403 });
+    }
+    if (isFreeUnfinishedProvider(doctor as { approvalStatus?: string; consultationFee?: number })) {
+      return NextResponse.json({ error: 'This doctor has not finished setting up their profile yet and is not available for booking.' }, { status: 403 });
     }
 
     const appointmentDate = String(body.appointmentDate || '').trim();
