@@ -1,3 +1,4 @@
+import { APPROVED_DOCTOR } from '@/lib/public-doctors';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
@@ -17,8 +18,7 @@ export async function GET(request: NextRequest) {
     if (id) {
       const doctor = await User.findOne({
         _id: id,
-        role: 'doctor',
-        approvalStatus: { $ne: 'rejected' },
+        ...APPROVED_DOCTOR,
       })
         .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience consultationFee currency practitionerType rating ratingCount bio phone address gender')
         .lean();
@@ -30,10 +30,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ doctor });
     }
 
-    const doctors = await User.find({
-      role: 'doctor',
-      approvalStatus: { $ne: 'rejected' },
-    })
+    const doctors = await User.find(APPROVED_DOCTOR)
       .select('name email image specialization department licenseNumber qualifications languages yearsOfExperience consultationFee currency practitionerType rating ratingCount bio phone')
       .sort({ name: 1 })
       .lean();
