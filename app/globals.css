@@ -533,7 +533,7 @@ a, [role="link"] {
 @keyframes qw-bg-drift { 0%, 100% { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%; } 50% { background-position: 4% 6%, 96% 4%, 94% 96%, 6% 94%; } }
 
 /* every page eases in on navigation */
-.qw-page { animation: qw-fade-up 0.5s var(--ease-out) both; }
+.qw-page { animation: qw-fade-up 0.5s var(--ease-out) backwards; }
 
 /* hero entrance (add .hero-in to children, they stagger automatically) */
 .hero-in > * { animation: qw-fade-up 0.8s var(--ease-out) both; }
