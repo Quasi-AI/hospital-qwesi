@@ -174,25 +174,25 @@ export function PublicLandingChat({
   const send = () => void sendMessage(input);
 
   return (
-    <div className="pointer-events-none fixed bottom-0 right-0 z-[70] flex flex-col items-end gap-3 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pr-[max(1rem,env(safe-area-inset-right))]">
+    <div className="pointer-events-none fixed right-0 top-20 z-[70] flex flex-col-reverse items-end gap-3 p-4 pr-[max(1rem,env(safe-area-inset-right))]">
       <div
         id="public-landing-chat-panel"
-        className={`pointer-events-auto flex max-h-[min(420px,calc(100dvh-8rem))] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl bg-gray-50 text-gray-900 shadow-xl shadow-gray-900/12 transition-[opacity,transform] duration-200 ${
-          open ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0'
+        className={`pointer-events-auto flex max-h-[min(420px,calc(100dvh-10rem))] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl bg-gray-50 text-gray-900 shadow-xl shadow-gray-900/12 transition-[opacity,transform] duration-200 ${
+          open ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'
         }`}
         role="dialog"
         aria-modal="true"
         aria-label={panelTitle}
         aria-hidden={!open}
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200/90 bg-gradient-to-r from-teal-900 to-teal-800 px-3 py-2.5">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200/90 bg-gradient-to-r from-brand-900 to-brand-700 px-3 py-2.5">
           <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15">
-              <MessageCircle className="h-4 w-4 text-teal-100" aria-hidden />
+              <MessageCircle className="h-4 w-4 text-brand-100" aria-hidden />
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white">{panelTitle}</p>
-              <p className="truncate text-[10px] font-medium uppercase tracking-wider text-teal-200/90">
+              <p className="truncate text-[10px] font-medium uppercase tracking-wider text-brand-200">
                 Website assistant
               </p>
             </div>
@@ -200,7 +200,7 @@ export function PublicLandingChat({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-teal-100 transition hover:bg-white/15 hover:text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-brand-100 transition hover:bg-white/15 hover:text-white"
             aria-label="Close assistant"
           >
             <X className="h-4 w-4" aria-hidden />
@@ -237,7 +237,7 @@ export function PublicLandingChat({
                       linkClassName={
                         m.role === 'user'
                           ? 'font-medium text-white underline decoration-white/70 underline-offset-2 hover:decoration-white break-all'
-                          : 'font-medium text-teal-700 underline decoration-teal-600/45 underline-offset-2 hover:text-teal-900 break-all'
+                          : 'font-medium text-teal-700 underline decoration-teal-600/45 underline-offset-2 hover:text-brand-900 break-all'
                       }
                     />
                     )}
@@ -249,7 +249,7 @@ export function PublicLandingChat({
             {busy && waitingFirstToken ? (
               <div className="flex justify-start">
                 <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-gray-200 bg-white px-3 py-2 text-gray-600 shadow-sm">
-                  <Loader2 className="h-4 w-4 animate-spin text-teal-600" aria-hidden />
+                  <Loader2 className="h-4 w-4 animate-spin text-brand-600" aria-hidden />
                   <span className="text-xs">Thinking…</span>
                 </div>
               </div>
@@ -276,7 +276,7 @@ export function PublicLandingChat({
                       type="button"
                       disabled={busy}
                       onClick={() => void sendMessage(action.prompt)}
-                      className="rounded-full border border-teal-200/90 bg-white px-2.5 py-1 text-[11px] font-semibold leading-tight text-teal-900 shadow-sm transition hover:border-teal-300 hover:bg-teal-50 disabled:pointer-events-none disabled:opacity-45"
+                      className="rounded-full border border-brand-200 bg-white px-2.5 py-1 text-[11px] font-semibold leading-tight text-brand-900 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 disabled:pointer-events-none disabled:opacity-45"
                     >
                       {action.label}
                     </button>
@@ -297,14 +297,14 @@ export function PublicLandingChat({
                 rows={2}
                 placeholder="Type a question…"
                 disabled={busy}
-                className="custom-scrollbar min-h-[44px] flex-1 resize-none rounded-xl border border-gray-200 bg-white px-3 py-2 text-[13px] text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/25 disabled:opacity-60"
+                className="custom-scrollbar min-h-[44px] flex-1 resize-none rounded-xl border border-gray-200 bg-white px-3 py-2 text-[13px] text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:opacity-60"
                 aria-label="Message"
               />
               <button
                 type="button"
                 onClick={() => void send()}
                 disabled={busy || !input.trim()}
-                className="flex h-[44px] w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-900/40 transition hover:from-teal-400 hover:to-cyan-500 disabled:pointer-events-none disabled:opacity-40"
+                className="flex h-[44px] w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-900/40 transition hover:from-brand-400 hover:to-brand-600 disabled:pointer-events-none disabled:opacity-40"
                 aria-label="Send message"
               >
                 <Send className="h-4 w-4" aria-hidden />
