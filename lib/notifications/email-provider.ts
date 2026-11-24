@@ -95,8 +95,23 @@ async function sendViaResend(options: EmailOptions): Promise<EmailResult> {
   }
 }
 
+/**
+ * Resend first (when RESEND_API_KEY is set); if it fails for any reason, e.g. the daily/monthly sending limit
+ * (HTTP 429) or a domain problem, fall back to the SMTP / SendGrid settings that were configured before Resend.
+ */
 export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
-  if (process.env.RESEND_API_KEY) return sendViaResend(options);
+  if (process.env.RESEND_API_KEY) {
+    const viaResend = await sendViaResend(options);
+    if (viaResend.success) return viaResend;
+    console.warn('[email] Resend failed, falling back to SMTP:', viaResend.error);
+    const fallback = await sendViaConfiguredProvider(options);
+    if (fallback.success) return fallback;
+    return { success: false, error: `Resend: ${viaResend.error}; fallback: ${fallback.error}` };
+  }
+  return sendViaConfiguredProvider(options);
+}
+
+async function sendViaConfiguredProvider(options: EmailOptions): Promise<EmailResult> {
   try {
     const config = await getEmailConfig();
     
