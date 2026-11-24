@@ -67,7 +67,36 @@ async function getEmailConfig(): Promise<EmailConfig | null> {
   return settings?.notificationProviders?.email ? (settings.notificationProviders.email as EmailConfig) : null;
 }
 
+/** Resend (https://resend.com): used whenever RESEND_API_KEY is set, ahead of any other provider. */
+async function sendViaResend(options: EmailOptions): Promise<EmailResult> {
+  try {
+    const from = process.env.RESEND_FROM_EMAIL || 'Qwesi <noreply@support.qwesi.org>';
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to: [options.to],
+        subject: options.subject,
+        html: options.html,
+        text: options.text || options.html.replace(/<[^>]*>/g, ''),
+        ...(process.env.RESEND_REPLY_TO ? { reply_to: process.env.RESEND_REPLY_TO } : {}),
+      }),
+    });
+    const data: any = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      console.error('Resend error:', res.status, data);
+      return { success: false, error: data?.message || `Resend error ${res.status}` };
+    }
+    return { success: true, messageId: data?.id };
+  } catch (error: any) {
+    console.error('Resend error:', error);
+    return { success: false, error: error.message || 'Resend error' };
+  }
+}
+
 export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
+  if (process.env.RESEND_API_KEY) return sendViaResend(options);
   try {
     const config = await getEmailConfig();
     
