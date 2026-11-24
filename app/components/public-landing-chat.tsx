@@ -174,11 +174,11 @@ export function PublicLandingChat({
   const send = () => void sendMessage(input);
 
   return (
-    <div className="pointer-events-none fixed bottom-0 right-0 z-[70] flex flex-col items-end gap-3 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pr-[max(1rem,env(safe-area-inset-right))]">
+    <div className="pointer-events-none fixed right-0 top-20 z-[70] flex flex-col-reverse items-end gap-3 p-4 pr-[max(1rem,env(safe-area-inset-right))]">
       <div
         id="public-landing-chat-panel"
-        className={`pointer-events-auto flex max-h-[min(420px,calc(100dvh-8rem))] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl bg-gray-50 text-gray-900 shadow-xl shadow-gray-900/12 transition-[opacity,transform] duration-200 ${
-          open ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0'
+        className={`pointer-events-auto flex max-h-[min(420px,calc(100dvh-10rem))] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl bg-gray-50 text-gray-900 shadow-xl shadow-gray-900/12 transition-[opacity,transform] duration-200 ${
+          open ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'
         }`}
         role="dialog"
         aria-modal="true"
