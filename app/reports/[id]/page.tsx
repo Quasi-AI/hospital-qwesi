@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -256,7 +258,7 @@ export default function ReportDetailsPage() {
           title="Report Details"
           description="View detailed information about a medical report" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

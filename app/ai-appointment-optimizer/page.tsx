@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
@@ -406,8 +408,7 @@ The optimization considers: patient age (${patientInfo.age}), medical urgency ($
       <ProtectedRoute>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
-            <p className="mt-3 text-xs text-gray-600">Loading translations...</p>
+            <ContentSkeleton />
           </div>
         </div>
       </ProtectedRoute>

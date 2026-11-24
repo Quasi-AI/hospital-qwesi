@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -34,7 +36,7 @@ export default function NewDocumentPage() {
     <Suspense
       fallback={
         <div className="flex h-48 items-center justify-center">
-          <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+          <ContentSkeleton />
         </div>
       }
     >
@@ -255,7 +257,7 @@ function NewDocumentPageContent() {
           description={t('documents.newDocumentDesc') || 'Upload and create a new document'}
           dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

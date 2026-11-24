@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -67,7 +69,7 @@ export default function NewMedicinePage() {
   const categories = ['tablet', 'capsule', 'syrup', 'injection', 'cream', 'ointment', 'drops', 'inhaler', 'powder', 'solution', 'suspension', 'other'];
 
   if (!translationsLoaded) {
-    return <ProtectedRoute><SidebarLayout title="" description="" dense><div className="flex items-center justify-center h-48"><div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600"></div></div></SidebarLayout></ProtectedRoute>;
+    return <ProtectedRoute><SidebarLayout title="" description="" dense><div className="flex items-center justify-center h-48"><ContentSkeleton /></div></SidebarLayout></ProtectedRoute>;
   }
 
   return (

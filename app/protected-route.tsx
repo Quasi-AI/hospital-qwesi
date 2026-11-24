@@ -1,5 +1,7 @@
 'use client';
 
+
+import { AppShellSkeleton } from '@/app/components/Skeletons';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
@@ -54,14 +56,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [session, status, router, pathname]);
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <AppShellSkeleton />;
   }
 
   if (!session) {

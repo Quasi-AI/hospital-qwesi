@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -313,7 +315,7 @@ export default function HospitalWebsiteCMSPage() {
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex justify-center py-24">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

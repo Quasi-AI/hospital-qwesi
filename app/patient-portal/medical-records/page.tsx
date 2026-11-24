@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import { useTranslations } from '../../hooks/useTranslations';
 import { 
@@ -68,8 +70,7 @@ export default function PatientMedicalRecordsPage() {
     return (
       <div className="flex min-h-[320px] items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-b-2 border-teal-600" />
-          <p className="mt-2 text-sm text-gray-600">{t('common.loading')}</p>
+          <ContentSkeleton />
         </div>
       </div>
     );

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle2, Loader2, Save, X } from 'lucide-react';
 import type { WebsiteContentData } from '@/lib/defaultWebsiteContent';
@@ -70,7 +72,7 @@ export function LandingChatWidgetSettings() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-14">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" aria-hidden />
+        <ContentSkeleton />
       </div>
     );
   }

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import {
   Mail,
@@ -312,7 +314,7 @@ export default function NotificationSettingsPage() {
       <ProtectedRoute requiredRoles={['admin']}>
         <SidebarLayout title="Notification Settings" description="Configure email and SMS providers" dense>
           <div className="flex h-32 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

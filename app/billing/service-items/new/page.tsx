@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -26,7 +28,7 @@ export default function NewServiceItemPage() {
       <ProtectedRoute>
         <SidebarLayout title="..." description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

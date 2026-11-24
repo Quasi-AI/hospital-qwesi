@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import { 
   Send, 
@@ -453,8 +455,7 @@ export default function AIAssistantPage() {
           dense
         >
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
-            <p className="text-xs text-gray-600">{t('ai.assistant.loadingTranslations')}</p>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

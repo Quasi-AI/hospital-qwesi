@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
@@ -275,8 +277,7 @@ export default function AISettingsPage() {
       <ProtectedRoute>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading translations...</p>
+            <ContentSkeleton />
           </div>
         </div>
       </ProtectedRoute>
@@ -290,7 +291,7 @@ export default function AISettingsPage() {
           title={t('ai.settings.title')} 
           description={t('ai.settings.description')} dense>
           <div className="flex items-center justify-center h-40">
-            <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-purple-600"></div>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

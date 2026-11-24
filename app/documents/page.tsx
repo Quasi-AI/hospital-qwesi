@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '../protected-route';
@@ -179,7 +181,7 @@ export default function DocumentsPage() {
           description={t('documents.description') || 'Manage documents, consent forms, and legal files'}
           dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -307,7 +309,7 @@ export default function DocumentsPage() {
         <div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-10">
-              <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+              <ContentSkeleton />
             </div>
           ) : filteredDocuments.length === 0 ? (
             <div className="py-8 text-center">

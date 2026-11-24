@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -80,7 +82,7 @@ export default function CalendarPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[40vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+          <ContentSkeleton />
         </div>
       }
     >
@@ -751,7 +753,7 @@ function CalendarPageContent() {
 
               {loading ? (
                 <div className="flex h-64 items-center justify-center sm:h-80">
-                  <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600 sm:h-8 sm:w-8" />
+                  <ContentSkeleton />
                 </div>
               ) : (
                 <>
@@ -835,7 +837,7 @@ function CalendarPageContent() {
                       {doctorIdValid && doctorIdFilter ? (
                         agendaSlotsLoading || agendaDaySlots === null ? (
                           <div className="flex h-48 items-center justify-center sm:h-56">
-                            <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600 sm:h-8 sm:w-8" />
+                            <ContentSkeleton />
                           </div>
                         ) : agendaDaySlots.length > 0 ? (
                           <ul className="space-y-1.5">

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams } from 'next/navigation';
@@ -286,8 +288,7 @@ export default function PatientTelemedicineSessionPage() {
     return (
       <div className="flex h-48 items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-teal-600" />
-          <p className="mt-2 text-xs text-gray-600">Loading session...</p>
+          <ContentSkeleton />
         </div>
       </div>
     );

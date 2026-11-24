@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import { Bell, CheckCircle2, Clock, Loader2, Pill } from 'lucide-react';
 
@@ -199,7 +201,7 @@ export default function PatientMedicationRemindersPage() {
           </div>
           {loading ? (
             <div className="flex min-h-[220px] items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+              <ContentSkeleton />
             </div>
           ) : reminders.length === 0 ? (
             <div className="rounded-lg border border-dashed border-gray-200 py-10 text-center text-sm text-gray-500">

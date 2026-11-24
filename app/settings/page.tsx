@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -276,8 +278,7 @@ export default function SettingsPage() {
       <ProtectedRoute>
         <SidebarLayout title={t('settings.title')} description={t('settings.description')} dense>
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
-            <p className="text-xs text-gray-600">{t('common.loading')}</p>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -289,7 +290,7 @@ export default function SettingsPage() {
       <ProtectedRoute>
         <SidebarLayout title={t('settings.title')} description={t('settings.description')} dense>
           <div className="flex items-center justify-center py-16">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

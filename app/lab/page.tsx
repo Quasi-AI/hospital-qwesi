@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -155,8 +157,7 @@ function LabTestsContent() {
       <ProtectedRoute>
         <SidebarLayout title={t('lab.title')} description="" dense>
           <div className="py-8 text-center sm:py-10">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600 sm:h-9 sm:w-9"></div>
-            <p className="mt-2 text-xs text-gray-600 sm:mt-3 sm:text-sm">{t('common.loading')}</p>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -252,8 +253,7 @@ function LabTestsContent() {
           <div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
             {loading ? (
               <div className="py-8 text-center sm:py-10">
-                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-xs text-gray-600 sm:text-sm">{t('common.loading')}</p>
+                <ContentSkeleton />
               </div>
             ) : labTests.length === 0 ? (
               <div className="py-8 text-center sm:py-10">
@@ -400,7 +400,7 @@ export default function LabTestsPage() {
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex items-center justify-center h-48">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

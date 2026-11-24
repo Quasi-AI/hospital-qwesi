@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '@/app/protected-route';
@@ -97,7 +99,7 @@ export default function DispensingPage() {
   };
 
   if (!translationsLoaded) {
-    return <ProtectedRoute><SidebarLayout title="" description="" dense><div className="flex items-center justify-center h-48"><div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600"></div></div></SidebarLayout></ProtectedRoute>;
+    return <ProtectedRoute><SidebarLayout title="" description="" dense><div className="flex items-center justify-center h-48"><ContentSkeleton /></div></SidebarLayout></ProtectedRoute>;
   }
 
   return (

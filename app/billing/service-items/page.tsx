@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -102,7 +104,7 @@ export default function ServiceItemsPage() {
       <ProtectedRoute>
         <SidebarLayout title="..." description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -180,7 +182,7 @@ export default function ServiceItemsPage() {
           {/* Service Items List */}
           {loading ? (
             <div className="flex h-48 items-center justify-center rounded-lg border border-gray-100 bg-white shadow-sm">
-              <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+              <ContentSkeleton />
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="rounded-lg border border-gray-100 bg-white py-8 text-center shadow-sm">

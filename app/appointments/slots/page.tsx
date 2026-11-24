@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -153,7 +155,7 @@ export default function AppointmentSlotsPage() {
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -298,7 +300,7 @@ export default function AppointmentSlotsPage() {
               <p className="text-xs text-gray-500 sm:text-sm">{t('appointments.placeholders.selectDoctor')}</p>
             ) : loading ? (
               <div className="flex justify-center py-8">
-                <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+                <ContentSkeleton />
               </div>
             ) : slots.length === 0 ? (
               <p className="text-xs text-gray-500 sm:text-sm">{t('publicAppointment.noSlots')}</p>

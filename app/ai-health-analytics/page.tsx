@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -259,8 +261,7 @@ export default function AIHealthAnalyticsPage() {
           dense
         >
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
-            <p className="text-xs text-gray-600">Loading translations...</p>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -506,7 +507,7 @@ export default function AIHealthAnalyticsPage() {
 
                 {isLoading ? (
                   <div className="flex flex-col items-center gap-2 py-8">
-                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-purple-600" />
+                    <ContentSkeleton />
                     <p className="text-xs text-gray-600 sm:text-sm">{t('ai.healthAnalytics.analyzingPracticeData')}</p>
                   </div>
                 ) : aiInsights ? (
@@ -559,7 +560,7 @@ export default function AIHealthAnalyticsPage() {
               {/* AI Predictions Content */}
               {isLoading ? (
                 <div className="flex flex-col items-center gap-2 py-8">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-purple-600" />
+                  <ContentSkeleton />
                   <p className="text-xs text-gray-600 sm:text-sm">{t('ai.healthAnalytics.generatingAIPredictions')}</p>
                 </div>
               ) : aiPredictions ? (
@@ -685,7 +686,7 @@ export default function AIHealthAnalyticsPage() {
               {/* AI Optimization Content */}
               {isLoading ? (
                 <div className="flex flex-col items-center gap-2 py-8">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-purple-600" />
+                  <ContentSkeleton />
                   <p className="text-xs text-gray-600 sm:text-sm">{t('ai.healthAnalytics.generatingAIOptimization')}</p>
                 </div>
               ) : aiOptimizations ? (

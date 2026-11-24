@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
@@ -308,7 +310,7 @@ export default function AIMedicalImagePage() {
           dense
         >
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -588,7 +590,7 @@ export default function AIMedicalImagePage() {
                   </h3>
                   
                   <div className="py-6 text-center">
-                    <div className="mx-auto mb-2 h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-indigo-600" />
+                    <ContentSkeleton />
                     <h4 className="mb-1 text-sm font-semibold text-gray-900">Analyzing Medical Image</h4>
                     <p className="mb-3 text-xs text-gray-600 sm:text-sm">
                       {activeModel

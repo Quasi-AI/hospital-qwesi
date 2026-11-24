@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, use, Suspense } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '@/app/protected-route';
@@ -70,7 +72,7 @@ function MedicineViewContent({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('pharmacy.medicine')} description="" dense>
           <div className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600"></div>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -82,8 +84,7 @@ function MedicineViewContent({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('pharmacy.medicine')} description="" dense>
           <div className="flex items-center justify-center h-48 gap-2">
-            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600 shrink-0"></div>
-            <span className="text-sm text-gray-600">Loading medicine data...</span>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -401,7 +402,7 @@ export default function MedicineViewPage({ params }: { params: Promise<{ id: str
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex items-center justify-center min-h-[40vh]">
-            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600"></div>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

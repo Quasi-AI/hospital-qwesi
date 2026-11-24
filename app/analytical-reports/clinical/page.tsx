@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import {
   Activity,
@@ -109,7 +111,7 @@ export default function ClinicalAnalyticsPage() {
       <ProtectedRoute>
         <SidebarLayout title={t('navigation.clinicalAnalytics')} description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -160,7 +162,7 @@ export default function ClinicalAnalyticsPage() {
           {loading && (
             <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
               <div className="flex h-32 items-center justify-center">
-                <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+                <ContentSkeleton />
               </div>
             </div>
           )}

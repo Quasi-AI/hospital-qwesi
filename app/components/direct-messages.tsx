@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { CheckCheck, Search, Send, UserRound } from 'lucide-react';
@@ -165,7 +167,7 @@ export function DirectMessages({
   if (loading) {
     return (
       <div className="flex min-h-[280px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+        <ContentSkeleton />
       </div>
     );
   }

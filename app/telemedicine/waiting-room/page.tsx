@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -179,7 +181,7 @@ export default function WaitingRoomPage() {
         {/* Waiting List */}
         {loading ? (
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         ) : sessions.length === 0 ? (
           <div className="rounded-lg border border-gray-100 bg-white p-10 text-center shadow-sm">

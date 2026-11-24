@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -315,7 +317,7 @@ export default function ReportsPage() {
       <ProtectedRoute>
         <SidebarLayout title={t('reports.title')} description="" dense>
           <div className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600 mx-auto" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -396,8 +398,7 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-10">
-                <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
-                <p className="text-sm text-gray-500 mt-3">{t('reports.loading')}</p>
+                <ContentSkeleton />
               </div>
             ) : (
             <table className="min-w-full divide-y divide-gray-200">

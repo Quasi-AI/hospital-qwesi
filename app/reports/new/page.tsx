@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -20,7 +22,7 @@ export default function NewReportPage() {
     <Suspense
       fallback={
         <div className="flex h-48 items-center justify-center">
-          <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+          <ContentSkeleton />
         </div>
       }
     >
@@ -243,7 +245,7 @@ function NewReportPageContent() {
           title="Create New Report" 
           description="Add a new medical report to the system." dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

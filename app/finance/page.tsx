@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useCallback, useEffect, useState } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -69,7 +71,7 @@ export default function FinancePage() {
           ))}
         </div>
         {msg && <p className="mb-3 rounded-lg bg-purple-50 p-2 text-sm text-gray-800">{msg}</p>}
-        {loading ? <div className="flex h-40 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-[#6949ED]" /></div> : (
+        {loading ? <div className="flex h-40 items-center justify-center"><ContentSkeleton /></div> : (
           <>
             {tab === 'withdrawals' && (
               <div className="space-y-3">

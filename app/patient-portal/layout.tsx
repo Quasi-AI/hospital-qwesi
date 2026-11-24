@@ -9,6 +9,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { useTranslations } from '../hooks/useTranslations';
 import TopNavbar from '../components/TopNavbar';
+import { AppShellSkeleton } from '../components/Skeletons';
 import { 
   Calendar,
   FileText,
@@ -121,16 +122,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
 
   // Show loading state
   if (!translationsLoaded || status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 flex">
-        <div className="flex items-center justify-center w-full">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <AppShellSkeleton />;
   }
 
   // Don't render for non-patients

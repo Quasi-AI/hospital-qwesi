@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -460,7 +462,7 @@ export default function AIDrugInteractionPage() {
           dense
         >
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -955,7 +957,7 @@ export default function AIDrugInteractionPage() {
                 
                 {isAnalyzing ? (
                   <div className="py-6 text-center">
-                    <div className="mx-auto mb-2 h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-red-600" />
+                    <ContentSkeleton />
                     <p className="text-sm text-gray-600">{t('ai.drugInteraction.analyzingDrugInteractions')}</p>
                   </div>
                 ) : aiAnalysis ? (

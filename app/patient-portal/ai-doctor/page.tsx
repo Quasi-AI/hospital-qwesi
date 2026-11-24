@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, PhoneOff, Video, Camera, ShieldAlert, Loader2, ExternalLink, Coins, Info } from 'lucide-react';
 
@@ -189,7 +191,7 @@ export default function AiDoctorPage() {
   const status = { idle: '', starting: 'Connecting…', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…', ended: 'Consultation ended' }[phase];
   const dot = phase === 'speaking' ? 'bg-[#a995ff]' : phase === 'listening' ? 'bg-white' : phase === 'thinking' ? 'bg-amber-300' : 'bg-white/40';
 
-  if (!cfg) return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-[#6949ED]" /></div>;
+  if (!cfg) return <div className="flex min-h-[50vh] items-center justify-center"><ContentSkeleton /></div>;
   if (!cfg.enabled) return (
     <div className="mx-auto max-w-lg p-4 sm:p-10">
       <div className="rounded-3xl border border-white/60 bg-white/70 p-8 text-center shadow-xl backdrop-blur-xl">

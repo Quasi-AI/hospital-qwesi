@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, use, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -215,7 +217,7 @@ function EditInvoiceForm({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('billing.editInvoice')} description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -227,7 +229,7 @@ function EditInvoiceForm({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('billing.editInvoice')} description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -524,7 +526,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

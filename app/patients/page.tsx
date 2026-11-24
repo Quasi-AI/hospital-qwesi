@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -177,7 +179,7 @@ export default function PatientsPage() {
             <div className="overflow-x-auto">
               {loading ? (
                 <div className="flex h-40 items-center justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+                  <ContentSkeleton />
                 </div>
               ) : filteredPatients.length === 0 ? (
                 <div className="p-6 text-center">

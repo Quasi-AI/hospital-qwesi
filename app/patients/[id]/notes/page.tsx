@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -198,7 +200,7 @@ export default function PatientClinicalNotesPage() {
       <SidebarLayout title="Clinical Notes" description="SOAP documentation for this patient" dense wide>
         {loading ? (
           <div className="flex min-h-[280px] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         ) : (
           <div className="space-y-4">

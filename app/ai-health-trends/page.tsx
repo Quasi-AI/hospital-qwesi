@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -402,8 +404,7 @@ Base your predictions on current trends and epidemiological patterns.`,
           dense
         >
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
-            <p className="text-xs text-gray-600">Loading translations...</p>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -474,8 +475,7 @@ Base your predictions on current trends and epidemiological patterns.`,
               {/* Trend Summary Cards */}
               {isLoadingData ? (
                 <div className="flex items-center justify-center gap-2 py-10">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-emerald-600" />
-                  <span className="text-xs text-gray-600">Loading trends…</span>
+                  <ContentSkeleton />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
@@ -610,8 +610,7 @@ Base your predictions on current trends and epidemiological patterns.`,
             <div className="space-y-4">
               {isLoadingData ? (
                 <div className="flex items-center justify-center gap-2 py-10">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-emerald-600" />
-                  <span className="text-xs text-gray-600">Loading trends…</span>
+                  <ContentSkeleton />
                 </div>
               ) : (
                 <>
@@ -720,7 +719,7 @@ Base your predictions on current trends and epidemiological patterns.`,
             <div className="space-y-4">
               {isAnalyzingPredictions ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-10">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+                  <ContentSkeleton />
                   <span className="text-xs text-gray-600">Generating AI predictions…</span>
                 </div>
               ) : (
@@ -794,8 +793,7 @@ Base your predictions on current trends and epidemiological patterns.`,
             <div className="space-y-4">
               {isLoadingData ? (
                 <div className="flex items-center justify-center gap-2 py-10">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-emerald-600" />
-                  <span className="text-xs text-gray-600">Loading population data…</span>
+                  <ContentSkeleton />
                 </div>
               ) : (
                 <>

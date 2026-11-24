@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -28,7 +30,7 @@ function NewDoctorSuspenseFallback() {
     return (
       <ProtectedRoute>
         <div className="flex min-h-[400px] items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+          <ContentSkeleton />
         </div>
       </ProtectedRoute>
     );
@@ -38,8 +40,7 @@ function NewDoctorSuspenseFallback() {
       <SidebarLayout title={t('common.loading')} description={t('doctors.new.loadingDescription')} dense>
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-            <p className="mt-4 text-gray-600">{t('common.loading')}</p>
+            <ContentSkeleton />
           </div>
         </div>
       </SidebarLayout>
@@ -99,8 +100,7 @@ function NewDoctorForm() {
         <SidebarLayout title={t('common.loading')} description={t('doctors.new.loadingDescription')} dense>
           <div className="flex min-h-[400px] items-center justify-center">
             <div className="text-center">
-              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-              <p className="mt-4 text-gray-600">{t('common.loading')}</p>
+              <ContentSkeleton />
             </div>
           </div>
         </SidebarLayout>

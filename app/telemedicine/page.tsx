@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -123,7 +125,7 @@ export default function TelemedicineDashboard() {
     return (
       <SidebarLayout title="Telemedicine" description="Virtual consultations dashboard" dense>
         <div className="flex items-center justify-center h-48">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+          <ContentSkeleton />
         </div>
       </SidebarLayout>
     );

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useCallback, useEffect, useState } from 'react';
 import {
   AlertCircle,
@@ -531,8 +533,7 @@ export function LandingKnowledgeBaseEditor() {
       {/* List */}
       {loading ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-16">
-          <Loader2 className="h-9 w-9 animate-spin text-teal-600" aria-hidden />
-          <p className="text-sm text-gray-500">Loading…</p>
+          <ContentSkeleton />
         </div>
       ) : rows.length === 0 && expandedId !== 'new' ? (
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-gray-300 bg-gradient-to-b from-gray-50 to-white px-6 py-14 text-center">
@@ -622,7 +623,7 @@ export function LandingKnowledgeBaseEditor() {
                   <div className="border-t border-gray-100 bg-gradient-to-b from-gray-50/90 to-white px-4 py-5 sm:px-6 sm:py-6">
                     {editLoading || !editForm ? (
                       <div className="flex justify-center py-10">
-                        <Loader2 className="h-8 w-8 animate-spin text-teal-600" aria-hidden />
+                        <ContentSkeleton />
                       </div>
                     ) : (
                       <div className="mx-auto max-w-3xl space-y-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">

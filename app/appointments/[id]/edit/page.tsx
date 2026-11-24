@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -274,7 +276,7 @@ export default function AppointmentEditPage() {
       <ProtectedRoute>
         <SidebarLayout title="Edit Appointment" description="Modify appointment" dense>
           <div className="flex min-h-[240px] items-center justify-center">
-            <div className="h-9 w-9 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

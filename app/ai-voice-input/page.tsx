@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
@@ -390,8 +392,7 @@ export default function AIVoiceInputPage() {
       <ProtectedRoute>
         <SidebarLayout title={t('ai.voiceInput.title')} description={t('ai.voiceInput.description')} dense>
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
-            <p className="text-xs text-gray-600">Loading translations...</p>
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -686,7 +687,7 @@ export default function AIVoiceInputPage() {
 
                 {isProcessing ? (
                   <div className="flex flex-col items-center justify-center gap-2 py-8">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+                    <ContentSkeleton />
                     <p className="text-sm font-medium text-gray-700">{t('ai.voiceInput.processingAudio')}</p>
                     <p className="text-xs text-gray-500">Formatting transcription with AI...</p>
                   </div>

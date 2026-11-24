@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -253,7 +255,7 @@ export default function PatientViewPage() {
           dense
         >
           <div className="flex min-h-[280px] items-center justify-center">
-            <div className="h-9 w-9 animate-spin rounded-full border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -654,7 +656,7 @@ export default function PatientViewPage() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Appointments</h2>
                 {loadingAppointments ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <ContentSkeleton />
                   </div>
                 ) : appointments.length === 0 ? (
                   <div className="text-center py-8">
@@ -730,7 +732,7 @@ export default function PatientViewPage() {
                 </div>
                 {loadingInvoices ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <ContentSkeleton />
                   </div>
                 ) : invoices.length === 0 ? (
                   <div className="text-center py-8">
@@ -855,7 +857,7 @@ export default function PatientViewPage() {
                 </div>
                 {loadingLabTests ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <ContentSkeleton />
                   </div>
                 ) : labTests.length === 0 ? (
                   <div className="text-center py-8">
@@ -949,7 +951,7 @@ export default function PatientViewPage() {
                 </h2>
                 {loadingAiResults ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <ContentSkeleton />
                   </div>
                 ) : getAIResultsByType('treatment-plan').length === 0 ? (
                   <div className="text-center py-8">
@@ -1052,7 +1054,7 @@ export default function PatientViewPage() {
                 </h2>
                 {loadingAiResults ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <ContentSkeleton />
                   </div>
                 ) : getAIResultsByType('prescription').length === 0 ? (
                   <div className="text-center py-8">
@@ -1182,7 +1184,7 @@ export default function PatientViewPage() {
                       </h2>
                       {loadingAiResults ? (
                         <div className="flex items-center justify-center py-8">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          <ContentSkeleton />
                         </div>
                       ) : typeResults.length === 0 ? (
                         <div className="text-center py-8">

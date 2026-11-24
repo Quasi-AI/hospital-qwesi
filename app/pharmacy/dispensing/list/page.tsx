@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '@/app/protected-route';
@@ -62,7 +64,7 @@ export default function DispensingListPage() {
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -111,8 +113,7 @@ export default function DispensingListPage() {
           <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-10">
-                <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
-                <p className="mt-3 text-sm text-gray-600">{t('common.loading')}</p>
+                <ContentSkeleton />
               </div>
             ) : rows.length === 0 ? (
               <div className="text-center py-8 px-4">

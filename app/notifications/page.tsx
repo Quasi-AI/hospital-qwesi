@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, useCallback } from 'react';
 import {
   Bell,
@@ -204,7 +206,7 @@ export default function NotificationsPage() {
       <ProtectedRoute requiredRoles={['admin', 'staff', 'doctor']}>
         <SidebarLayout title="Notifications" description="Manage and monitor system notifications" dense>
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -322,7 +324,7 @@ export default function NotificationsPage() {
           <div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
             {loading ? (
               <div className="flex h-48 items-center justify-center">
-                <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+                <ContentSkeleton />
               </div>
             ) : filteredNotifications.length === 0 ? (
               <div className="py-8 text-center">

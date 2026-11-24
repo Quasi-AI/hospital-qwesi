@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -281,7 +283,7 @@ function SessionsListContent() {
                 {loading ? (
                   <tr>
                     <td colSpan={9} className="px-3 py-10 text-center">
-                      <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+                      <ContentSkeleton />
                     </td>
                   </tr>
                 ) : sessions.length === 0 ? (
@@ -456,7 +458,7 @@ export default function SessionsListPage() {
     <Suspense fallback={
       <SidebarLayout title="Telemedicine Sessions" description="Manage all virtual consultations" dense>
         <div className="flex h-48 items-center justify-center">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+          <ContentSkeleton />
         </div>
       </SidebarLayout>
     }>

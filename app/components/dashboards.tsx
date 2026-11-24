@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -512,7 +514,7 @@ function PharmacyApprovalPanel() {
       ) : null}
       {loading ? (
         <div className="flex h-24 items-center justify-center">
-          <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-blue-600" />
+          <ContentSkeleton />
         </div>
       ) : pending.length === 0 ? (
         <div className="rounded-md border border-dashed border-gray-200 p-4 text-sm text-gray-500">

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
@@ -40,7 +42,7 @@ export default function RefundsPage() {
     <div className="mx-auto max-w-3xl space-y-4 p-4">
       <h1 className="text-xl font-bold text-gray-900">Report a problem / request a refund</h1>
       <p className="text-sm text-gray-600">Refunds go back to the card or account you paid with. If the practitioner never joined while you waited, it is approved automatically. If you only need a different time, reschedule instead of requesting a refund.</p>
-      {loading ? <Loader2 className="h-6 w-6 animate-spin text-[#6949ED]" /> : (
+      {loading ? <ContentSkeleton /> : (
         <>
           <form onSubmit={submit} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
             <select required value={sel} onChange={(e) => setSel(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm">

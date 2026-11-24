@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
@@ -348,7 +350,7 @@ Base your assessment on evidence-based medicine and current clinical guidelines.
           dense
         >
           <div className="flex h-48 items-center justify-center">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -419,8 +421,7 @@ Base your assessment on evidence-based medicine and current clinical guidelines.
               {/* Risk Summary Cards */}
               {isLoadingStats ? (
                 <div className="flex items-center justify-center gap-2 py-6 text-xs text-gray-600">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-purple-600" />
-                  <span>Loading statistics...</span>
+                  <ContentSkeleton />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
@@ -510,8 +511,7 @@ Base your assessment on evidence-based medicine and current clinical guidelines.
                 <h3 className="mb-2 text-sm font-semibold text-gray-900">Recent Risk Assessments</h3>
                 {isLoadingStats ? (
                   <div className="flex items-center justify-center gap-2 py-6 text-xs text-gray-600">
-                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-purple-600" />
-                    <span>Loading assessments...</span>
+                    <ContentSkeleton />
                   </div>
                 ) : recentAssessments.length > 0 ? (
                   <div className="space-y-3">
@@ -805,8 +805,7 @@ Base your assessment on evidence-based medicine and current clinical guidelines.
             <div className="space-y-4">
               {isLoadingStats ? (
                 <div className="flex items-center justify-center gap-2 py-8 text-xs text-gray-600">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-purple-600" />
-                  <span>Loading predictions...</span>
+                  <ContentSkeleton />
                 </div>
               ) : recentAssessments.length > 0 ? (
                 <>

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -124,8 +126,7 @@ function EditStaffForm() {
         <SidebarLayout title="Loading..." description="Please wait..." dense>
           <div className="flex min-h-[280px] items-center justify-center">
             <div className="text-center">
-              <div className="mx-auto h-9 w-9 animate-spin rounded-full border-b-2 border-blue-600" />
-              <p className="mt-3 text-sm text-gray-600">Loading staff data...</p>
+              <ContentSkeleton />
             </div>
           </div>
         </SidebarLayout>
@@ -498,8 +499,7 @@ export default function EditStaffPage() {
         <SidebarLayout title="Loading..." description="Please wait..." dense>
           <div className="flex min-h-[280px] items-center justify-center">
             <div className="text-center">
-              <div className="mx-auto h-9 w-9 animate-spin rounded-full border-b-2 border-blue-600" />
-              <p className="mt-3 text-sm text-gray-600">Loading...</p>
+              <ContentSkeleton />
             </div>
           </div>
         </SidebarLayout>

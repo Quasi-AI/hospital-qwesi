@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -38,7 +40,7 @@ export default function AiChatSettingsPage() {
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex justify-center py-24">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+            <ContentSkeleton />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

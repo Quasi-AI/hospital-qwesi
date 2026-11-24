@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -158,8 +160,7 @@ export default function AdminsPage() {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-500 mt-2">Loading...</p>
+                <ContentSkeleton />
               </div>
             ) : (
             <table className="min-w-full divide-y divide-gray-200">

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Users, X } from 'lucide-react';
 
@@ -182,7 +184,7 @@ export default function PatientFamilyPage() {
 
       {loading ? (
         <div className="flex min-h-40 items-center justify-center rounded-lg border border-slate-200 bg-white">
-          <div className="h-7 w-7 animate-spin rounded-full border-b-2 border-emerald-600" />
+          <ContentSkeleton />
         </div>
       ) : members.length === 0 ? (
         <div className="rounded-lg border border-dashed border-gray-200 bg-white p-8 text-center">

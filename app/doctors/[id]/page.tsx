@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
@@ -171,7 +173,7 @@ export default function DoctorDetailPage() {
   if (!translationsLoaded || !isAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        <ContentSkeleton />
       </div>
     );
   }
@@ -239,7 +241,7 @@ export default function DoctorDetailPage() {
 
           {loading ? (
             <div className="flex justify-center py-10">
-              <div className="h-9 w-9 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              <ContentSkeleton />
             </div>
           ) : error ? (
             <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800">{error}</div>

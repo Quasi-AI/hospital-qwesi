@@ -1,5 +1,7 @@
 'use client';
 
+
+import { ContentSkeleton } from '@/app/components/Skeletons';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { BookingAgreement, agreementSigned } from '@/app/components/booking-agreement';
@@ -64,8 +66,7 @@ function NewPatientAppointmentFallback() {
   return (
     <div className="flex min-h-[320px] items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-teal-600" />
-        <p className="mt-2 text-sm text-gray-600">Loading booking...</p>
+        <ContentSkeleton />
       </div>
     </div>
   );

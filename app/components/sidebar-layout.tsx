@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import TopNavbar from './TopNavbar';
+import { AppShellSkeleton } from './Skeletons';
 import { useTranslations } from '../hooks/useTranslations';
 import { useSettings } from '../contexts/SettingsContext';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -295,16 +296,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
 
   // Show loading state if translations aren't loaded yet
   if (!translationsLoaded) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex">
-        <div className="flex items-center justify-center w-full">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading translations...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <AppShellSkeleton />;
   }
 
   return (
@@ -616,16 +608,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
 export default function SidebarLayout(props: SidebarLayoutProps) {
   return (
     <Suspense
-      fallback={
-        <div className="flex min-h-screen bg-gray-50">
-          <div className="flex w-full items-center justify-center">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-              <p className="mt-4 text-gray-600">Loading...</p>
-            </div>
-          </div>
-        </div>
-      }
+      fallback={<AppShellSkeleton />}
     >
       <SidebarLayoutInner {...props} />
     </Suspense>
