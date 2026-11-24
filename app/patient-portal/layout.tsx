@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { useTranslations } from '../hooks/useTranslations';
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import TopNavbar from '../components/TopNavbar';
 import { 
   Calendar,
   FileText,
@@ -185,121 +185,12 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
           ))}
         </nav>
 
-        {/* Language Switcher */}
-        <div className="shrink-0 border-t border-gray-200 px-2.5 py-3">
-          <div className="px-2">
-            <LanguageSwitcher />
-          </div>
-        </div>
-
-        {/* User Profile */}
-        <div className="shrink-0 border-t border-gray-200 px-2.5 py-3">
-          <div className="relative" ref={profileMenuRef}>
-            <button
-              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              className="flex w-full items-center gap-2.5 rounded-lg p-2 text-left transition-colors hover:bg-teal-50"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500 text-sm font-semibold text-white">
-                {session?.user?.name?.charAt(0) || 'P'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-gray-900">{session?.user?.name || 'Patient'}</p>
-                <p className="truncate text-xs text-teal-700">{session?.user?.patientId || session?.user?.role || 'Patient'}</p>
-              </div>
-              <ChevronDown className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {profileMenuOpen && (
-              <div className="absolute bottom-full left-0 right-0 z-50 mb-2 rounded-lg border border-gray-200 bg-white shadow-lg">
-                <div className="py-1">
-                  <div className="border-b border-gray-100 px-4 py-2">
-                    <p className="truncate text-sm font-medium text-gray-900">{session?.user?.name || 'Patient'}</p>
-                    <p className="truncate text-xs text-gray-500">{session?.user?.email}</p>
-                  </div>
-                  <Link
-                    href="/patient-portal/profile"
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100"
-                    onClick={() => setProfileMenuOpen(false)}
-                  >
-                    <User className="h-4 w-4" />
-                    <span>{t('patientPortal.navigation.profile')}</span>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      signOut({ callbackUrl: '/login' });
-                    }}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>{t('profile.logout')}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Main Content */}
       <div className="flex h-dvh min-h-0 min-w-0 flex-1 flex-col lg:pl-64">
-        {/* Mobile Header */}
-        <header className="border-b border-gray-200 bg-white shadow-sm lg:hidden">
-          <div className="flex h-12 items-center justify-between px-3 sm:px-4">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-1.5 text-gray-400 hover:text-gray-600"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              <LanguageSwitcher />
-              <div className="relative" ref={mobileProfileMenuRef}>
-                <button
-                  onClick={() => setMobileProfileMenuOpen(!mobileProfileMenuOpen)}
-                  className="flex items-center gap-1.5 p-1.5 text-gray-600 hover:text-teal-600"
-                >
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-xs font-semibold text-white">
-                    {session?.user?.name?.charAt(0) || 'P'}
-                  </div>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${mobileProfileMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Profile Dropdown Menu */}
-                {mobileProfileMenuOpen && (
-                  <div className="absolute right-0 z-50 mt-1.5 w-52 rounded-lg border border-gray-200 bg-white shadow-lg">
-                    <div className="py-0.5">
-                      <div className="border-b border-gray-200 px-3 py-2">
-                        <p className="text-sm font-medium text-gray-900">{session?.user?.name || 'Patient'}</p>
-                        <p className="text-xs text-gray-500">{session?.user?.email}</p>
-                        <p className="mt-0.5 text-xs text-teal-600">{session?.user?.patientId}</p>
-                      </div>
-                      <Link
-                        href="/patient-portal/profile"
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
-                        onClick={() => setMobileProfileMenuOpen(false)}
-                      >
-                        <User className="h-4 w-4" />
-                        <span>{t('patientPortal.navigation.profile')}</span>
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setMobileProfileMenuOpen(false);
-                          signOut({ callbackUrl: '/login' });
-                        }}
-                        className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span>{t('profile.logout')}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+        {/* Top navbar: notifications, language, profile */}
+        <TopNavbar onMenu={() => setSidebarOpen(true)} homeHref="/patient-portal" profileHref="/patient-portal/profile" notificationsHref={null} />
 
         {/* Page Content */}
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
