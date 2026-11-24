@@ -85,8 +85,8 @@ export function HospitalLanding({
       )}
 
       {/* ───────── Hero ───────── */}
+      <PublicHeader settings={settings} tone="dark" />
       <section className="qw-hero-bg relative overflow-hidden text-white">
-        <PublicHeader settings={settings} tone="dark" />
         <div className="mx-auto grid grid-cols-1 max-w-7xl items-center gap-12 px-4 pb-20 pt-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:pb-28 lg:pt-20">
           <div className="hero-in">
             <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold text-brand-100 backdrop-blur sm:text-sm">

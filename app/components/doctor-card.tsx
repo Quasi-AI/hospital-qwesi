@@ -71,6 +71,8 @@ export function DoctorAvatar({
       src={doctor.photoUrl}
       alt={doctorTitle(doctor.name, (doctor as PublicDoctor).practitionerType)}
       loading="lazy"
+      // the image can fail before React hydrates, so onError never fires — check once mounted too
+      ref={(el) => { if (el && el.complete && el.naturalWidth === 0) setFailed(true); }}
       onError={() => setFailed(true)}
       className={`${className} shrink-0 rounded-2xl bg-brand-50 object-cover`}
     />
