@@ -7,5 +7,15 @@
     "NODE_ENV": "production",
     "SKIP_LINTING": "true",
     "SKIP_TYPE_CHECK": "true"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/lifecycle",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/notifications/cron",
+      "schedule": "0 7 * * *"
+    }
+  ]
 }

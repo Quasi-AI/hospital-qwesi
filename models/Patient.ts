@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 export interface IPatient {
+  lastLoginAt?: Date;
+  profileReminderSentAt?: Date;
+  profileReminderCount?: number;
+  checkInEmailSentAt?: Date;
   _id: string;
   patientId: string;
   name: string;
@@ -190,7 +194,12 @@ const patientSchema = new mongoose.Schema<IPatient>(
       signedAt: { type: Date },
       userAgent: { type: String, trim: true },
     },
-  },
+      // Lifecycle emails (see lib/lifecycle.ts): when each reminder was last sent, so nobody is emailed twice.
+    lastLoginAt: { type: Date },
+    profileReminderSentAt: { type: Date },
+    profileReminderCount: { type: Number, default: 0 },
+    checkInEmailSentAt: { type: Date },
+},
   {
     timestamps: true,
   }

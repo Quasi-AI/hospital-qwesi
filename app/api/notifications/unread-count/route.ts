@@ -7,6 +7,7 @@ import { processScheduledNotifications } from '@/lib/notifications/notification-
 
 // Sends due reminders even when no external cron is configured (at most once a minute per server instance).
 let lastSweep = 0;
+let lastLifecycle = 0;
 
 /** In-app items not yet marked read (status still pending or sent). */
 export async function GET() {
@@ -21,6 +22,13 @@ export async function GET() {
     if (Date.now() - lastSweep > 60_000) {
       lastSweep = Date.now();
       processScheduledNotifications().catch((e) => console.error('reminder sweep', e));
+    }
+
+    // Daily emails (profile reminders, missed consultations, patient check-ins) also run from here at most every 6 hours,
+    // so they work even before an external scheduler is set up. Sends are claimed atomically, so nobody gets duplicates.
+    if (process.env.LIFECYCLE_IN_APP !== 'false' && Date.now() - lastLifecycle > 6 * 3600_000) {
+      lastLifecycle = Date.now();
+      import('@/lib/lifecycle').then((m) => m.runLifecycleJobs()).catch((e) => console.error('lifecycle sweep', e));
     }
 
     const now = new Date();
