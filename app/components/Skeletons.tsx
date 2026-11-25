@@ -63,7 +63,7 @@ export function ContentSkeleton({
   }
   if (variant === 'form') {
     return (
-      <div className="w-full max-w-2xl max-h-full space-y-4 overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm" role="status" aria-busy="true" aria-label="Loading">
+      <div className="w-full min-w-[16rem] max-w-2xl max-h-full space-y-4 overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm" role="status" aria-busy="true" aria-label="Loading">
         {Array.from({ length: rows ?? 3 }).map((_, i) => (
           <div key={i} className="space-y-2">
             <div className={`${bar} h-3 w-28`} />
@@ -75,7 +75,7 @@ export function ContentSkeleton({
     );
   }
   return (
-    <div className="w-full max-h-full overflow-hidden" role="status" aria-busy="true" aria-label="Loading">
+    <div className="w-full min-w-[16rem] max-h-full overflow-hidden" role="status" aria-busy="true" aria-label="Loading">
       <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-white/80">
         {Array.from({ length: rows ?? 3 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-3 py-2.5">

@@ -407,9 +407,7 @@ The optimization considers: patient age (${patientInfo.age}), medical urgency ($
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <ContentSkeleton />
-          </div>
+          <ContentSkeleton />
         </div>
       </ProtectedRoute>
     );

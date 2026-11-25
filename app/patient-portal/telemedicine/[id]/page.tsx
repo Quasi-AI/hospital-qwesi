@@ -287,9 +287,7 @@ export default function PatientTelemedicineSessionPage() {
   if (loading) {
     return (
       <div className="flex h-48 items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <ContentSkeleton />
-        </div>
+        <ContentSkeleton />
       </div>
     );
   }

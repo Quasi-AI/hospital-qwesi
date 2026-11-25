@@ -170,9 +170,7 @@ export default function EnterResultsPage() {
     return (
       <ProtectedRoute>
         <SidebarLayout title={t('lab.enterResults')} description="" dense>
-          <div className="text-center py-12">
-            <ContentSkeleton variant="form" />
-          </div>
+          <ContentSkeleton variant="form" />
         </SidebarLayout>
       </ProtectedRoute>
     );

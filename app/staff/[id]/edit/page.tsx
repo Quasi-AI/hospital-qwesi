@@ -125,9 +125,7 @@ function EditStaffForm() {
       <ProtectedRoute>
         <SidebarLayout title="Loading..." description="Please wait..." dense>
           <div className="flex min-h-[280px] items-center justify-center">
-            <div className="text-center">
-              <ContentSkeleton variant="form" />
-            </div>
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -498,9 +496,7 @@ export default function EditStaffPage() {
       <Suspense fallback={
         <SidebarLayout title="Loading..." description="Please wait..." dense>
           <div className="flex min-h-[280px] items-center justify-center">
-            <div className="text-center">
-              <ContentSkeleton variant="form" />
-            </div>
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       }>

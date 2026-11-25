@@ -39,9 +39,7 @@ function NewDoctorSuspenseFallback() {
     <ProtectedRoute>
       <SidebarLayout title={t('common.loading')} description={t('doctors.new.loadingDescription')} dense>
         <div className="flex min-h-[400px] items-center justify-center">
-          <div className="text-center">
-            <ContentSkeleton variant="form" />
-          </div>
+          <ContentSkeleton variant="form" />
         </div>
       </SidebarLayout>
     </ProtectedRoute>
@@ -99,9 +97,7 @@ function NewDoctorForm() {
       <ProtectedRoute>
         <SidebarLayout title={t('common.loading')} description={t('doctors.new.loadingDescription')} dense>
           <div className="flex min-h-[400px] items-center justify-center">
-            <div className="text-center">
-              <ContentSkeleton variant="form" />
-            </div>
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

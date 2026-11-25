@@ -142,9 +142,7 @@ export default function PatientVitalsPage() {
   if (loading) {
     return (
       <div className="flex min-h-[320px] items-center justify-center">
-        <div className="text-center">
-          <ContentSkeleton />
-        </div>
+        <ContentSkeleton />
       </div>
     );
   }

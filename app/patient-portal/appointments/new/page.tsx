@@ -65,9 +65,7 @@ function todayYmd() {
 function NewPatientAppointmentFallback() {
   return (
     <div className="flex min-h-[320px] items-center justify-center">
-      <div className="text-center">
-        <ContentSkeleton variant="form" />
-      </div>
+      <ContentSkeleton variant="form" />
     </div>
   );
 }

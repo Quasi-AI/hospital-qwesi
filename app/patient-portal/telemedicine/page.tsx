@@ -141,9 +141,7 @@ export default function PatientTelemedicinePage() {
   if (loading) {
     return (
       <div className="flex h-48 items-center justify-center">
-        <div className="text-center">
-          <ContentSkeleton />
-        </div>
+        <ContentSkeleton />
       </div>
     );
   }

@@ -153,9 +153,7 @@ function NewLabTestPageContent() {
     return (
       <ProtectedRoute>
         <SidebarLayout title={t('lab.newTestOrder')} description="" dense>
-          <div className="text-center py-12">
-            <ContentSkeleton variant="form" />
-          </div>
+          <ContentSkeleton variant="form" />
         </SidebarLayout>
       </ProtectedRoute>
     );

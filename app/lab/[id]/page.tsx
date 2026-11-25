@@ -131,9 +131,7 @@ export default function LabTestDetailPage() {
     return (
       <ProtectedRoute>
         <SidebarLayout title={t('lab.testDetails')} description="" dense>
-          <div className="text-center py-12">
-            <ContentSkeleton />
-          </div>
+          <ContentSkeleton />
         </SidebarLayout>
       </ProtectedRoute>
     );
