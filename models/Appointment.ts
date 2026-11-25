@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { safeTimeZone, zonedToInstant, ymdOf } from '@/lib/timezone';
 
 export type AppointmentSource = 'staff' | 'website' | 'patient_portal';
 
@@ -16,6 +17,10 @@ export interface IAppointment {
   source?: AppointmentSource;
   appointmentDate: Date;
   appointmentTime: string;
+  /** Zone the doctor's clock time is in (appointmentDate/appointmentTime are written in it) */
+  doctorTimeZone?: string;
+  /** The exact UTC moment the appointment starts */
+  startAt?: Date;
   appointmentType: 'consultation' | 'follow-up' | 'followUp' | 'checkup' | 'emergency' | 'surgery' | 'therapy' | 'telemedicine' | 'home-nurse-visit';
   status: 'scheduled' | 'confirmed' | 'in-progress' | 'inProgress' | 'completed' | 'cancelled';
   location?: string;
@@ -82,6 +87,8 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
       type: String,
       required: true,
     },
+    doctorTimeZone: { type: String, trim: true },
+    startAt: { type: Date },
     appointmentType: {
       type: String,
       enum: ['consultation', 'follow-up', 'followUp', 'checkup', 'emergency', 'surgery', 'therapy', 'telemedicine', 'home-nurse-visit'],
@@ -134,6 +141,35 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
     timestamps: true,
   }
 );
+
+// Stamp the doctor's time zone and the exact start moment whenever an appointment is saved.
+appointmentSchema.pre('validate', async function () {
+  try {
+    const doc: any = this;
+    if (!doc.doctorTimeZone) {
+      let tz: string | undefined;
+      const User = mongoose.models.User;
+      if (User && (doc.doctorId || doc.doctorEmail)) {
+        const d: any = await User.findOne(doc.doctorId ? { _id: doc.doctorId } : { email: String(doc.doctorEmail).toLowerCase() }).select('timeZone').lean();
+        tz = d?.timeZone;
+      }
+      doc.doctorTimeZone = safeTimeZone(tz);
+    }
+    if (doc.appointmentDate && doc.appointmentTime) {
+      const at = zonedToInstant(ymdOf(doc.appointmentDate), doc.appointmentTime, doc.doctorTimeZone);
+      if (!Number.isNaN(at.getTime())) doc.startAt = at;
+    }
+  } catch { /* never block saving an appointment because of the zone stamp */ }
+});
+
+// Indexes: doctor/patient dashboards and lists filter on these fields (there were none, so every request scanned the collection)
+appointmentSchema.index({ doctorId: 1, appointmentDate: 1 });
+appointmentSchema.index({ doctorEmail: 1, appointmentDate: 1 });
+appointmentSchema.index({ doctorName: 1 });
+appointmentSchema.index({ patientId: 1, appointmentDate: -1 });
+appointmentSchema.index({ patientEmail: 1 });
+appointmentSchema.index({ appointmentDate: 1, status: 1 });
+appointmentSchema.index({ createdAt: -1 });
 
 // Prevent multiple model initialization in development
 export default mongoose.models.Appointment || mongoose.model<IAppointment>('Appointment', appointmentSchema);

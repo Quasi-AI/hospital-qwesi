@@ -1,5 +1,7 @@
 'use client';
 
+import { ApptDayBadge, ApptTime } from '@/app/components/ApptTime';
+
 
 import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
@@ -40,6 +42,7 @@ interface Appointment {
   doctorEmail?: string;
   appointmentDate: string;
   appointmentTime: string;
+  doctorTimeZone?: string;
   appointmentType: string;
   status: string;
   reason?: string;
@@ -258,12 +261,7 @@ export default function PatientAppointmentsPage() {
               <div className="flex">
                 {/* Date Badge */}
                 <div className="hidden flex-col items-center justify-center border-r border-gray-100 bg-gradient-to-b from-teal-50 to-cyan-50 px-4 py-3 sm:flex">
-                  <span className="text-2xl font-bold text-teal-600">
-                    {new Date(apt.appointmentDate).getDate()}
-                  </span>
-                  <span className="text-xs font-medium uppercase text-teal-700">
-                    {new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short' })}
-                  </span>
+                  <ApptDayBadge appt={apt} />
                 </div>
 
                 {/* Appointment Details */}
@@ -284,11 +282,11 @@ export default function PatientAppointmentsPage() {
                   <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-600 sm:text-sm">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4 text-gray-400" />
-                      {formatDate(apt.appointmentDate)}
+                      <ApptTime appt={apt} part="date" />
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Clock className="h-4 w-4 text-gray-400" />
-                      {apt.appointmentTime}
+                      <ApptTime appt={apt} />
                     </span>
                   </div>
 

@@ -11,6 +11,7 @@ import { sendEmail } from './email-provider';
 import { sendSMS } from './sms-provider';
 import { sendWhatsApp } from '@/lib/whatsapp';
 import { getTemplate, TemplateData } from './templates';
+import { appointmentInstant, appointmentSentence, appointmentWhen, formatDateIn, formatTimeIn, offsetLabel, safeTimeZone } from '@/lib/timezone';
 import { emitRealtimeEvent, notificationTargets } from '@/lib/realtime';
 
 export interface CreateNotificationOptions {
@@ -416,8 +417,7 @@ export async function sendAppointmentReminder(appointmentId: string): Promise<No
     const templateData: TemplateData = {
       patientName: appointment.patientName || patient?.name,
       doctorName: appointment.doctorName,
-      appointmentDate: new Date(appointment.appointmentDate).toLocaleDateString(),
-      appointmentTime: appointment.appointmentTime,
+      ...(() => { const w = appointmentWhen(appointment as any, safeTimeZone((patient as any)?.timeZone, safeTimeZone((appointment as any).doctorTimeZone))); return { appointmentDate: w.date, appointmentTime: `${w.time} (${w.zone})` }; })(),
       location: appointment.location,
       ...clinicInfo,
     };
@@ -709,11 +709,8 @@ export async function scheduleTelemedicineSessionReminders(
     const clinicInfo = await getClinicInfo();
     const patient = (telemedicineSession as any).patientId;
     const doctor = (telemedicineSession as any).doctorId;
-    const appointmentDate = telemedicineSession.scheduledStartTime.toLocaleDateString();
-    const appointmentTime = telemedicineSession.scheduledStartTime.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const startAt = telemedicineSession.scheduledStartTime;
+    const inZone = (tz?: string | null) => { const z = safeTimeZone(tz); return `${formatDateIn(startAt, z)} at ${formatTimeIn(startAt, z)} (${offsetLabel(z, startAt)})`; };
     const sessionUrl = `/telemedicine/sessions/${telemedicineSessionId}`;
     const patientUrl = `/patient-portal/telemedicine/${telemedicineSessionId}`;
 
@@ -725,7 +722,7 @@ export async function scheduleTelemedicineSessionReminders(
         recipientPhone: doctor?.phone,
         name: doctor?.name || 'Doctor',
         title: 'Telemedicine session starting soon',
-        message: `${patient?.name || 'Your patient'} has a telemedicine session with you on ${appointmentDate} at ${appointmentTime}.`,
+        message: `${patient?.name || 'Your patient'} has a telemedicine session with you on ${inZone(doctor?.timeZone)}.`,
         link: sessionUrl,
         role: 'doctor',
       },
@@ -736,7 +733,7 @@ export async function scheduleTelemedicineSessionReminders(
         recipientPhone: patient?.phone,
         name: patient?.name || 'Patient',
         title: 'Your telemedicine session starts soon',
-        message: `Your telemedicine session with Dr. ${doctor?.name || 'your doctor'} is on ${appointmentDate} at ${appointmentTime}.`,
+        message: `Your telemedicine session with Dr. ${doctor?.name || 'your doctor'} is on ${inZone(patient?.timeZone)}.`,
         link: patientUrl,
         role: 'patient',
       },
@@ -841,8 +838,8 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
     }
 
     const settings = await getSettings();
-    const appointmentDay = new Date(appointment.appointmentDate).toISOString().slice(0, 10);
-    const startsAt = new Date(`${appointmentDay}T${appointment.appointmentTime}`);
+    // The stored time is the doctor's wall clock; work out the real moment it starts.
+    const startsAt = appointmentInstant(appointment as any);
     if (Number.isNaN(startsAt.getTime())) return { success: false, error: 'Invalid appointment time' };
 
     // Reminder lead times: 24 hours, 1 hour, and the clinic's configured lead (default 15 min) before the consultation.
@@ -865,7 +862,10 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
     const doctor = appointment.doctorId ? await User.findById(appointment.doctorId).select('name email phone') : null;
     const clinicInfo = await getClinicInfo();
     const isVideo = Boolean(appointment.telemedicineSessionId) || appointment.appointmentType === 'telemedicine';
-    const when = `${startsAt.toLocaleDateString()} at ${appointment.appointmentTime}`;
+    // Each person gets the time in their own zone (patient zone, doctor zone), labelled so nobody is confused.
+    const patientWhen = appointmentSentence(appointment as any, (patient as any)?.timeZone);
+    const doctorWhen = appointmentSentence(appointment as any, (doctor as any)?.timeZone || (appointment as any).doctorTimeZone);
+    const patientW = appointmentWhen(appointment as any, safeTimeZone((patient as any)?.timeZone, safeTimeZone((appointment as any).doctorTimeZone)));
     const patientLink = appointment.telemedicineSessionId ? `/patient-portal/telemedicine/${appointment.telemedicineSessionId}` : '/patient-portal/appointments';
     const doctorLink = appointment.telemedicineSessionId ? `/telemedicine/sessions/${appointment.telemedicineSessionId}` : '/appointments';
 
@@ -873,13 +873,13 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
     let first: NotificationResult = { success: true };
     let created = 0;
     for (const lead of due) {
-      const patientMsg = `Reminder: your ${isVideo ? 'video consultation' : 'appointment'} with ${appointment.doctorName ? `Dr. ${String(appointment.doctorName).replace(/^Dr\.?\s*/i, '')}` : 'your doctor'} is ${label(lead.minutes)} (${when}).`;
-      const doctorMsg = `Reminder: you have a ${isVideo ? 'video consultation' : 'appointment'} with ${appointment.patientName || 'a patient'} ${label(lead.minutes)} (${when}).`;
+      const patientMsg = `Reminder: your ${isVideo ? 'video consultation' : 'appointment'} with ${appointment.doctorName ? `Dr. ${String(appointment.doctorName).replace(/^Dr\.?\s*/i, '')}` : 'your doctor'} is ${label(lead.minutes)} (${patientWhen}).`;
+      const doctorMsg = `Reminder: you have a ${isVideo ? 'video consultation' : 'appointment'} with ${appointment.patientName || 'a patient'} ${label(lead.minutes)} (${doctorWhen}).`;
       const tpl = getTemplate('appointment_reminder', {
         patientName: appointment.patientName || patient?.name,
         doctorName: appointment.doctorName,
-        appointmentDate: startsAt.toLocaleDateString(),
-        appointmentTime: appointment.appointmentTime,
+        appointmentDate: patientW.date,
+        appointmentTime: `${patientW.time} (${patientW.zone})`,
         location: appointment.location,
         ...clinicInfo,
       });
@@ -890,7 +890,7 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
           recipientType: 'patient',
           recipientEmail: appointment.patientEmail || patient?.email,
           recipientPhone: appointment.patientPhone || patient?.phone,
-          title: `Consultation reminder - ${when}`,
+          title: `Consultation reminder - ${patientWhen}`,
           message: patientMsg,
           channels: channelsForEmail(appointment.patientEmail || patient?.email),
           priority: 'high',
@@ -907,7 +907,7 @@ export async function scheduleAppointmentReminder(appointmentId: string, reminde
           recipientType: 'user',
           recipientEmail: doctor.email,
           recipientPhone: doctor.phone,
-          title: `Consultation reminder - ${when}`,
+          title: `Consultation reminder - ${doctorWhen}`,
           message: doctorMsg,
           channels: channelsForEmail(doctor.email),
           priority: 'high',

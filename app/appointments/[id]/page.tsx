@@ -1,5 +1,7 @@
 'use client';
 
+import { ApptTime } from '@/app/components/ApptTime';
+
 
 import { ContentSkeleton } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
@@ -181,7 +183,7 @@ export default function AppointmentViewPage() {
                     <Clock className="h-4 w-4 shrink-0 text-gray-400" />
                     <div>
                       <p className="text-[11px] font-medium text-gray-500 sm:text-xs">Time</p>
-                      <p className="text-xs text-gray-900 sm:text-sm">{appointment.appointmentTime}</p>
+                      <p className="text-xs text-gray-900 sm:text-sm"><ApptTime appt={appointment} /></p>
                     </div>
                   </div>
                 </div>

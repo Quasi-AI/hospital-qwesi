@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 import { Bell, BellOff, Check, CheckCheck, ChevronDown, LogOut, Menu, User, Volume2, VolumeX } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
+import TimeZoneSelect from './TimeZoneSelect';
 import { LogoLink } from './logo';
 import { playAlertSound, unlockAlertSound, isAlertSoundOn, setAlertSoundOn } from '@/lib/alertSound';
 
@@ -133,6 +134,7 @@ export default function TopNavbar({
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
+        <TimeZoneSelect compact />
         <LanguageSwitcher flagOnly compact />
 
         {/* Notification bell */}

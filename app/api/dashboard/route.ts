@@ -302,12 +302,18 @@ export async function GET(request: NextRequest) {
         ],
       };
 
-      const doctorAppointments = await Appointment.find(doctorAppointmentMatch)
-        .select('patientId patientName patientEmail doctorName doctorEmail appointmentDate appointmentTime status createdAt')
-        .lean();
-      const telemedicinePatientIds = doctorId
-        ? await TelemedicineSession.distinct('patientId', { doctorId })
-        : [];
+      // Read only what the dashboard needs, in parallel (was: every appointment loaded into memory, one query after another).
+      const [recentDoctorAppointments, apptPatientIds, apptPatientEmails, apptPatientNames, telemedicinePatientIds] = await Promise.all([
+        Appointment.find(doctorAppointmentMatch)
+          .sort({ createdAt: -1 })
+          .limit(5)
+          .select('patientName appointmentTime status createdAt')
+          .lean(),
+        Appointment.distinct('patientId', doctorAppointmentMatch),
+        Appointment.distinct('patientEmail', doctorAppointmentMatch),
+        Appointment.distinct('patientName', doctorAppointmentMatch),
+        doctorId ? TelemedicineSession.distinct('patientId', { doctorId }) : Promise.resolve([] as any[]),
+      ]);
       const telemedicinePatients = telemedicinePatientIds.length > 0
         ? await Patient.find({ _id: { $in: telemedicinePatientIds } }).select('_id patientId name email').lean()
         : [];
@@ -315,11 +321,9 @@ export async function GET(request: NextRequest) {
       const patientIds = new Set<string>();
       const patientEmails = new Set<string>();
       const patientNames = new Set<string>();
-      doctorAppointments.forEach((appointment: any) => {
-        if (appointment.patientId) patientIds.add(String(appointment.patientId));
-        if (appointment.patientEmail) patientEmails.add(String(appointment.patientEmail).toLowerCase());
-        if (appointment.patientName) patientNames.add(String(appointment.patientName));
-      });
+      apptPatientIds.forEach((v: any) => { if (v) patientIds.add(String(v)); });
+      apptPatientEmails.forEach((v: any) => { if (v) patientEmails.add(String(v).toLowerCase()); });
+      apptPatientNames.forEach((v: any) => { if (v) patientNames.add(String(v)); });
       telemedicinePatients.forEach((patient: any) => {
         if (patient._id) patientIds.add(String(patient._id));
         if (patient.patientId) patientIds.add(String(patient.patientId));
@@ -398,9 +402,6 @@ export async function GET(request: NextRequest) {
 
       const monthlyTotal = monthlyRevenue[0]?.total || 0;
       const previousMonthlyTotal = previousMonthlyRevenue[0]?.total || 0;
-      const recentDoctorAppointments = doctorAppointments
-        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 5);
 
       const recentActivities: any[] = [];
       recentDoctorAppointments.forEach((appointment: any) => {

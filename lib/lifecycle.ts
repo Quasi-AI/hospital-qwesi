@@ -6,6 +6,7 @@ import { sendEmail } from '@/lib/notifications/email-provider';
 import { sendWhatsApp } from '@/lib/whatsapp';
 import { getEffectiveProviderApprovalStatus } from '@/lib/providerApproval';
 import Settings from '@/models/Settings';
+import { appointmentInstant, appointmentSentence } from '@/lib/timezone';
 
 /**
  * Scheduled emails (run daily by /api/cron/lifecycle):
@@ -108,24 +109,24 @@ export async function noticeMissedConsultations(): Promise<Counts> {
 
   for (const a of rows as any[]) {
     const day = new Date(a.appointmentDate).toISOString().slice(0, 10);
-    const startsAt = new Date(`${day}T${a.appointmentTime}`);
+    const startsAt = appointmentInstant(a);
     if (Number.isNaN(startsAt.getTime()) || startsAt.getTime() + grace > now) continue;
     out.checked++;
     const claimed = await Appointment.findOneAndUpdate({ _id: a._id, missedNoticeSentAt: { $exists: false } }, { $set: { missedNoticeSentAt: new Date() } }).select('_id').lean();
     if (!claimed) continue;
-    const when = `${day} at ${a.appointmentTime}`;
+    const patientTz = ((await Patient.findOne({ email: String(a.patientEmail || '').toLowerCase() }).select('timeZone').lean()) as any)?.timeZone;
     let delivered = 0, tried = 0;
-    const provider = a.doctorId ? ((await User.findById(a.doctorId).select('name email role').lean()) as any) : null;
+    const provider = a.doctorId ? ((await User.findById(a.doctorId).select('name email role timeZone').lean()) as any) : null;
     if (provider?.email) {
-      const body = `<p>Hello ${esc(provider.name || '')},</p><p>A consultation with <strong>${esc(a.patientName || 'a patient')}</strong> scheduled for <strong>${esc(when)}</strong> was not attended.</p>
+      const body = `<p>Hello ${esc(provider.name || '')},</p><p>A consultation with <strong>${esc(a.patientName || 'a patient')}</strong> scheduled for <strong>${esc(appointmentSentence(a, provider.timeZone || a.doctorTimeZone))}</strong> was not attended.</p>
 <p>Please keep your availability up to date and join consultations on time, because patients pay for these slots. If something went wrong, you can reschedule it from your dashboard.</p>`;
       tried++; (await mail(provider.email, `Missed consultation on ${day}`, layout(brand, 'You missed a consultation', body, { label: 'Open my appointments', href: `${appUrl()}/appointments` }))) ? (out.sent++, delivered++) : out.failed++;
     }
     if (a.patientPhone) {
-      tried++; (await sendWhatsApp(a.patientPhone, `Hello ${a.patientName || ''}, we are sorry: your consultation with ${a.doctorName || 'your doctor'} on ${when} did not take place. You can book a new time here: ${appUrl()}/patient-portal/doctors`)) ? (out.sent++, delivered++) : out.failed++;
+      tried++; (await sendWhatsApp(a.patientPhone, `Hello ${a.patientName || ''}, we are sorry: your consultation with ${a.doctorName || 'your doctor'} on ${appointmentSentence(a, patientTz)} did not take place. You can book a new time here: ${appUrl()}/patient-portal/doctors`)) ? (out.sent++, delivered++) : out.failed++;
     }
     if (realEmail(a.patientEmail)) {
-      const body = `<p>Hello ${esc(a.patientName || '')},</p><p>We are sorry: your consultation with <strong>${esc(a.doctorName || 'your doctor')}</strong> on <strong>${esc(when)}</strong> did not take place.</p>
+      const body = `<p>Hello ${esc(a.patientName || '')},</p><p>We are sorry: your consultation with <strong>${esc(a.doctorName || 'your doctor')}</strong> on <strong>${esc(appointmentSentence(a, patientTz))}</strong> did not take place.</p>
 <p>You can book a new time, or choose another practitioner, and we will make sure it is looked after.</p>`;
       tried++; (await mail(a.patientEmail, 'Sorry we missed you - let us rebook', layout(brand, 'Your consultation did not take place', body, { label: 'Book again', href: `${appUrl()}/patient-portal/doctors` }))) ? (out.sent++, delivered++) : out.failed++;
     }

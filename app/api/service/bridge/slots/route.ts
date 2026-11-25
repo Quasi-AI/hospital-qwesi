@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
       success: true,
       doctor: result.doctor,
       date,
+      timeZone: result.timeZone,
       slotDurationMinutes: result.slotDurationMinutes,
       slots: result.slots,
     });

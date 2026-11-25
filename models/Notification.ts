@@ -145,6 +145,7 @@ const notificationSchema = new mongoose.Schema<INotification>(
 
 // Compound indexes for efficient queries
 notificationSchema.index({ recipientId: 1, status: 1 });
+notificationSchema.index({ recipientId: 1, createdAt: -1 });
 notificationSchema.index({ scheduledFor: 1, status: 1 });
 notificationSchema.index({ type: 1, status: 1 });
 notificationSchema.index({ createdAt: -1 });

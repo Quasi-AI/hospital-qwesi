@@ -316,6 +316,7 @@ export default function SessionDetailPage() {
     if (newStatus === 'completed' && !confirm('End this session and mark as completed?')) return;
     if (newStatus === 'cancelled' && !confirm('Cancel this session? The consultation will be marked as cancelled.')) return;
     setUpdatingStatus(true);
+    if (newStatus === 'completed') setIsCallActive(false); // react instantly; the server confirms right after
     try {
       const payload: Record<string, unknown> = { status: newStatus };
       if (newStatus === 'completed') {
@@ -330,9 +331,6 @@ export default function SessionDetailPage() {
       });
       if (res.ok) {
         await fetchSession();
-        if (newStatus === 'completed') {
-          setIsCallActive(false);
-        }
       } else {
         const err = await res.json().catch(() => ({}));
         notify(err.error || 'Failed to update status');

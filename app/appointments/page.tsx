@@ -1,5 +1,7 @@
 'use client';
 
+import { ApptTime } from '@/app/components/ApptTime';
+
 
 import { ContentSkeleton } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
@@ -352,7 +354,7 @@ export default function AppointmentsPage() {
                       <div className="text-xs text-gray-900 sm:text-sm">{new Date(appointment.appointmentDate).toLocaleDateString()}</div>
                       <div className="flex items-center text-xs text-gray-700 sm:text-sm">
                         <Clock className="mr-1 h-3 w-3 shrink-0" />
-                        {appointment.appointmentTime}
+                        <ApptTime appt={appointment} />
                       </div>
                     </td>
                     <td className="hidden whitespace-nowrap px-3 py-2 md:table-cell lg:px-4">

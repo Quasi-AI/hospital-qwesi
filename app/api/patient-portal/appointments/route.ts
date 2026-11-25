@@ -59,6 +59,14 @@ export async function GET(request: NextRequest) {
       ts.patientId?.email === patientEmail
     );
 
+    // Older appointments have no stored zone: use the doctor's current one.
+    const docEmails = Array.from(new Set(appointments.filter((a: any) => !a.doctorTimeZone && a.doctorEmail).map((a: any) => String(a.doctorEmail).toLowerCase())));
+    if (docEmails.length) {
+      const docs: any[] = await User.find({ email: { $in: docEmails } }).select('email timeZone').lean();
+      const tzByEmail = new Map(docs.map((d) => [String(d.email).toLowerCase(), d.timeZone]));
+      appointments.forEach((a: any) => { if (!a.doctorTimeZone) a.doctorTimeZone = tzByEmail.get(String(a.doctorEmail).toLowerCase()) || undefined; });
+    }
+
     return NextResponse.json({ 
       appointments,
       telemedicineSessions: patientSessions,

@@ -4,6 +4,7 @@ import Settings from '@/models/Settings';
 import DoctorSchedule from '@/models/DoctorSchedule';
 import Appointment from '@/models/Appointment';
 import { isProviderApproved } from '@/lib/providerApproval';
+import { safeTimeZone } from '@/lib/timezone';
 
 const WEEKDAYS = [
   'sunday',
@@ -201,13 +202,15 @@ export async function computeDoctorDaySlots(
     excludeAppointmentId?: string;
     /** Skip per-day User + schedule lookups when building many days for the same doctor (e.g. landing chat). */
     preloaded?: {
-      doctor: { _id: mongoose.Types.ObjectId; name: string; email: string };
+      doctor: { _id: mongoose.Types.ObjectId; name: string; email: string; timeZone?: string };
       schedule: EffectiveDoctorSchedule;
     };
   }
 ): Promise<{
   ok: true;
   doctor: { id: string; name: string; email: string };
+  /** Time zone the slot times are written in (the doctor's) */
+  timeZone: string;
   slotDurationMinutes: number;
   slots: DaySlot[];
 } | { ok: false; error: string; status: number }> {
@@ -218,7 +221,7 @@ export async function computeDoctorDaySlots(
     return { ok: false, error: 'Invalid date', status: 400 };
   }
 
-  let d: { _id: mongoose.Types.ObjectId; name: string; email: string };
+  let d: { _id: mongoose.Types.ObjectId; name: string; email: string; timeZone?: string };
   let sched: EffectiveDoctorSchedule;
 
   if (options?.preloaded) {
@@ -230,7 +233,7 @@ export async function computeDoctorDaySlots(
     sched = pl.schedule;
   } else {
     const doctor = await User.findById(doctorId)
-      .select('name email role approvalStatus hasImage licenseNumber licenseCertificate')
+      .select('name email role approvalStatus hasImage licenseNumber licenseCertificate timeZone')
       .lean();
     if (!doctor || (doctor as { role?: string }).role !== 'doctor') {
       return { ok: false, error: 'Doctor not found', status: 404 };
@@ -242,7 +245,7 @@ export async function computeDoctorDaySlots(
       return { ok: false, error: 'Doctor is not available for online booking', status: 403 };
     }
 
-    d = doctor as { _id: mongoose.Types.ObjectId; name: string; email: string };
+    d = doctor as { _id: mongoose.Types.ObjectId; name: string; email: string; timeZone?: string };
     sched = await getEffectiveDoctorSchedule(doctorId);
   }
 
@@ -255,6 +258,7 @@ export async function computeDoctorDaySlots(
     return {
       ok: true,
       doctor: { id: d._id.toString(), name: d.name, email: d.email },
+      timeZone: safeTimeZone(d.timeZone),
       slotDurationMinutes: sched.slotDurationMinutes,
       slots: [],
     };
@@ -282,6 +286,7 @@ export async function computeDoctorDaySlots(
   return {
     ok: true,
     doctor: { id: d._id.toString(), name: d.name, email: d.email },
+    timeZone: safeTimeZone(d.timeZone),
     slotDurationMinutes: sched.slotDurationMinutes,
     slots,
   };

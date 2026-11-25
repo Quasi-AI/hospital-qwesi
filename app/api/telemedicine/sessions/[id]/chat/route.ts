@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
@@ -100,52 +100,56 @@ export async function POST(
       telemedicineSession.chatMessages.length - 1
     ];
 
-    const [patient, doctor] = await Promise.all([
-      Patient.findById(telemedicineSession.patientId).select('name email phone patientId').lean(),
-      User.findById(telemedicineSession.doctorId).select('name email phone').lean(),
-    ]);
+    after(async () => {
+      try {
+        const [patient, doctor] = await Promise.all([
+          Patient.findById(telemedicineSession.patientId).select('name email phone patientId').lean(),
+          User.findById(telemedicineSession.doctorId).select('name email phone').lean(),
+        ]);
 
-    const targets = [
-      `patient:${String(telemedicineSession.patientId)}`,
-      patient?.patientId ? `patient:${patient.patientId}` : '',
-      `user:${String(telemedicineSession.doctorId)}`,
-    ].filter(Boolean);
+        const targets = [
+          `patient:${String(telemedicineSession.patientId)}`,
+          patient?.patientId ? `patient:${patient.patientId}` : '',
+          `user:${String(telemedicineSession.doctorId)}`,
+        ].filter(Boolean);
 
-    await emitRealtimeEvent({
-      type: 'telemedicine.chat.created',
-      targets,
-      payload: {
-        sessionId: id,
-        sessionNumber: telemedicineSession.sessionNumber,
-        message: savedMessage,
-      },
+        await emitRealtimeEvent({
+          type: 'telemedicine.chat.created',
+          targets,
+          payload: {
+            sessionId: id,
+            sessionNumber: telemedicineSession.sessionNumber,
+            message: savedMessage,
+          },
+        });
+
+        if (newMessage.senderType === 'doctor' && patient) {
+          await createNotification({
+            type: 'telemedicine',
+            recipientId: String(patient._id),
+            recipientType: 'patient',
+            recipientEmail: patient.email,
+            recipientPhone: patient.phone,
+            title: `New telemedicine message from ${doctor?.name || newMessage.senderName}`,
+            message: newMessage.message,
+            relatedEntity: { type: 'telemedicineSession', id },
+            metadata: { sessionId: id, sessionNumber: telemedicineSession.sessionNumber },
+          });
+        } else if (doctor) {
+          await createNotification({
+            type: 'telemedicine',
+            recipientId: String(doctor._id),
+            recipientType: 'user',
+            recipientEmail: doctor.email,
+            recipientPhone: doctor.phone,
+            title: `New telemedicine message from ${patient?.name || newMessage.senderName}`,
+            message: newMessage.message,
+            relatedEntity: { type: 'telemedicineSession', id },
+            metadata: { sessionId: id, sessionNumber: telemedicineSession.sessionNumber },
+          });
+        }
+      } catch (e) { console.error('chat background tasks', e); }
     });
-
-    if (newMessage.senderType === 'doctor' && patient) {
-      await createNotification({
-        type: 'telemedicine',
-        recipientId: String(patient._id),
-        recipientType: 'patient',
-        recipientEmail: patient.email,
-        recipientPhone: patient.phone,
-        title: `New telemedicine message from ${doctor?.name || newMessage.senderName}`,
-        message: newMessage.message,
-        relatedEntity: { type: 'telemedicineSession', id },
-        metadata: { sessionId: id, sessionNumber: telemedicineSession.sessionNumber },
-      });
-    } else if (doctor) {
-      await createNotification({
-        type: 'telemedicine',
-        recipientId: String(doctor._id),
-        recipientType: 'user',
-        recipientEmail: doctor.email,
-        recipientPhone: doctor.phone,
-        title: `New telemedicine message from ${patient?.name || newMessage.senderName}`,
-        message: newMessage.message,
-        relatedEntity: { type: 'telemedicineSession', id },
-        metadata: { sessionId: id, sessionNumber: telemedicineSession.sessionNumber },
-      });
-    }
 
     return NextResponse.json({ message: savedMessage }, { status: 201 });
   } catch (error) {

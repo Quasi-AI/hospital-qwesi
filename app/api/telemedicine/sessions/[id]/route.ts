@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../auth/[...nextauth]/route';
 import { markConsultationCompleted } from '@/lib/finance';
@@ -161,10 +161,6 @@ export async function PUT(
 
     await telemedicineSession.save();
 
-    // Doctor finished the consultation: start the payout safety window for the earning
-    if (statusChanged && data.status === 'completed') {
-      try { await markConsultationCompleted(id); } catch (e) { console.error('markConsultationCompleted', e); }
-    }
 
     // Populate and return
     const populatedSession = await TelemedicineSession.findById(id)
@@ -173,66 +169,74 @@ export async function PUT(
       .populate('appointmentId', 'appointmentNumber')
       .lean();
 
-    if (populatedSession) {
-      const patient = (populatedSession as any).patientId;
-      const doctor = (populatedSession as any).doctorId;
-      const sessionTargets = [
-        'role:admin',
-        'role:staff',
-        doctor?._id ? `user:${String(doctor._id)}` : '',
-        patient?._id ? `patient:${String(patient._id)}` : '',
-        patient?.patientId ? `patient:${patient.patientId}` : '',
-      ].filter(Boolean);
+    // Everything below (payout window, realtime push, emails/WhatsApp) runs after the response is sent,
+    // so ending a call or sending a message is instant for the doctor and patient.
+    const completedNow = statusChanged && data.status === 'completed';
+    after(async () => {
+      try {
+        if (completedNow) await markConsultationCompleted(id).catch((e) => console.error('markConsultationCompleted', e));
+      if (populatedSession) {
+        const patient = (populatedSession as any).patientId;
+        const doctor = (populatedSession as any).doctorId;
+        const sessionTargets = [
+          'role:admin',
+          'role:staff',
+          doctor?._id ? `user:${String(doctor._id)}` : '',
+          patient?._id ? `patient:${String(patient._id)}` : '',
+          patient?.patientId ? `patient:${patient.patientId}` : '',
+        ].filter(Boolean);
 
-      await emitRealtimeEvent({
-        type: 'telemedicine.session.updated',
-        targets: sessionTargets,
-        payload: {
-          sessionId: String((populatedSession as any)._id),
-          sessionNumber: (populatedSession as any).sessionNumber,
-          status: (populatedSession as any).status,
-          oldStatus,
-        },
-      });
+        await emitRealtimeEvent({
+          type: 'telemedicine.session.updated',
+          targets: sessionTargets,
+          payload: {
+            sessionId: String((populatedSession as any)._id),
+            sessionNumber: (populatedSession as any).sessionNumber,
+            status: (populatedSession as any).status,
+            oldStatus,
+          },
+        });
 
-      if (statusChanged) {
-        const title = `Telemedicine session ${String((populatedSession as any).status).replace('-', ' ')}`;
-        const message = `Session ${(populatedSession as any).sessionNumber} changed from ${oldStatus} to ${(populatedSession as any).status}.`;
-        const actorId = session.user.id;
-        const notifications = [];
+        if (statusChanged) {
+          const title = `Telemedicine session ${String((populatedSession as any).status).replace('-', ' ')}`;
+          const message = `Session ${(populatedSession as any).sessionNumber} changed from ${oldStatus} to ${(populatedSession as any).status}.`;
+          const actorId = session.user.id;
+          const notifications = [];
 
-        if (doctor?._id && String(doctor._id) !== actorId) {
-          notifications.push(createNotification({
-            type: 'telemedicine',
-            recipientId: String(doctor._id),
-            recipientType: 'user',
-            recipientEmail: doctor.email,
-            title,
-            message,
-            priority: (populatedSession as any).status === 'waiting' ? 'high' : 'normal',
-            relatedEntity: { type: 'telemedicineSession', id: String((populatedSession as any)._id) },
-            metadata: { sessionId: String((populatedSession as any)._id) },
-          }));
+          if (doctor?._id && String(doctor._id) !== actorId) {
+            notifications.push(createNotification({
+              type: 'telemedicine',
+              recipientId: String(doctor._id),
+              recipientType: 'user',
+              recipientEmail: doctor.email,
+              title,
+              message,
+              priority: (populatedSession as any).status === 'waiting' ? 'high' : 'normal',
+              relatedEntity: { type: 'telemedicineSession', id: String((populatedSession as any)._id) },
+              metadata: { sessionId: String((populatedSession as any)._id) },
+            }));
+          }
+
+          if (patient?._id && String(patient._id) !== actorId) {
+            notifications.push(createNotification({
+              type: 'telemedicine',
+              recipientId: String(patient._id),
+              recipientType: 'patient',
+              recipientEmail: patient.email,
+              recipientPhone: patient.phone,
+              title,
+              message,
+              priority: 'normal',
+              relatedEntity: { type: 'telemedicineSession', id: String((populatedSession as any)._id) },
+              metadata: { sessionId: String((populatedSession as any)._id) },
+            }));
+          }
+
+          await Promise.all(notifications);
         }
-
-        if (patient?._id && String(patient._id) !== actorId) {
-          notifications.push(createNotification({
-            type: 'telemedicine',
-            recipientId: String(patient._id),
-            recipientType: 'patient',
-            recipientEmail: patient.email,
-            recipientPhone: patient.phone,
-            title,
-            message,
-            priority: 'normal',
-            relatedEntity: { type: 'telemedicineSession', id: String((populatedSession as any)._id) },
-            metadata: { sessionId: String((populatedSession as any)._id) },
-          }));
-        }
-
-        await Promise.all(notifications);
       }
-    }
+      } catch (e) { console.error('telemedicine background tasks', e); }
+    });
 
     return NextResponse.json(populatedSession);
   } catch (error) {

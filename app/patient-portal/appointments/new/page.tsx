@@ -1,5 +1,8 @@
 'use client';
 
+import { formatDateIn, formatTimeIn, offsetLabel, timeZoneLabel, zonedToInstant } from '@/lib/timezone';
+import { useViewerTimeZone } from '@/lib/useTimeZone';
+
 
 import { ContentSkeleton } from '@/app/components/Skeletons';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
@@ -70,6 +73,15 @@ function NewPatientAppointmentFallback() {
   );
 }
 
+function slotLabel(ymd: string, time: string, doctorZone: string, viewerZone: string, withDate = false) {
+  const at = zonedToInstant(ymd, time, doctorZone);
+  if (Number.isNaN(at.getTime())) return time;
+  const t = formatTimeIn(at, viewerZone);
+  const viewerYmd = new Intl.DateTimeFormat('en-CA', { timeZone: viewerZone }).format(at);
+  const showDate = withDate || viewerYmd !== ymd;
+  return showDate ? `${formatDateIn(at, viewerZone)} ${t}` : t;
+}
+
 export default function NewPatientAppointmentPage() {
   return (
     <Suspense fallback={<NewPatientAppointmentFallback />}>
@@ -89,6 +101,8 @@ function NewPatientAppointmentPageContent() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(true);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotZone, setSlotZone] = useState('Africa/Accra');
+  const { timeZone: viewerZone } = useViewerTimeZone();
   const [submitting, setSubmitting] = useState(false);
   const [paying, setPaying] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
@@ -196,6 +210,7 @@ function NewPatientAppointmentPageContent() {
         if (cancelled) return;
         const nextSlots = Array.isArray(data.slots) ? data.slots : [];
         setSlots(nextSlots);
+        if (data.timeZone) setSlotZone(data.timeZone);
         if (pendingTime && !nextSlots.some((slot: Slot) => slot.time === pendingTime && slot.available)) {
           setForm((current) =>
             current.appointmentTime === pendingTime ? { ...current, appointmentTime: '' } : current
@@ -424,6 +439,11 @@ function NewPatientAppointmentPageContent() {
             </div>
             <div>
               <span className="mb-1 block text-xs font-medium text-gray-700">Available slots</span>
+              {form.doctorId && offsetLabel(slotZone) !== offsetLabel(viewerZone) && (
+                <p className="mb-2 rounded-md bg-violet-50 px-3 py-1.5 text-xs text-violet-800">
+                  Times are shown in your time zone ({timeZoneLabel(viewerZone)}, {offsetLabel(viewerZone)}). The doctor is in {timeZoneLabel(slotZone)} ({offsetLabel(slotZone)}). Change yours from the clock at the top.
+                </p>
+              )}
               {!form.doctorId ? (
                 <p className="rounded-md border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-500">
                   Select a doctor first.
@@ -453,7 +473,7 @@ function NewPatientAppointmentPageContent() {
                             : 'cursor-not-allowed border-gray-100 bg-gray-100 text-gray-400 line-through'
                       }`}
                     >
-                      {slot.time}
+                      {slotLabel(form.appointmentDate, slot.time, slotZone, viewerZone)}
                     </button>
                   ))}
                 </div>
@@ -530,7 +550,7 @@ function NewPatientAppointmentPageContent() {
                 </p>
                 <p className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-400" />
-                  {form.appointmentDate} {form.appointmentTime || ''}
+                  {form.appointmentTime ? slotLabel(form.appointmentDate, form.appointmentTime, slotZone, viewerZone, true) : form.appointmentDate}
                 </p>
                 <p className="flex items-center gap-2">
                   <Video className="h-4 w-4 text-gray-400" />

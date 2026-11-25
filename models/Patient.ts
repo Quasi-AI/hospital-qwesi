@@ -9,6 +9,7 @@ export interface IPatient {
   patientId: string;
   name: string;
   email: string;
+  timeZone?: string;
   deletedAt?: Date;
   deletedBy?: string;
   originalEmail?: string;
@@ -88,6 +89,7 @@ const patientSchema = new mongoose.Schema<IPatient>(
       required: false, // Will be auto-generated in pre-save hook
       trim: true,
     },
+    timeZone: { type: String, trim: true },
     deletedAt: { type: Date },
     deletedBy: { type: String },
     originalEmail: { type: String },

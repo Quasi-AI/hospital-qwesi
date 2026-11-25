@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 export interface IUser {
   lastLoginAt?: Date;
   /** Soft delete: set when an admin archives the account; email/phone are released so the person can register again */
+  timeZone?: string;
   deletedAt?: Date;
   deletedBy?: string;
   originalEmail?: string;
@@ -88,6 +89,7 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: false,
     },
+    timeZone: { type: String, trim: true },
     deletedAt: { type: Date },
     deletedBy: { type: String },
     originalEmail: { type: String },
