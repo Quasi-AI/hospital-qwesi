@@ -6,7 +6,7 @@ import dbConnect from '@/lib/mongodb';
 import Patient from '@/models/Patient';
 
 export const maxDuration = 60;
-const ACTIONS = new Set(['session', 'speak', 'turn', 'look', 'topup']);
+const ACTIONS = new Set(['session', 'speak', 'turn', 'look', 'topup', 'history']);
 
 /**
  * Patient-authenticated proxy to the Qwesi AI backend (brain, credits, voice).

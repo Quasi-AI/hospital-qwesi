@@ -297,6 +297,8 @@ export default function AiDoctorPage() {
             <p className="mt-2 text-3xl font-bold text-[#6949ED]">{balance ?? '—'}</p>
             <p className="mt-1 text-xs text-gray-500">{linked ? `Linked to the number ending ${linked}, the same account as WhatsApp.` : 'Linked to the phone number on your profile, the same account as WhatsApp.'}</p>
             <p className="mt-2 text-xs text-gray-600">Each answer uses 5 credits (simple question) or 10 credits (health question).</p>
+            {balance !== null && balance < 20 && <p className="mt-2 text-xs font-semibold text-amber-700">Running low on credits.</p>}
+            <a href="/patient-portal/subscriptions" className="mt-3 inline-flex h-9 items-center rounded-full bg-[#6949ED] px-4 text-xs font-semibold text-white">Top up &amp; history</a>
           </div>
           <div className="rounded-3xl border border-white/60 bg-white/75 p-4 shadow-lg backdrop-blur-xl">
             <div className="flex items-center gap-2 text-sm font-semibold text-black"><Info className="h-4 w-4 text-[#6949ED]" /> Tips</div>
