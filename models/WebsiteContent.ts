@@ -45,6 +45,7 @@ const TestimonialSchema = new mongoose.Schema(
     quote: { type: String, default: '' },
     author: { type: String, default: '' },
     role: { type: String, default: '' },
+    rating: { type: Number, default: 5 },
   },
   { _id: false }
 );
@@ -144,6 +145,11 @@ const websiteContentSchema = new mongoose.Schema(
     providersTitle: { type: String, default: '' },
     providersSubtitle: { type: String, default: '' },
     providers: { type: [ProviderSchema], default: [] },
+
+    teamEyebrow: { type: String, default: '' },
+    teamTitle: { type: String, default: '' },
+    teamSubtitle: { type: String, default: '' },
+    team: { type: [ProviderSchema], default: [] },
 
     subscriptionsEyebrow: { type: String, default: '' },
     subscriptionsTitle: { type: String, default: '' },

@@ -384,6 +384,57 @@ export function HospitalLanding({
         </div>
       </section>
 
+      {/* ───────── Team ───────── */}
+      {(content.team ?? []).some((m) => m.name.trim()) && (
+        <section id="team" className="cv-auto scroll-mt-20 py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <Eyebrow>{content.teamEyebrow}</Eyebrow>
+              <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.teamTitle}</h2>
+              <p className="mt-3 text-gray-600">{content.teamSubtitle}</p>
+            </div>
+            <div className="reveal-stagger mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {content.team.filter((m) => m.name.trim()).map((m, i) => (
+                <article key={`${m.name}-${i}`} className="qw-card flex flex-col items-center p-6 text-center">
+                  {m.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={m.imageUrl} alt={m.name} loading="lazy" className="h-28 w-28 rounded-full object-cover ring-4 ring-white shadow" />
+                  ) : (
+                    <span className="flex h-28 w-28 items-center justify-center rounded-full bg-brand-100 font-display text-3xl font-semibold text-brand-700 ring-4 ring-white shadow">
+                      {m.name.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+                    </span>
+                  )}
+                  <h3 className="font-display mt-4 text-lg font-semibold text-brand-950">{m.name}</h3>
+                  {m.role && <p className="text-sm font-medium text-brand-700">{m.role}</p>}
+                  {m.bio && <p className="mt-3 text-sm leading-relaxed text-gray-600">{m.bio}</p>}
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ───────── Working hours ───────── */}
+      {content.visitRows.some((r) => r.label.trim()) && (
+        <section id="hours" className="cv-auto scroll-mt-20 bg-white/20 py-16 sm:py-20">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+            <div>
+              <Eyebrow>{content.visitEyebrow}</Eyebrow>
+              <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.visitTitle}</h2>
+              <p className="mt-3 text-gray-600">{content.visitSubtitle}</p>
+            </div>
+            <dl className="qw-card divide-y divide-brand-100 p-2">
+              {content.visitRows.filter((r) => r.label.trim()).map((r, i) => (
+                <div key={i} className="flex items-start justify-between gap-4 px-4 py-3.5">
+                  <dt className="font-medium text-gray-900">{r.label}</dt>
+                  <dd className="whitespace-pre-line text-right text-gray-600">{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+      )}
+
       {/* ───────── Testimonials ───────── */}
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -391,10 +442,13 @@ export function HospitalLanding({
             <Eyebrow>{content.testimonialsEyebrow}</Eyebrow>
             <h2 className="font-display mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">{content.testimonialsTitle}</h2>
           </div>
-          <div className="reveal-stagger mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {content.testimonials.slice(0, 3).map((t) => (
+          <div className="reveal-stagger mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {content.testimonials.filter((t) => t.quote.trim()).slice(0, 6).map((t) => (
               <figure key={t.quote} className="qw-card flex h-full flex-col p-6">
-                <Quote className="h-7 w-7 text-accent-400" />
+                <div className="flex items-center justify-between">
+                  <Quote className="h-7 w-7 text-accent-400" />
+                  <span className="text-lg tracking-tight text-accent-400" aria-label={`${t.rating ?? 5} out of 5 stars`}>{'★'.repeat(Math.min(5, Math.max(0, Math.round(t.rating ?? 5))))}<span className="opacity-25">{'★'.repeat(5 - Math.min(5, Math.max(0, Math.round(t.rating ?? 5))))}</span></span>
+                </div>
                 <blockquote className="mt-3 flex-1 text-gray-800">{t.quote}</blockquote>
                 <figcaption className="mt-5 text-sm">
                   <span className="font-semibold text-gray-900">{t.author}</span>

@@ -23,7 +23,7 @@ import {
 import ProtectedRoute from '@/app/protected-route';
 import SidebarLayout from '@/app/components/sidebar-layout';
 import { useTranslations } from '@/app/hooks/useTranslations';
-import type { WebsiteContentData } from '@/lib/defaultWebsiteContent';
+import { defaultWebsiteContent, type WebsiteContentData } from '@/lib/defaultWebsiteContent';
 
 function Field({
   label,
@@ -101,17 +101,14 @@ export default function HospitalWebsiteCMSPage() {
         { id: 'cms-announcement', label: t('settings.hospitalWebsiteSectionAnnouncement') },
         { id: 'cms-trust-pillars', label: t('settings.hospitalWebsiteSectionTrustPillars') },
         { id: 'cms-highlights', label: t('settings.hospitalWebsiteSectionHighlights') },
-        { id: 'cms-about', label: t('settings.hospitalWebsiteSectionAbout') },
         { id: 'cms-stats', label: t('settings.hospitalWebsiteSectionStats') },
-        { id: 'cms-services', label: t('settings.hospitalWebsiteSectionServices') },
         { id: 'cms-subscriptions', label: 'Subscriptions' },
         { id: 'cms-departments', label: t('settings.hospitalWebsiteSectionDepartments') },
-        { id: 'cms-providers', label: 'Providers' },
+        { id: 'cms-team', label: 'Team & leadership' },
         { id: 'cms-care-journey', label: t('settings.hospitalWebsiteSectionCareJourney') },
-        { id: 'cms-visit', label: t('settings.hospitalWebsiteSectionVisit') },
-        { id: 'cms-testimonials', label: t('settings.hospitalWebsiteSectionTestimonials') },
+        { id: 'cms-visit', label: 'Working hours' },
+        { id: 'cms-testimonials', label: 'Customer reviews' },
         { id: 'cms-faq', label: t('settings.hospitalWebsiteSectionFaq') },
-        { id: 'cms-appointment', label: t('settings.hospitalWebsiteSectionAppointment') },
         { id: 'cms-contact', label: t('settings.hospitalWebsiteSectionContact') },
         { id: 'cms-footer', label: t('settings.hospitalWebsiteSectionFooter') },
       ] as const,
@@ -136,7 +133,7 @@ export default function HospitalWebsiteCMSPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'providers') {
-      setActiveSection('cms-providers');
+      setActiveSection('cms-team');
     }
   }, []);
 
@@ -175,6 +172,13 @@ export default function HospitalWebsiteCMSPage() {
       return { ...prev, visitRows: arr };
     });
   };
+
+  const addVisitRow = () => setForm((p) => (p ? { ...p, visitRows: [...p.visitRows, { label: '', value: '' }] } : p));
+  const removeVisitRow = (i: number) => setForm((p) => (p ? { ...p, visitRows: p.visitRows.filter((_, k) => k !== i) } : p));
+  const addReview = () => setForm((p) => (p ? { ...p, testimonials: [...p.testimonials, { quote: '', author: '', role: '', rating: 5 }] } : p));
+  const removeReview = (i: number) => setForm((p) => (p ? { ...p, testimonials: p.testimonials.filter((_, k) => k !== i) } : p));
+  const setReviewRating = (i: number, rating: number) =>
+    setForm((p) => { if (!p) return p; const arr = [...p.testimonials]; arr[i] = { ...arr[i], rating }; return { ...p, testimonials: arr }; });
 
   const updateFaq = (index: number, field: 'question' | 'answer', val: string) => {
     setForm((prev) => {
@@ -238,6 +242,37 @@ export default function HospitalWebsiteCMSPage() {
     );
   };
 
+  const updateTeam = (index: number, field: 'name' | 'role' | 'bio' | 'imageUrl', val: string) => {
+    setForm((prev) => {
+      if (!prev) return prev;
+      const arr = [...(prev.team ?? [])];
+      arr[index] = { ...arr[index], [field]: val };
+      return { ...prev, team: arr };
+    });
+  };
+
+  const addTeam = () => {
+    setForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            team: [...(prev.team ?? []), { name: '', role: '', bio: '', imageUrl: '' }],
+          }
+        : prev
+    );
+  };
+
+  const removeTeam = (index: number) => {
+    setForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            team: (prev.team ?? []).filter((_, i) => i !== index),
+          }
+        : prev
+    );
+  };
+
   const handleProviderImageFile = (index: number, file: File | undefined) => {
     if (!file) return;
     if (!PROVIDER_IMAGE_TYPES.includes(file.type)) {
@@ -252,6 +287,26 @@ export default function HospitalWebsiteCMSPage() {
     reader.onload = () => {
       if (typeof reader.result === 'string') {
         updateProvider(index, 'imageUrl', reader.result);
+        setMessage(null);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleTeamImageFile = (index: number, file: File | undefined) => {
+    if (!file) return;
+    if (!PROVIDER_IMAGE_TYPES.includes(file.type)) {
+      setMessage({ type: 'err', text: 'Provider photo must be PNG, JPG, GIF, or WebP.' });
+      return;
+    }
+    if (file.size > PROVIDER_IMAGE_MAX_BYTES) {
+      setMessage({ type: 'err', text: 'Provider photo must be smaller than 900 KB.' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateTeam(index, 'imageUrl', reader.result);
         setMessage(null);
       }
     };
@@ -373,6 +428,17 @@ export default function HospitalWebsiteCMSPage() {
                   <ExternalLink className="h-4 w-4" />
                   {t('settings.hospitalWebsiteViewLive')}
                 </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!confirm('Replace every field with the latest default text for the current landing page? Nothing is published until you press Save.')) return;
+                    setForm((prev) => ({ ...defaultWebsiteContent, team: prev?.team ?? [], providers: prev?.providers ?? [] }));
+                    setMessage({ type: 'ok', text: 'Loaded the latest default text. Review it, then press Save to publish.' });
+                  }}
+                  className="inline-flex h-10 items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                >
+                  Reset to latest text
+                </button>
                 <button
                   type="button"
                   onClick={handleSave}
@@ -982,6 +1048,166 @@ export default function HospitalWebsiteCMSPage() {
                 </SectionCard>
                 ) : null}
 
+                {activeSection === 'cms-team' ? (
+                <SectionCard
+                  id="cms-team"
+                  title="Team & leadership"
+                  description="Leadership shown in the “Our team” section of the landing page: CEO, CTO, medical director and others, with photo, role and bio. The section is hidden while empty."
+                >
+                  <Field
+                    label="Eyebrow"
+                    value={form.teamEyebrow}
+                    onChange={(v) => update({ teamEyebrow: v })}
+                  />
+                  <Field
+                    label="Section title"
+                    value={form.teamTitle}
+                    onChange={(v) => update({ teamTitle: v })}
+                  />
+                  <Field
+                    label="Section subtitle"
+                    value={form.teamSubtitle}
+                    onChange={(v) => update({ teamSubtitle: v })}
+                    multiline
+                  />
+                  {(form.team ?? []).length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-blue-200 bg-blue-50/70 p-6 text-center">
+                      <Users className="mx-auto h-10 w-10 text-blue-400" />
+                      <h4 className="mt-3 text-base font-semibold text-blue-950">No team members yet</h4>
+                      <p className="mx-auto mt-1 max-w-xl text-sm text-blue-800">
+                        Add leaders such as your CEO and CTO with their name, role, bio and photo.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={addTeam}
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add team member
+                      </button>
+                    </div>
+                  ) : null}
+                  {(form.team ?? []).map((provider, i) => (
+                    <div key={i} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Member {i + 1}</p>
+                        <button
+                          type="button"
+                          onClick={() => removeTeam(i)}
+                          className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Remove
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[18rem_minmax(0,1fr)]">
+                        <div className="space-y-3">
+                          <div className="aspect-[4/3] overflow-hidden rounded-lg border border-slate-200 bg-white">
+                            {provider.imageUrl?.trim() ? (
+                              <img
+                                src={provider.imageUrl.trim()}
+                                alt={provider.name || `Member ${i + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-slate-400">
+                                <ImageIcon className="h-8 w-8" />
+                                <span className="text-xs font-medium">No photo</span>
+                              </div>
+                            )}
+                          </div>
+                          <label className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-blue-200 bg-white px-3 text-xs font-semibold text-blue-700 hover:bg-blue-50">
+                            <Upload className="h-4 w-4" />
+                            Upload image
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/gif,image/webp"
+                              className="sr-only"
+                              onChange={(e) => {
+                                handleTeamImageFile(i, e.target.files?.[0]);
+                                e.target.value = '';
+                              }}
+                            />
+                          </label>
+                          {provider.imageUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => updateTeam(i, 'imageUrl', '')}
+                              className="w-full text-center text-xs font-medium text-red-600 hover:text-red-800"
+                            >
+                              Remove photo
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="space-y-4">
+                          <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
+                            <h4 className="text-sm font-semibold text-blue-950">Details</h4>
+                            <p className="mt-0.5 text-xs text-blue-800">
+                              Name, role and bio shown on the landing page.
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                            <Field
+                              label="Name"
+                              value={provider.name}
+                              onChange={(x) => updateTeam(i, 'name', x)}
+                            />
+                            <Field
+                              label="Role (e.g. CEO, CTO)"
+                              value={provider.role}
+                              onChange={(x) => updateTeam(i, 'role', x)}
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                              Photo URL or uploaded image
+                            </label>
+                            <input
+                              type="text"
+                              value={
+                                provider.imageUrl?.startsWith('data:image/')
+                                  ? 'Uploaded image stored with this member'
+                                  : provider.imageUrl
+                              }
+                              onChange={(e) => updateTeam(i, 'imageUrl', e.target.value)}
+                              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                              placeholder="https://example.com/provider.jpg"
+                              readOnly={provider.imageUrl?.startsWith('data:image/')}
+                            />
+                            <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                              Paste an HTTPS image URL, or upload PNG/JPG/GIF/WebP under 900 KB.
+                            </p>
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                              Short bio
+                            </label>
+                            <textarea
+                              value={provider.bio}
+                              onChange={(e) => updateTeam(i, 'bio', e.target.value)}
+                              rows={5}
+                              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                              placeholder="Short bio, qualifications, specialty focus, or patient care approach."
+                            />
+                            <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                              This appears under the provider name on the homepage.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addTeam}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add team member
+                  </button>
+                </SectionCard>
+                ) : null}
+
                 {activeSection === 'cms-care-journey' ? (
                 <SectionCard
                   id="cms-care-journey"
@@ -1013,7 +1239,7 @@ export default function HospitalWebsiteCMSPage() {
                 <SectionCard
                   id="cms-visit"
                   title={t('settings.hospitalWebsiteSectionVisit')}
-                  description="Reception hours, ED, parking — label + value rows."
+                  description="Shown in the “Working hours” section of the landing page. Each row is a label (e.g. Monday – Friday) and its hours."
                 >
                   <Field
                     label="Eyebrow"
@@ -1043,13 +1269,15 @@ export default function HospitalWebsiteCMSPage() {
                         onChange={(x) => updateVisitRow(i, 'value', x)}
                         multiline
                       />
+                      <button type="button" onClick={() => removeVisitRow(i)} className="inline-flex items-center gap-1 self-start text-xs font-semibold text-red-700 hover:underline md:col-span-2"><Trash2 className="h-3.5 w-3.5" />Remove row</button>
                     </div>
                   ))}
+                  <button type="button" onClick={addVisitRow} className="inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100"><Plus className="h-4 w-4" />Add hours row</button>
                 </SectionCard>
                 ) : null}
 
                 {activeSection === 'cms-testimonials' ? (
-                <SectionCard id="cms-testimonials" title={t('settings.hospitalWebsiteSectionTestimonials')}>
+                <SectionCard id="cms-testimonials" title="Customer reviews" description="Shown in the reviews section of the landing page (up to 6) with a star rating.">
                   <Field
                     label="Eyebrow"
                     value={form.testimonialsEyebrow}
@@ -1083,8 +1311,17 @@ export default function HospitalWebsiteCMSPage() {
                           onChange={(x) => updateTestimonial(i, 'role', x)}
                         />
                       </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1" role="radiogroup" aria-label="Rating">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <button key={n} type="button" aria-label={`${n} stars`} onClick={() => setReviewRating(i, n)} className={`text-2xl leading-none ${n <= (story.rating ?? 5) ? 'text-amber-400' : 'text-slate-300'}`}>★</button>
+                          ))}
+                        </div>
+                        <button type="button" onClick={() => removeReview(i)} className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 hover:underline"><Trash2 className="h-3.5 w-3.5" />Remove review</button>
+                      </div>
                     </div>
                   ))}
+                  <button type="button" onClick={addReview} className="inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100"><Plus className="h-4 w-4" />Add review</button>
                 </SectionCard>
                 ) : null}
 

@@ -5,7 +5,7 @@ export type WebsiteValue = { title: string; description: string };
 export type WebsiteStat = { label: string; value: string };
 export type WebsiteVisitRow = { label: string; value: string };
 export type WebsiteFaqItem = { question: string; answer: string };
-export type WebsiteTestimonial = { quote: string; author: string; role: string };
+export type WebsiteTestimonial = { quote: string; author: string; role: string; rating?: number };
 export type WebsiteProvider = { name: string; role: string; bio: string; imageUrl: string };
 export type WebsiteSubscriptionPlan = { name: string; price: string; cadence: string; description: string; benefits: string[] };
 /** Trust pillars band under announcement */
@@ -76,6 +76,12 @@ export interface WebsiteContentData {
   providersTitle: string;
   providersSubtitle: string;
   providers: WebsiteProvider[];
+
+  /** Leadership / team members (CEO, CTO …) shown in the “Our team” section */
+  teamEyebrow: string;
+  teamTitle: string;
+  teamSubtitle: string;
+  team: WebsiteProvider[];
 
   subscriptionsEyebrow: string;
   subscriptionsTitle: string;
@@ -203,21 +209,30 @@ export const defaultWebsiteContent: WebsiteContentData = {
     { title: 'Pay to book', body: 'Pay the doctor’s consultation fee securely by card or local payment method.' },
     { title: 'Meet online', body: 'Join your video, audio or chat consultation, then find your notes and prescriptions in your portal.' },
   ],
-  visitEyebrow: '',
-  visitTitle: '',
-  visitSubtitle: '',
-  visitRows: [],
+  visitEyebrow: 'Working hours',
+  visitTitle: 'When we are here to help',
+  visitSubtitle: 'Doctors set their own availability, so you can book any time. Our support team keeps these hours.',
+  visitRows: [
+    { label: 'Monday – Friday', value: '8:00 AM – 8:00 PM' },
+    { label: 'Saturday', value: '9:00 AM – 5:00 PM' },
+    { label: 'Sunday', value: '10:00 AM – 2:00 PM' },
+    { label: 'Online booking', value: 'Open 24/7' },
+  ],
   testimonialsEyebrow: 'Patient voices',
-  testimonialsTitle: 'What patients say',
+  testimonialsTitle: 'What our customers say',
   testimonials: [
-    { quote: 'I knew the price before I booked and was speaking to a doctor the same evening.', author: 'A. M.', role: 'Video consultation' },
-    { quote: 'No travelling, no waiting room. My doctor sent my prescription straight to my portal.', author: 'R. K.', role: 'Follow-up visit' },
-    { quote: 'Booking for my mother from abroad was simple, and the doctor was kind and thorough.', author: 'S. L.', role: 'Family booking' },
+    { quote: 'I knew the price before I booked and was speaking to a doctor the same evening.', author: 'A. M.', role: 'Video consultation', rating: 5 },
+    { quote: 'No travelling, no waiting room. My doctor sent my prescription straight to my portal.', author: 'R. K.', role: 'Follow-up visit', rating: 5 },
+    { quote: 'Booking for my mother from abroad was simple, and the doctor was kind and thorough.', author: 'S. L.', role: 'Family booking', rating: 5 },
   ],
   providersEyebrow: 'Our doctors',
   providersTitle: 'Meet our doctors',
   providersSubtitle: 'Verified doctors with their consultation fee shown up front.',
   providers: [],
+  teamEyebrow: 'Our team',
+  teamTitle: 'The people behind Qwesi',
+  teamSubtitle: 'Meet the leadership team building accessible, transparent virtual care.',
+  team: [],
   subscriptionsEyebrow: 'Membership plans',
   subscriptionsTitle: 'Plans for regular care',
   subscriptionsSubtitle: 'Prefer a monthly plan? Subscribe for included virtual care, reminders and family coordination.',
