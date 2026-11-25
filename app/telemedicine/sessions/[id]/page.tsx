@@ -438,6 +438,8 @@ export default function SessionDetailPage() {
                   roomId={session.roomId}
                   participantName={authSession?.user?.name || 'Doctor'}
                   participantRole="doctor"
+                  mode={session.consultationType === 'audio' ? 'audio' : 'video'}
+                  remoteName={(session as any).patientId?.name}
                   sessionStatus={session.status}
                   onCallEnd={handleJitsiReadyToClose}
                 />

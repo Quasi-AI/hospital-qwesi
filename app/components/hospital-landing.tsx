@@ -32,6 +32,7 @@ import { PublicHeader, PublicFooter } from './public-shell';
 
 const PublicChat = dynamic(() => import('./public-shell').then((m) => m.PublicChat), { ssr: false });
 import { DoctorCard, DoctorCardSkeleton, DoctorAvatar, doctorTitle, formatFee } from './doctor-card';
+import { convertAmount, formatMoney, getDisplayCurrency } from '@/lib/money';
 import { usePublicDoctors } from './doctor-marketplace';
 import type { PublicDoctor } from './doctor-card';
 
@@ -68,9 +69,8 @@ export function HospitalLanding({
     .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.ratingCount - a.ratingCount)
     .slice(0, 6);
   const heroPreview = featured.slice(0, 3);
-  const feeCurrencies = Array.from(new Set(doctors.map((d) => d.currency || 'GHS')));
   // only compare fees when everyone charges in the same currency
-  const lowestFee = doctors.length && feeCurrencies.length === 1 ? Math.min(...doctors.map((d) => d.consultationFee)) : null;
+  const lowestFee = doctors.length ? Math.min(...doctors.map((d) => convertAmount(d.consultationFee, d.currency || 'GHS', getDisplayCurrency()))) : null;
 
   const search = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +135,7 @@ export function HospitalLanding({
             <div className="glass-dark float-slow relative space-y-3 rounded-[2rem] p-4 sm:p-5">
               <div className="flex items-center justify-between px-1 text-sm text-white/80">
                 <span className="font-semibold">Available now</span>
-                {lowestFee != null && <span>from {formatFee(lowestFee, feeCurrencies[0])}</span>}
+                {lowestFee != null && <span>from {formatMoney(lowestFee, getDisplayCurrency())}</span>}
               </div>
               {loading ? (
                 [0, 1, 2].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-white/10" />)

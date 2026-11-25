@@ -1,4 +1,5 @@
 'use client';
+import { feeForViewer } from '@/lib/money';
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -25,9 +26,16 @@ export type PublicDoctor = {
   slotDurationMinutes: number;
 };
 
+/** Fee in the visitor's own currency (cedis in Ghana, naira in Nigeria, dollars elsewhere), chosen from their IP address. */
 export function formatFee(fee: number, currency = 'GHS') {
   if (!fee || fee <= 0) return 'Free';
-  return `${currency} ${Number.isInteger(fee) ? fee : fee.toFixed(2)}`;
+  return feeForViewer(fee, currency).text;
+}
+
+/** For checkout screens: "≈ $10 (charged as GH₵150)". */
+export function formatFeeWithCharge(fee: number, currency = 'GHS') {
+  const f = feeForViewer(fee, currency);
+  return f.converted ? `${f.text} (charged as ${f.original})` : f.text;
 }
 
 export function isHerbalist(d?: { practitionerType?: string }) {

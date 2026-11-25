@@ -379,6 +379,8 @@ export default function PatientTelemedicineSessionPage() {
                   roomId={session.roomId}
                   participantName={authSession?.user?.name || 'Patient'}
                   participantRole="patient"
+                  mode={session.consultationType === 'audio' ? 'audio' : 'video'}
+                  remoteName={(session as any).doctorId?.name ? `Dr. ${String((session as any).doctorId.name).replace(/^Dr\.?\s*/i, '')}` : undefined}
                   sessionStatus={session.status}
                   onCallEnd={handleJitsiReadyToClose}
                 />
