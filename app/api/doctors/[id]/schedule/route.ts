@@ -5,6 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import User from '@/models/User';
 import DoctorSchedule from '@/models/DoctorSchedule';
+import { cleanWeekly, cleanTimeOff, cleanOverrides } from '@/lib/availability';
 import { getEffectiveDoctorSchedule, getPracticeWorkingHoursFallback } from '@/lib/appointmentSlotting';
 
 const DAY_SET = new Set([
@@ -20,7 +21,7 @@ const DAY_SET = new Set([
 function canAccessDoctorSchedule(session: { user: { id?: string; role?: string } }, doctorId: string) {
   const role = session.user.role || '';
   if (role === 'admin' || role === 'staff') return true;
-  if (role === 'doctor' && session.user.id === doctorId) return true;
+  if ((role === 'doctor' || role === 'pharmacy') && session.user.id === doctorId) return true;
   return false;
 }
 
@@ -43,8 +44,8 @@ export async function GET(
 
     await dbConnect();
     const user = await User.findById(doctorId).select('role name').lean();
-    if (!user || (user as { role?: string }).role !== 'doctor') {
-      return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+    if (!user || !['doctor', 'pharmacy'].includes((user as { role?: string }).role || '')) {
+      return NextResponse.json({ error: 'Provider not found' }, { status: 404 });
     }
 
     const raw = await DoctorSchedule.findOne({ doctorId }).lean();
@@ -57,6 +58,7 @@ export async function GET(
         ? {
             slotDurationMinutes: (raw as { slotDurationMinutes?: number }).slotDurationMinutes,
             websiteBookingEnabled: (raw as { websiteBookingEnabled?: boolean }).websiteBookingEnabled,
+            ...(raw as object),
             workingHours: (raw as { workingHours?: { start?: string; end?: string; days?: string[] } }).workingHours,
           }
         : null,
@@ -85,7 +87,7 @@ export async function PUT(
 
     const role = session.user.role || '';
     const canEdit =
-      role === 'admin' || role === 'staff' || (role === 'doctor' && session.user.id === doctorId);
+      role === 'admin' || role === 'staff' || ((role === 'doctor' || role === 'pharmacy') && session.user.id === doctorId);
     if (!canEdit) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -113,8 +115,38 @@ export async function PUT(
 
     await dbConnect();
     const user = await User.findById(doctorId).select('role').lean();
-    if (!user || (user as { role?: string }).role !== 'doctor') {
-      return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+    if (!user || !['doctor', 'pharmacy'].includes((user as { role?: string }).role || '')) {
+      return NextResponse.json({ error: 'Provider not found' }, { status: 404 });
+    }
+
+    const num = (v: unknown, min: number, max: number, def: number) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n))) : def;
+    };
+    const extra: Record<string, unknown> = {};
+    if (body.weekly) {
+      const weekly = cleanWeekly(body.weekly);
+      extra.weekly = weekly;
+      const on = Object.entries(weekly).filter(([, p]) => p.enabled);
+      if (on.length) {
+        extra['workingHours'] = {
+          days: on.map(([d]) => d),
+          start: on.flatMap(([, p]) => p.ranges.map((r) => r.start)).sort()[0],
+          end: on.flatMap(([, p]) => p.ranges.map((r) => r.end)).sort().slice(-1)[0],
+        };
+      }
+    }
+    if (body.timeOff) extra.timeOff = cleanTimeOff(body.timeOff);
+    if (body.dateOverrides) extra.dateOverrides = cleanOverrides(body.dateOverrides);
+    if ('bufferMinutes' in body) extra.bufferMinutes = num(body.bufferMinutes, 0, 120, 0);
+    if ('minNoticeHours' in body) extra.minNoticeHours = num(body.minNoticeHours, 0, 720, 0);
+    if ('maxAdvanceDays' in body) extra.maxAdvanceDays = num(body.maxAdvanceDays, 1, 730, 90);
+    if ('maxPerDay' in body) extra.maxPerDay = num(body.maxPerDay, 0, 200, 0);
+    if ('paused' in body) {
+      extra.paused = Boolean(body.paused);
+      const until = body.pausedUntil ? new Date(body.pausedUntil) : null;
+      extra.pausedUntil = extra.paused && until && !Number.isNaN(until.getTime()) ? until : null;
+      extra.pauseMessage = String(body.pauseMessage || '').slice(0, 200);
     }
 
     await DoctorSchedule.findOneAndUpdate(
@@ -122,9 +154,10 @@ export async function PUT(
       {
         $set: {
           doctorId: new mongoose.Types.ObjectId(doctorId),
-          slotDurationMinutes,
-          websiteBookingEnabled,
-          workingHours,
+          ...('slotDurationMinutes' in body ? { slotDurationMinutes } : {}),
+          ...('websiteBookingEnabled' in body ? { websiteBookingEnabled } : {}),
+          ...(body.workingHours ? { workingHours } : {}),
+          ...extra,
         },
       },
       { upsert: true, returnDocument: 'after' }

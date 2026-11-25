@@ -5,6 +5,10 @@ import DoctorSchedule from '@/models/DoctorSchedule';
 import Appointment from '@/models/Appointment';
 import { isProviderApproved } from '@/lib/providerApproval';
 import { safeTimeZone } from '@/lib/timezone';
+import {
+  type AvailabilitySettings, WEEK, cleanWeekly, cleanTimeOff, cleanOverrides, weeklyFromLegacy,
+  hoursForDate, slotTimes, tooSoon,
+} from '@/lib/availability';
 
 const WEEKDAYS = [
   'sunday',
@@ -76,7 +80,38 @@ export type EffectiveDoctorSchedule = {
   slotDurationMinutes: number;
   websiteBookingEnabled: boolean;
   workingHours: WorkingHoursShape;
+  settings: AvailabilitySettings;
 };
+
+function buildSettings(d: any, wh: WorkingHoursShape, slot: number, web: boolean): AvailabilitySettings {
+  const weekly = d?.weekly && typeof d.weekly === 'object' && Object.keys(d.weekly).length ? cleanWeekly(d.weekly) : weeklyFromLegacy(wh);
+  return {
+    slotDurationMinutes: slot,
+    bufferMinutes: Math.min(120, Math.max(0, Number(d?.bufferMinutes) || 0)),
+    minNoticeHours: Math.min(720, Math.max(0, Number(d?.minNoticeHours) || 0)),
+    maxAdvanceDays: Math.min(730, Math.max(1, Number(d?.maxAdvanceDays) || 90)),
+    maxPerDay: Math.min(200, Math.max(0, Number(d?.maxPerDay) || 0)),
+    paused: Boolean(d?.paused),
+    pausedUntil: d?.pausedUntil ? new Date(d.pausedUntil).toISOString() : null,
+    pauseMessage: String(d?.pauseMessage || ''),
+    weekly,
+    timeOff: cleanTimeOff(d?.timeOff),
+    dateOverrides: cleanOverrides(d?.dateOverrides),
+    websiteBookingEnabled: web,
+  };
+}
+
+/** Old single start/end/days view, derived from the weekly plan so older screens keep working. */
+function legacyFromWeekly(weekly: AvailabilitySettings['weekly'], fb: WorkingHoursShape): WorkingHoursShape {
+  const days = WEEK.filter((d) => weekly[d].enabled);
+  if (!days.length) return { start: fb.start, end: fb.end, days: [] };
+  const all = days.flatMap((d) => weekly[d].ranges);
+  return {
+    days: [...days],
+    start: all.map((r) => r.start).sort()[0],
+    end: all.map((r) => r.end).sort().slice(-1)[0],
+  };
+}
 
 export async function getEffectiveDoctorSchedule(
   doctorId: string,
@@ -89,20 +124,24 @@ export async function getEffectiveDoctorSchedule(
   };
 
   if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+    const f = await ensureFallback();
     return {
       slotDurationMinutes: 30,
       websiteBookingEnabled: true,
-      workingHours: await ensureFallback(),
+      workingHours: f,
+      settings: buildSettings(null, f, 30, true),
     };
   }
   const doc = await DoctorSchedule.findOne({
     doctorId: new mongoose.Types.ObjectId(doctorId),
   }).lean();
   if (!doc) {
+    const f = await ensureFallback();
     return {
       slotDurationMinutes: 30,
       websiteBookingEnabled: true,
-      workingHours: await ensureFallback(),
+      workingHours: f,
+      settings: buildSettings(null, f, 30, true),
     };
   }
   const d = doc as {
@@ -111,17 +150,23 @@ export async function getEffectiveDoctorSchedule(
     workingHours?: Partial<WorkingHoursShape>;
   };
   const fb = await ensureFallback();
-  return {
-    slotDurationMinutes: Math.min(180, Math.max(5, d.slotDurationMinutes ?? 30)),
-    websiteBookingEnabled: d.websiteBookingEnabled !== false,
-    workingHours: {
+  const slot = Math.min(180, Math.max(5, d.slotDurationMinutes ?? 30));
+  const web = d.websiteBookingEnabled !== false;
+  const legacy: WorkingHoursShape = {
       start: d.workingHours?.start || fb.start,
       end: d.workingHours?.end || fb.end,
       days:
         Array.isArray(d.workingHours?.days) && d.workingHours!.days!.length > 0
           ? (d.workingHours!.days as string[])
           : fb.days,
-    },
+  };
+  const settings = buildSettings(doc, legacy, slot, web);
+  const hasWeekly = (doc as any).weekly && Object.keys((doc as any).weekly).length;
+  return {
+    slotDurationMinutes: slot,
+    websiteBookingEnabled: web,
+    workingHours: hasWeekly ? legacyFromWeekly(settings.weekly, fb) : legacy,
+    settings,
   };
 }
 
@@ -213,6 +258,8 @@ export async function computeDoctorDaySlots(
   timeZone: string;
   slotDurationMinutes: number;
   slots: DaySlot[];
+  unavailableReason?: string;
+  unavailableMessage?: string;
 } | { ok: false; error: string; status: number }> {
   if (!mongoose.Types.ObjectId.isValid(doctorId)) {
     return { ok: false, error: 'Invalid doctor', status: 400 };
@@ -253,22 +300,13 @@ export async function computeDoctorDaySlots(
     return { ok: false, error: 'Online booking disabled for this provider', status: 403 };
   }
 
-  const dow = dayKeyFromYmd(dateStr);
-  if (!sched.workingHours.days.map((x) => x.toLowerCase()).includes(dow)) {
-    return {
-      ok: true,
-      doctor: { id: d._id.toString(), name: d.name, email: d.email },
-      timeZone: safeTimeZone(d.timeZone),
-      slotDurationMinutes: sched.slotDurationMinutes,
-      slots: [],
-    };
+  const tz = safeTimeZone(d.timeZone);
+  const base = { ok: true as const, doctor: { id: d._id.toString(), name: d.name, email: d.email }, timeZone: tz, slotDurationMinutes: sched.slotDurationMinutes };
+  const day = hoursForDate(sched.settings, dateStr, tz);
+  if (!day.ranges.length) {
+    return { ...base, slots: [], unavailableReason: day.reason, unavailableMessage: day.message };
   }
-
-  const times = generateSlotTimes(
-    sched.workingHours.start,
-    sched.workingHours.end,
-    sched.slotDurationMinutes
-  );
+  const times = slotTimes(day.ranges, sched.slotDurationMinutes, sched.settings.bufferMinutes);
 
   const booked = await loadBookedTimesForDoctorDay(
     doctorId,
@@ -278,15 +316,16 @@ export async function computeDoctorDaySlots(
     options?.excludeAppointmentId
   );
 
+  const full = sched.settings.maxPerDay > 0 && booked.size >= sched.settings.maxPerDay;
   const slots: DaySlot[] = times.map((time) => ({
     time,
-    available: !booked.has(time),
+    available: !full && !booked.has(time) && !tooSoon(dateStr, time, tz, sched.settings.minNoticeHours),
   }));
 
   return {
     ok: true,
     doctor: { id: d._id.toString(), name: d.name, email: d.email },
-    timeZone: safeTimeZone(d.timeZone),
+    timeZone: tz,
     slotDurationMinutes: sched.slotDurationMinutes,
     slots,
   };

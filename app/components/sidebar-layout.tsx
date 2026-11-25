@@ -169,7 +169,8 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytical-reports/financial', roles: ['admin'] },
 
     // Doctor / herbalist
-    { id: 'appointment-slots', label: 'My availability', icon: LayoutGrid, href: '/appointments/slots', roles: ['doctor'] },
+    { id: 'appointment-slots', label: 'My availability', icon: LayoutGrid, href: '/availability', roles: ['doctor'] },
+    { id: 'appointment-slots-view', label: 'Booked slots', icon: Calendar, href: '/appointments/slots', roles: ['doctor'] },
     { id: 'calendar', label: t('navigation.calendar'), icon: CalendarDays, href: '/calendar', roles: ['doctor'] },
     {
       id: 'telemedicine',
@@ -195,6 +196,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     { id: 'pharmacy-deliveries', label: 'Deliveries', icon: Truck, href: '/pharmacy/deliveries', exact: true, roles: ['pharmacy'] },
     { id: 'pharmacy-billing-wallet', label: 'Earnings & wallet', icon: Wallet, href: '/pharmacy/billing-wallet', exact: true, roles: ['pharmacy'] },
     { id: 'pharmacy-reports', label: 'Reports', icon: BarChart3, href: '/pharmacy/reports', exact: true, roles: ['pharmacy'] },
+    { id: 'pharmacy-availability', label: 'Opening hours', icon: Clock, href: '/availability', exact: true, roles: ['pharmacy'] },
     { id: 'pharmacy-settings', label: 'Settings', icon: Settings, href: '/pharmacy/settings', exact: true, roles: ['pharmacy'] },
 
     // Everyone
