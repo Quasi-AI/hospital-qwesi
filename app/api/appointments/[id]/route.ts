@@ -6,6 +6,7 @@ import {
   normalizeTimeLabel,
 } from '@/lib/appointmentSlotting';
 import TelemedicineSession from '../../../../models/TelemedicineSession';
+import { zonedToInstant, safeTimeZone, ymdOf } from '@/lib/timezone';
 
 export async function GET(
   request: NextRequest,
@@ -114,6 +115,42 @@ export async function PUT(
       update.source = sourceUpdate;
     }
 
+    // Never write undefined fields (a partial update such as a reschedule must not blank the rest)
+    for (const k of Object.keys(update)) if (update[k] === undefined) delete update[k];
+
+    // Rescheduling: validate the new moment in the DOCTOR'S time zone, keep startAt and the call session in step
+    let rescheduledTo: Date | null = null;
+    if (update.appointmentDate !== undefined || update.appointmentTime !== undefined) {
+      const current: any = await Appointment.findById(id).select('appointmentDate appointmentTime doctorTimeZone doctorId doctorEmail status').lean();
+      if (!current) return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
+      const date = (update.appointmentDate as Date | undefined) ?? current.appointmentDate;
+      const time = (update.appointmentTime as string | undefined) ?? current.appointmentTime;
+      if (Number.isNaN(new Date(date).getTime()) || !/^\d{1,2}:\d{2}/.test(String(time))) {
+        return NextResponse.json({ error: 'Please choose a valid date and time' }, { status: 400 });
+      }
+      const tz = safeTimeZone(current.doctorTimeZone);
+      const at = zonedToInstant(ymdOf(date), String(time), tz);
+      const changed = ymdOf(date) !== ymdOf(current.appointmentDate) || String(time) !== String(current.appointmentTime);
+      if (changed) {
+        if (at.getTime() < Date.now() - 60_000) {
+          return NextResponse.json({ error: 'That time has already passed. Please pick a future time.' }, { status: 400 });
+        }
+        const clash = await Appointment.findOne({
+          _id: { $ne: id },
+          status: { $nin: ['cancelled'] },
+          appointmentDate: date,
+          appointmentTime: time,
+          ...(current.doctorId ? { doctorId: current.doctorId } : { doctorEmail: current.doctorEmail }),
+        }).select('_id').lean();
+        if (clash) return NextResponse.json({ error: 'The doctor already has an appointment at that time. Please choose another slot.' }, { status: 409 });
+        update.startAt = at;
+        update.doctorTimeZone = tz;
+        // a rescheduled visit is upcoming again, even if it had been marked missed or completed
+        if (!update.status && ['completed', 'cancelled'].includes(String(current.status))) update.status = 'scheduled';
+        rescheduledTo = at;
+      }
+    }
+
     // Use native MongoDB update to bypass any Mongoose schema caching
     const db = mongoose.default.connection.db;
     const collection = db?.collection('appointments');
@@ -132,6 +169,16 @@ export async function PUT(
         );
       }
       
+      if (rescheduledTo) {
+        try {
+          const sess: any = await TelemedicineSession.findOne({ appointmentId: result._id }).select('scheduledStartTime scheduledEndTime status').lean();
+          if (sess && !['completed', 'in-progress'].includes(sess.status)) {
+            const len = Math.max(15 * 60_000, new Date(sess.scheduledEndTime).getTime() - new Date(sess.scheduledStartTime).getTime() || 30 * 60_000);
+            await TelemedicineSession.updateOne({ _id: sess._id }, { $set: { scheduledStartTime: rescheduledTo, scheduledEndTime: new Date(rescheduledTo.getTime() + len), status: 'scheduled' } });
+          }
+        } catch (e) { console.error('Could not move the call session', e); }
+      }
+
       const response = {
         ...result,
         _id: result._id?.toString?.() ?? result._id,

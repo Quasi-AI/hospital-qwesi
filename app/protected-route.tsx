@@ -46,7 +46,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       router.push('/pharmacy');
     } else if (
       providerRoles.includes(session.user?.role || '') &&
-      (!session.user?.hasImage || !session.user?.hasLicenseCertificate || !session.user?.hasLicenseNumber) &&
+      session.user?.approvalStatus !== 'approved' &&
+      !session.user?.hasLicenseCertificate && !session.user?.hasLicenseNumber &&
       pathname !== '/profile'
     ) {
       router.push(`/profile?verificationRequired=1&returnTo=${encodeURIComponent(roleHome(session.user?.role))}`);

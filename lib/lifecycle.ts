@@ -75,9 +75,7 @@ export async function remindIncompleteProfiles(): Promise<Counts> {
     ).select('profileReminderSentAt profileReminderCount').lean() as any;
     if (!claimed) continue;
     const missing: string[] = [];
-    if (!(u.image || u.hasImage)) missing.push('a profile photo');
-    if (!u.licenseNumber?.trim()) missing.push('your licence number');
-    if (!(u.licenseCertificate?.fileName)) missing.push('your licence certificate');
+    if (!u.licenseNumber?.trim() && !u.licenseCertificate?.fileName) missing.push('your licence number or certificate');
     const kind = u.role === 'pharmacy' ? 'pharmacy' : u.practitionerType === 'herbalist' ? 'herbalist' : 'doctor';
     const free = u.role === 'doctor' && !(Number(u.consultationFee) > 0);
     const body = `<p>Hello ${esc(u.name || '')},</p>

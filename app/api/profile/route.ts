@@ -169,15 +169,17 @@ export async function PUT(request: NextRequest) {
     }
 
     if (isProvider) {
-      const hasRequiredProfile = Boolean(nextImage && nextLicenseNumber && nextCertificate);
-      if (!hasRequiredProfile) {
+      const hasRequiredProfile = Boolean(nextLicenseNumber || nextCertificate);
+      if (existingCurrentUser.approvalStatus === 'approved' && !hasRequiredProfile) {
+        // approved by an admin: never downgrade because a licence is missing
+      } else if (!hasRequiredProfile) {
         updateData.approvalStatus = 'pending_profile';
         updateData.rejectionReason = undefined;
         updateData.licenseVerification = {
           status: 'not_started',
           method: 'manual',
           checkedAt: new Date(),
-          message: 'Profile photo, license number, and license certificate are required.',
+          message: 'A license number or license certificate is required.',
         };
       } else if (
         existingCurrentUser.approvalStatus !== 'approved' ||

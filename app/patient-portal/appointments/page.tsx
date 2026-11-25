@@ -41,6 +41,7 @@ interface Appointment {
   doctorName: string;
   doctorEmail?: string;
   appointmentDate: string;
+  startAt?: string;
   appointmentTime: string;
   doctorTimeZone?: string;
   appointmentType: string;
@@ -161,7 +162,8 @@ export default function PatientAppointmentsPage() {
 
   const filteredAppointments = appointments.filter(apt => {
     const now = new Date();
-    const aptDate = new Date(apt.appointmentDate);
+    // Compare the real start moment (date alone is midnight UTC, which made today's visits look past)
+    const aptDate = apt.startAt ? new Date(new Date(apt.startAt).getTime() + 60 * 60_000) : new Date(new Date(apt.appointmentDate).getTime() + 24 * 3600_000 - 1); // a visit stays "upcoming" for an hour after it starts
     
     // Filter by time
     if (filter === 'upcoming' && aptDate < now) return false;

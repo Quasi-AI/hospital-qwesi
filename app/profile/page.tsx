@@ -316,9 +316,9 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {verificationRequired && isProvider && (!formData.image || !formData.licenseNumber || !formData.licenseCertificate) && (
+          {verificationRequired && isProvider && (!formData.licenseNumber && !formData.licenseCertificate) && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              Please upload your profile photo, license number, and license certificate before continuing. Your account will go to approval after submission.
+              Please add your license number or upload your license certificate before continuing. Your account will go to approval after submission.
             </div>
           )}
 
@@ -345,7 +345,7 @@ export default function ProfilePage() {
                 {isProvider && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Profile photo <span className="text-red-500">*</span>
+                      Profile photo <span className="text-xs font-normal text-gray-400">(optional)</span>
                     </label>
                     <div className="flex items-center gap-4">
                       {formData.image ? (
@@ -377,7 +377,7 @@ export default function ProfilePage() {
                   <>
                     <div>
                       <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                        License number <span className="text-red-500">*</span>
+                        License number <span className="text-xs font-normal text-gray-400">(number or certificate)</span>
                       </label>
                       <div className="relative">
                         <ShieldCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -395,7 +395,7 @@ export default function ProfilePage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        License certificate <span className="text-red-500">*</span>
+                        License certificate <span className="text-xs font-normal text-gray-400">(number or certificate)</span>
                       </label>
                       <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
                         <div className="mb-3 flex items-center gap-2 text-sm text-gray-700">

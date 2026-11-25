@@ -31,15 +31,7 @@ export async function PATCH(
     }
 
     if (action === 'approve') {
-      const currentStatus = getEffectiveProviderApprovalStatus(user as any);
-      if (currentStatus === 'pending_profile') {
-        user.approvalStatus = 'pending_profile';
-        await user.save();
-        return NextResponse.json(
-          { error: 'Profile photo, license number, and license certificate are required before approval.' },
-          { status: 400 }
-        );
-      }
+      // Admins can approve any provider, with or without a photo or licence on file.
       user.approvalStatus = 'approved';
       user.approvalMethod = 'manual';
       user.approvedBy = session.user.email;
@@ -75,11 +67,11 @@ export async function PATCH(
           status: 'not_started',
           method: 'manual',
           checkedAt: new Date(),
-          message: 'Profile photo, license number, and license certificate are required before verification.',
+          message: 'A license number or license certificate is required before verification.',
         };
         await user.save();
         return NextResponse.json(
-          { error: 'Profile photo, license number, and license certificate are required before auto-check.' },
+          { error: 'A license number or certificate is required before auto-check. You can still approve manually.' },
           { status: 400 }
         );
       }

@@ -15,11 +15,14 @@ export function getEffectiveProviderApprovalStatus(user: ProviderLike): string {
     return user.approvalStatus || 'approved';
   }
 
-  const hasPhoto = Boolean(user.image || user.hasImage);
+  // An administrator's approval always stands, even if no licence or photo was uploaded.
+  if (user.approvalStatus === 'approved') return 'approved';
+
+  // Only a licence (number or certificate) is needed; a profile photo is optional.
   const hasCertificate = Boolean(user.licenseCertificate?.data || user.licenseCertificate?.fileName);
   const hasLicenseNumber = Boolean(user.licenseNumber?.trim());
 
-  if (!hasPhoto || !hasCertificate || !hasLicenseNumber) {
+  if (!hasCertificate && !hasLicenseNumber) {
     return 'pending_profile';
   }
 

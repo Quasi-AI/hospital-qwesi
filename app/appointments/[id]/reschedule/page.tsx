@@ -66,11 +66,17 @@ export default function AppointmentReschedulePage() {
       return;
     }
 
+    const today = new Date().toLocaleDateString('en-CA');
+    if (formData.appointmentDate < today) {
+      notify('Please choose today or a later date');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const updateData = {
-        appointmentDate: new Date(formData.appointmentDate),
+        appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime
       };
 
@@ -165,7 +171,7 @@ export default function AppointmentReschedulePage() {
                       required
                       value={formData.appointmentDate}
                       onChange={handleInputChange}
-                      min={new Date().toISOString().split('T')[0]}
+                      min={new Date().toLocaleDateString('en-CA')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
