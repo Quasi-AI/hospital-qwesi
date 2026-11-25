@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
       let doctors;
       if (!q) {
-        doctors = await User.find({ role: 'doctor' })
+        doctors = await User.find({ role: 'doctor', deletedAt: { $exists: false } })
           .select('-password')
           .sort({ name: 1 })
           .limit(limit)
@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
         const regex = new RegExp(escaped, 'i');
         doctors = await User.find({
           role: 'doctor',
+          deletedAt: { $exists: false },
           $or: [{ name: regex }, { email: regex }],
         })
           .select('-password')
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Otherwise return all doctors (no search params)
-    const doctors = await User.find({ role: 'doctor' })
+    const doctors = await User.find({ role: 'doctor', deletedAt: { $exists: false } })
       .select('-password -image -licenseCertificate.data')
       .sort({ createdAt: -1 })
       .lean();

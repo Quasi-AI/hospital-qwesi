@@ -20,7 +20,7 @@ export async function GET() {
 
     await dbConnect();
 
-    const pharmacies = await User.find({ role: 'pharmacy' })
+    const pharmacies = await User.find({ role: 'pharmacy', deletedAt: { $exists: false } })
       .select('_id name email phone address approvalStatus hasImage licenseNumber licenseCertificate createdAt')
       .sort({ name: 1 })
       .lean();

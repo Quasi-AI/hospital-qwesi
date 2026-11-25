@@ -176,6 +176,17 @@ export const authOptions: AuthOptions = {
           token.patientId = user.patientId;
         }
       }
+      // Archived / permanently deleted accounts lose their session within ~2 minutes.
+      if (token.id && token.role && (!token.accountCheckedAt || Date.now() - Number(token.accountCheckedAt) > 120_000)) {
+        try {
+          await dbConnect();
+          const isId = /^[a-f0-9]{24}$/i.test(String(token.id));
+          const doc: any = !isId ? true
+            : (await User.findById(token.id).select('deletedAt').lean()) || (token.role === 'patient' ? await Patient.findById(token.id).select('deletedAt').lean() : null);
+          token.accountDeleted = !doc || Boolean((doc as any).deletedAt);
+          token.accountCheckedAt = Date.now();
+        } catch { /* keep the session if the database is unreachable */ }
+      }
       if (trigger === 'update' && session?.user) {
         token.name = session.user.name ?? token.name;
         token.email = session.user.email ?? token.email;
@@ -202,6 +213,7 @@ export const authOptions: AuthOptions = {
           session.user.patientId = token.patientId as string;
         }
       }
+      if (token.accountDeleted) (session as any).error = 'AccountDeleted';
       return session;
     },
   },

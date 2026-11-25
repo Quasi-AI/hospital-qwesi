@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 export interface IUser {
   lastLoginAt?: Date;
+  /** Soft delete: set when an admin archives the account; email/phone are released so the person can register again */
+  deletedAt?: Date;
+  deletedBy?: string;
+  originalEmail?: string;
+  originalPhone?: string;
   profileReminderSentAt?: Date;
   profileReminderCount?: number;
   checkInEmailSentAt?: Date;
@@ -83,6 +88,10 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: false,
     },
+    deletedAt: { type: Date },
+    deletedBy: { type: String },
+    originalEmail: { type: String },
+    originalPhone: { type: String },
     role: {
       type: String,
       enum: ['doctor', 'admin', 'staff', 'nurse', 'patient', 'pharmacy', 'hospital'],

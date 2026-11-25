@@ -9,6 +9,10 @@ export interface IPatient {
   patientId: string;
   name: string;
   email: string;
+  deletedAt?: Date;
+  deletedBy?: string;
+  originalEmail?: string;
+  originalPhone?: string;
   phone: string;
   dateOfBirth: Date;
   gender: 'male' | 'female' | 'other' | 'prefer-not-to-say';
@@ -84,6 +88,10 @@ const patientSchema = new mongoose.Schema<IPatient>(
       required: false, // Will be auto-generated in pre-save hook
       trim: true,
     },
+    deletedAt: { type: Date },
+    deletedBy: { type: String },
+    originalEmail: { type: String },
+    originalPhone: { type: String },
     name: {
       type: String,
       required: true,

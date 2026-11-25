@@ -76,10 +76,11 @@ export async function getPatientScope(): Promise<{ user: SessionUser | null; sco
 
 /** Mongo filter that restricts a Patient query to what the scope allows. */
 export function patientFilterForScope(scope: PatientScope): Record<string, unknown> {
+  const live = { deletedAt: { $exists: false } };
   switch (scope.kind) {
-    case 'all': return {};
-    case 'ids': return { _id: { $in: scope.ids } };
-    case 'self': return { email: scope.email };
+    case 'all': return live;
+    case 'ids': return { ...live, _id: { $in: scope.ids } };
+    case 'self': return { ...live, email: scope.email };
     default: return { _id: { $in: [] } };
   }
 }

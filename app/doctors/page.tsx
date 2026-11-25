@@ -23,6 +23,7 @@ import {
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
 import { useTranslations } from '../hooks/useTranslations';
+import { DeleteAccountModal, type DeleteTarget } from '../components/DeleteAccountModal';
 
 export default function DoctorsPage() {
   const router = useRouter();
@@ -80,31 +81,9 @@ export default function DoctorsPage() {
     return matchesSearch && matchesSpec;
   });
 
-  const handleDeleteDoctor = async (doctorId: string, doctorName: string) => {
-    if (!confirm(t('doctors.confirmDelete', { name: doctorName }))) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/doctors?id=${doctorId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        notify(t('doctors.deletedSuccess'));
-        fetchDoctors();
-      } else {
-        const errorData = await response.json();
-        notify(
-          t('doctors.deleteFailed', {
-            error: errorData.error || t('doctors.unknownDeleteError'),
-          })
-        );
-      }
-    } catch (error) {
-      console.error('Error deleting doctor:', error);
-      notify(t('doctors.deleteError'));
-    }
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const handleDeleteDoctor = (doctorId: string, doctorName: string) => {
+    setDeleteTarget({ type: 'user', id: doctorId, name: doctorName, label: 'doctor' });
   };
 
   const handleApproval = async (doctorId: string, action: 'approve' | 'reject' | 'auto-verify') => {
@@ -474,6 +453,7 @@ export default function DoctorsPage() {
           </div>
         </div>
       </SidebarLayout>
+      <DeleteAccountModal target={deleteTarget} onClose={() => setDeleteTarget(null)} onDone={(m) => { notify(m); fetchDoctors(); }} />
     </ProtectedRoute>
   );
 }

@@ -11,7 +11,7 @@ const PUBLIC_FIELDS =
 export const FREE_UNFINISHED_PROVIDER = {
   $or: [{ consultationFee: { $lte: 0 } }, { consultationFee: { $exists: false } }, { consultationFee: null }],
 };
-export const APPROVED_DOCTOR = { role: 'doctor', approvalStatus: { $ne: 'rejected' }, $nor: [FREE_UNFINISHED_PROVIDER] };
+export const APPROVED_DOCTOR = { role: 'doctor', deletedAt: { $exists: false }, approvalStatus: { $ne: 'rejected' }, $nor: [FREE_UNFINISHED_PROVIDER] };
 
 export const isFreeUnfinishedProvider = (u: { approvalStatus?: string; consultationFee?: number | null }) =>
   !(Number(u.consultationFee) > 0);

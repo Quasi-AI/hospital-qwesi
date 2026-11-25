@@ -79,11 +79,11 @@ export async function GET(request: NextRequest) {
     }
 
     const [users, patients] = await Promise.all([
-      User.find({ role: { $in: ['doctor', 'staff'] }, email: { $ne: session.user.email } })
+      User.find({ role: { $in: ['doctor', 'staff'] }, email: { $ne: session.user.email }, deletedAt: { $exists: false } })
         .select('name email role image specialization department')
         .sort({ name: 1 })
         .lean(),
-      Patient.find({}).select('name email patientId').sort({ name: 1 }).limit(200).lean(),
+      Patient.find({ deletedAt: { $exists: false } }).select('name email patientId').sort({ name: 1 }).limit(200).lean(),
     ]);
 
     return NextResponse.json({

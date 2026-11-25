@@ -19,6 +19,7 @@ import {
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
 import { useTranslations } from '../hooks/useTranslations';
+import { DeleteAccountModal, type DeleteTarget } from '../components/DeleteAccountModal';
 
 export default function PatientsPage() {
   const router = useRouter();
@@ -76,26 +77,10 @@ export default function PatientsPage() {
     router.push(`/patients/${patient._id}/edit`);
   };
 
-  const handleDeletePatient = async (patient: any) => {
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const handleDeletePatient = (patient: any) => {
     setShowActionsMenu(null);
-    if (confirm(`${t('common.confirm')} ${t('patients.deletePatient')} ${patient.name}?`)) {
-      try {
-        const response = await fetch(`/api/patients/${patient._id}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          setPatients(patients.filter((p) => p._id !== patient._id));
-          notify(`${t('patients.patient')} ${patient.name} ${t('common.success')}`);
-        } else {
-          const error = await response.json();
-          notify(error.error || t('common.error'));
-        }
-      } catch (error) {
-        console.error('Error deleting patient:', error);
-        notify(t('common.error'));
-      }
-    }
+    setDeleteTarget({ type: 'patient', id: patient._id, name: patient.name, label: 'patient' });
   };
 
   const toggleActionsMenu = (patientId: string, e?: React.MouseEvent) => {
@@ -372,6 +357,7 @@ export default function PatientsPage() {
           </div>
         </div>
       </SidebarLayout>
+      <DeleteAccountModal target={deleteTarget} onClose={() => setDeleteTarget(null)} onDone={(m) => { notify(m); setPatients((prev) => prev.filter((p) => p._id !== deleteTarget?.id)); }} />
     </ProtectedRoute>
   );
 }

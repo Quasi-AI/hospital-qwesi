@@ -2,7 +2,7 @@
 
 
 import { AppShellSkeleton } from '@/app/components/Skeletons';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -28,6 +28,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     if (!session) {
       router.push('/login');
+      return;
+    }
+
+    if ((session as any).error === 'AccountDeleted') {
+      signOut({ callbackUrl: '/login?deleted=1' });
       return;
     }
 
