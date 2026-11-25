@@ -200,6 +200,25 @@ export async function getPatientConsultationAccess(params: {
   };
 }
 
+/**
+ * Atomically reserve a paid credit so two simultaneous bookings can never spend the same payment.
+ * Returns false when someone else already took it.
+ */
+export async function claimPaygCredit(transactionId: string): Promise<boolean> {
+  if (!mongoose.Types.ObjectId.isValid(transactionId)) return false;
+  const r = await PaystackTransaction.findOneAndUpdate(
+    { _id: transactionId, status: 'success', $or: [{ 'metadata.consumedAt': { $exists: false } }, { 'metadata.consumedAt': null }] },
+    { $set: { 'metadata.consumedAt': new Date() } },
+  ).select('_id').lean();
+  return Boolean(r);
+}
+
+/** Give a reserved credit back (the booking failed after it was claimed). */
+export async function releasePaygCredit(transactionId: string) {
+  if (!mongoose.Types.ObjectId.isValid(transactionId)) return;
+  await PaystackTransaction.updateOne({ _id: transactionId, 'metadata.consumedByAppointmentId': { $exists: false } }, { $unset: { 'metadata.consumedAt': 1 } });
+}
+
 export async function consumePatientPaygCredit(params: {
   transactionId: string;
   appointmentId: string;

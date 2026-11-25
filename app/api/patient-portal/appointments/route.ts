@@ -15,6 +15,8 @@ import { createNotification, scheduleAppointmentReminder } from '@/lib/notificat
 import { emitRealtimeEvent } from '@/lib/realtime';
 import {
   consumePatientPaygCredit,
+  claimPaygCredit,
+  releasePaygCredit,
   getPatientConsultationAccess,
 } from '@/lib/patientConsultationAccess';
 import { isProviderApproved } from '@/lib/providerApproval';
@@ -183,7 +185,17 @@ export async function POST(request: NextRequest) {
       .filter(Boolean)
       .join('\n');
 
-    const appointment = await Appointment.create({
+    // Reserve the paid credit first so the same payment cannot book twice
+    if (access.source === 'payg' && access.paygTransaction) {
+      const claimed = await claimPaygCredit(access.paygTransaction._id);
+      if (!claimed) {
+        return NextResponse.json({ error: 'This payment has already been used for another booking. Please pay again to book.', access }, { status: 402 });
+      }
+    }
+
+    let appointment: any;
+    try {
+    appointment = await Appointment.create({
       patientId: String(patient._id),
       patientName: patient.name,
       patientEmail: patient.email,
@@ -201,6 +213,10 @@ export async function POST(request: NextRequest) {
       notes,
       consentAgreement: parsedAgreement.agreement,
     });
+    } catch (createError) {
+      if (access.source === 'payg' && access.paygTransaction) await releasePaygCredit(access.paygTransaction._id);
+      throw createError;
+    }
 
     try {
       await scheduleAppointmentReminder(appointment._id.toString());

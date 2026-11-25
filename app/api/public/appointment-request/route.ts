@@ -17,6 +17,7 @@ import { phoneDigitsForMatch } from '@/lib/phoneNormalize';
 import { verifyBookingVerificationToken } from '@/lib/publicBookingToken';
 import { registerPatientFromBooking } from '@/lib/registerPatientFromBooking';
 import { isProviderApproved } from '@/lib/providerApproval';
+import { getPatientConsultationAccess, claimPaygCredit, consumePatientPaygCredit } from '@/lib/patientConsultationAccess';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PORTAL_GENDERS = new Set(['male', 'female', 'other', 'prefer-not-to-say']);
@@ -183,6 +184,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // A confirmed booking needs payment (or a covering subscription / free practitioner).
+    const access = await getPatientConsultationAccess({ patientEmail, doctorId: String(doctorId) });
+    if (!access.allowed) {
+      return NextResponse.json({ error: access.message || 'Payment required to book', needsPayment: true }, { status: 402 });
+    }
+    if (access.source === 'payg' && access.paygTransaction && !(await claimPaygCredit(access.paygTransaction._id))) {
+      return NextResponse.json({ error: 'This payment has already been used for another booking.', needsPayment: true }, { status: 402 });
+    }
+
     const doc = {
       ...(finalPatientId ? { patientId: finalPatientId } : {}),
       patientName,
@@ -199,7 +209,7 @@ export async function POST(request: NextRequest) {
       location: '',
       consultationFee: Number((doctor as any).consultationFee || 0),
       currency: (doctor as any).consultationCurrency || 'GHS',
-      paymentStatus: 'pending',
+      paymentStatus: access.source === 'payg' ? 'paid' : access.source === 'free' ? 'waived' : 'covered',
       reason: reason || undefined,
       notes,
     };
@@ -214,6 +224,7 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       });
       const idStr = result.insertedId.toString();
+      if (access.source === 'payg' && access.paygTransaction) await consumePatientPaygCredit({ transactionId: access.paygTransaction._id, appointmentId: idStr });
       try {
         await scheduleAppointmentReminder(idStr);
       } catch (e) {
@@ -228,6 +239,7 @@ export async function POST(request: NextRequest) {
     const appointment = new Appointment(doc);
     await appointment.save();
     const idStr = appointment._id.toString();
+    if (access.source === 'payg' && access.paygTransaction) await consumePatientPaygCredit({ transactionId: access.paygTransaction._id, appointmentId: idStr });
     try {
       await scheduleAppointmentReminder(idStr);
     } catch (e) {

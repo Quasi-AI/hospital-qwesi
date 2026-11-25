@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '../../../../lib/mongodb';
 import Appointment from '../../../../models/Appointment';
 import {
@@ -62,6 +64,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const guard = await getServerSession(authOptions);
+    if (!guard?.user || !['admin', 'staff', 'nurse', 'doctor'].includes(String(guard.user.role))) {
+      return NextResponse.json({ error: 'Not allowed' }, { status: 403 });
+    }
     await dbConnect();
     const { id } = await params;
     const body = await request.json();
@@ -223,6 +229,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const guard = await getServerSession(authOptions);
+    if (!guard?.user || !['admin', 'staff', 'nurse', 'doctor'].includes(String(guard.user.role))) {
+      return NextResponse.json({ error: 'Not allowed' }, { status: 403 });
+    }
     await dbConnect();
     const { id } = await params;
 

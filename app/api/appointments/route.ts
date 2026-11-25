@@ -132,6 +132,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    // Only staff create appointments here. Patients book (and pay) through the patient portal.
+    if (!session?.user || !['admin', 'staff', 'nurse', 'doctor'].includes(String(session.user.role))) {
+      return NextResponse.json({ error: 'Not allowed. Patients book and pay through the patient portal.' }, { status: 403 });
+    }
     await dbConnect();
     const body = await request.json();
     

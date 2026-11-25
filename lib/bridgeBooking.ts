@@ -7,7 +7,7 @@ import { normalizeAppointmentDateForStorage, normalizeTimeLabel, isSlotAvailable
 import { getSystemCurrency } from '@/lib/getSystemCurrency';
 import { createNotification, scheduleAppointmentReminder } from '@/lib/notifications/notification-service';
 import { parseBookingAgreement } from '@/lib/booking-agreement';
-import { consumePatientPaygCredit, getPatientConsultationAccess } from '@/lib/patientConsultationAccess';
+import { claimPaygCredit, consumePatientPaygCredit, getPatientConsultationAccess } from '@/lib/patientConsultationAccess';
 
 export type BookingRequest = {
   doctorId: string;
@@ -52,6 +52,10 @@ export async function createBridgeAppointment(patient: any, req: BookingRequest)
 
   const parsed = parseBookingAgreement(req.agreement, req.channel || 'whatsapp');
   if (!parsed.ok) return { ok: false, status: 400, error: parsed.error, needsAgreement: true };
+
+  if (access.source === 'payg' && access.paygTransaction && !(await claimPaygCredit(access.paygTransaction._id))) {
+    return { ok: false, status: 402, error: 'This payment has already been used for another booking.', needsPayment: true };
+  }
 
   const reason = String(req.reason || '').trim().slice(0, 4000) || 'Consultation booked via WhatsApp/Facebook';
   const cleanName = String(doctor.name || '').replace(/^dr\.?\s+/i, '');
