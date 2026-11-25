@@ -1,7 +1,7 @@
 'use client';
 
 
-import { ContentSkeleton } from '@/app/components/Skeletons';
+import { ContentSkeleton, InlineLoading } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
@@ -421,7 +421,7 @@ Base your assessment on evidence-based medicine and current clinical guidelines.
               {/* Risk Summary Cards */}
               {isLoadingStats ? (
                 <div className="flex items-center justify-center gap-2 py-6 text-xs text-gray-600">
-                  <ContentSkeleton />
+                  <InlineLoading />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
@@ -511,7 +511,7 @@ Base your assessment on evidence-based medicine and current clinical guidelines.
                 <h3 className="mb-2 text-sm font-semibold text-gray-900">Recent Risk Assessments</h3>
                 {isLoadingStats ? (
                   <div className="flex items-center justify-center gap-2 py-6 text-xs text-gray-600">
-                    <ContentSkeleton />
+                    <InlineLoading />
                   </div>
                 ) : recentAssessments.length > 0 ? (
                   <div className="space-y-3">
@@ -805,7 +805,7 @@ Base your assessment on evidence-based medicine and current clinical guidelines.
             <div className="space-y-4">
               {isLoadingStats ? (
                 <div className="flex items-center justify-center gap-2 py-8 text-xs text-gray-600">
-                  <ContentSkeleton />
+                  <InlineLoading />
                 </div>
               ) : recentAssessments.length > 0 ? (
                 <>

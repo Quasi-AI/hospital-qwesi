@@ -72,7 +72,7 @@ export function LandingChatWidgetSettings() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-14">
-        <ContentSkeleton />
+        <ContentSkeleton variant="form" />
       </div>
     );
   }

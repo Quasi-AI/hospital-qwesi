@@ -315,7 +315,7 @@ export default function HospitalWebsiteCMSPage() {
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex justify-center py-24">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

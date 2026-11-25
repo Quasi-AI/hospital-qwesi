@@ -209,7 +209,7 @@ function EditDoctorForm() {
         <SidebarLayout title="Loading..." description="Please wait..." dense>
           <div className="flex min-h-[280px] items-center justify-center">
             <div className="text-center">
-              <ContentSkeleton />
+              <ContentSkeleton variant="form" />
             </div>
           </div>
         </SidebarLayout>
@@ -804,7 +804,7 @@ export default function EditDoctorPage() {
         <SidebarLayout title="Loading..." description="Please wait..." dense>
           <div className="flex min-h-[280px] items-center justify-center">
             <div className="text-center">
-              <ContentSkeleton />
+              <ContentSkeleton variant="form" />
             </div>
           </div>
         </SidebarLayout>

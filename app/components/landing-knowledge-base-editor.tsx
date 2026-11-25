@@ -623,7 +623,7 @@ export function LandingKnowledgeBaseEditor() {
                   <div className="border-t border-gray-100 bg-gradient-to-b from-gray-50/90 to-white px-4 py-5 sm:px-6 sm:py-6">
                     {editLoading || !editForm ? (
                       <div className="flex justify-center py-10">
-                        <ContentSkeleton />
+                        <ContentSkeleton variant="form" />
                       </div>
                     ) : (
                       <div className="mx-auto max-w-3xl space-y-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">

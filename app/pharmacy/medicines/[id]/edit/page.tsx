@@ -142,7 +142,7 @@ function EditMedicineForm({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('pharmacy.editMedicine')} description="" dense>
           <div className="flex items-center justify-center h-48">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -154,7 +154,7 @@ function EditMedicineForm({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('pharmacy.editMedicine')} description="" dense>
           <div className="flex items-center justify-center h-48 gap-2">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -514,7 +514,7 @@ export default function EditMedicinePage({ params }: { params: Promise<{ id: str
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex items-center justify-center min-h-[40vh]">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

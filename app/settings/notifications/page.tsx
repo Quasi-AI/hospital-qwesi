@@ -314,7 +314,7 @@ export default function NotificationSettingsPage() {
       <ProtectedRoute requiredRoles={['admin']}>
         <SidebarLayout title="Notification Settings" description="Configure email and SMS providers" dense>
           <div className="flex h-32 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

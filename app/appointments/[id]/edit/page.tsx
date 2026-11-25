@@ -276,7 +276,7 @@ export default function AppointmentEditPage() {
       <ProtectedRoute>
         <SidebarLayout title="Edit Appointment" description="Modify appointment" dense>
           <div className="flex min-h-[240px] items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

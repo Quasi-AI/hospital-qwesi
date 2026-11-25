@@ -278,7 +278,7 @@ export default function SettingsPage() {
       <ProtectedRoute>
         <SidebarLayout title={t('settings.title')} description={t('settings.description')} dense>
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -290,7 +290,7 @@ export default function SettingsPage() {
       <ProtectedRoute>
         <SidebarLayout title={t('settings.title')} description={t('settings.description')} dense>
           <div className="flex items-center justify-center py-16">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

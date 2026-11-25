@@ -85,7 +85,7 @@ export default function NewAppointmentPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[40vh] items-center justify-center">
-          <ContentSkeleton />
+          <ContentSkeleton variant="form" />
         </div>
       }
     >

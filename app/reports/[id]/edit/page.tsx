@@ -146,7 +146,7 @@ export default function ReportEditPage() {
           title="Edit Report"
           description="Edit medical report information" dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

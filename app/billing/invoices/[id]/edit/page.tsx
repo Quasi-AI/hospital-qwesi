@@ -217,7 +217,7 @@ function EditInvoiceForm({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('billing.editInvoice')} description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -229,7 +229,7 @@ function EditInvoiceForm({ params }: { params: Promise<{ id: string }> }) {
       <ProtectedRoute>
         <SidebarLayout title={t('billing.editInvoice')} description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -526,7 +526,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       <ProtectedRoute>
         <SidebarLayout title="" description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

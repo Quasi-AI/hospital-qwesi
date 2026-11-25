@@ -42,7 +42,7 @@ export default function NewSessionPage() {
       fallback={
         <SidebarLayout title="Schedule New Session" description="Create a new telemedicine consultation" dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       }

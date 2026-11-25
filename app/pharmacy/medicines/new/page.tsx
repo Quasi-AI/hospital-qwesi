@@ -69,7 +69,7 @@ export default function NewMedicinePage() {
   const categories = ['tablet', 'capsule', 'syrup', 'injection', 'cream', 'ointment', 'drops', 'inhaler', 'powder', 'solution', 'suspension', 'other'];
 
   if (!translationsLoaded) {
-    return <ProtectedRoute><SidebarLayout title="" description="" dense><div className="flex items-center justify-center h-48"><ContentSkeleton /></div></SidebarLayout></ProtectedRoute>;
+    return <ProtectedRoute><SidebarLayout title="" description="" dense><div className="flex items-center justify-center h-48"><ContentSkeleton variant="form" /></div></SidebarLayout></ProtectedRoute>;
   }
 
   return (

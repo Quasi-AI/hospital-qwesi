@@ -24,7 +24,7 @@ export default function NewLabTestPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[40vh] items-center justify-center">
-          <ContentSkeleton />
+          <ContentSkeleton variant="form" />
         </div>
       }
     >
@@ -154,7 +154,7 @@ function NewLabTestPageContent() {
       <ProtectedRoute>
         <SidebarLayout title={t('lab.newTestOrder')} description="" dense>
           <div className="text-center py-12">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

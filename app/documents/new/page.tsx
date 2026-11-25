@@ -36,7 +36,7 @@ export default function NewDocumentPage() {
     <Suspense
       fallback={
         <div className="flex h-48 items-center justify-center">
-          <ContentSkeleton />
+          <ContentSkeleton variant="form" />
         </div>
       }
     >
@@ -257,7 +257,7 @@ function NewDocumentPageContent() {
           description={t('documents.newDocumentDesc') || 'Upload and create a new document'}
           dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

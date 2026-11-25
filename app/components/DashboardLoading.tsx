@@ -9,7 +9,7 @@ export default function DashboardLoading() {
   return (
     <ProtectedRoute>
       <SidebarLayout title="" description="" dense>
-        <ContentSkeleton rows={6} stats={4} />
+        <ContentSkeleton variant="page" rows={6} stats={4} />
       </SidebarLayout>
     </ProtectedRoute>
   );

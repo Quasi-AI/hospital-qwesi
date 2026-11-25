@@ -1,7 +1,7 @@
 'use client';
 
 
-import { ContentSkeleton } from '@/app/components/Skeletons';
+import { ContentSkeleton, InlineLoading } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
@@ -590,7 +590,7 @@ export default function AIMedicalImagePage() {
                   </h3>
                   
                   <div className="py-6 text-center">
-                    <ContentSkeleton />
+                    <InlineLoading />
                     <h4 className="mb-1 text-sm font-semibold text-gray-900">Analyzing Medical Image</h4>
                     <p className="mb-3 text-xs text-gray-600 sm:text-sm">
                       {activeModel

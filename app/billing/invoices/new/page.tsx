@@ -35,7 +35,7 @@ export default function NewInvoicePage() {
     <Suspense
       fallback={
         <div className="flex min-h-[40vh] items-center justify-center">
-          <ContentSkeleton />
+          <ContentSkeleton variant="form" />
         </div>
       }
     >
@@ -134,7 +134,7 @@ function NewInvoicePageContent() {
       <ProtectedRoute>
         <SidebarLayout title="..." description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

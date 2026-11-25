@@ -66,7 +66,7 @@ function NewPatientAppointmentFallback() {
   return (
     <div className="flex min-h-[320px] items-center justify-center">
       <div className="text-center">
-        <ContentSkeleton />
+        <ContentSkeleton variant="form" />
       </div>
     </div>
   );

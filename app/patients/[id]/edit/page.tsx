@@ -167,7 +167,7 @@ export default function PatientEditPage() {
           dense
         >
           <div className="flex min-h-[280px] items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

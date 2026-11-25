@@ -1,7 +1,7 @@
 'use client';
 
 
-import { ContentSkeleton } from '@/app/components/Skeletons';
+import { ContentSkeleton, InlineLoading } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import { 
   Send, 
@@ -455,7 +455,7 @@ export default function AIAssistantPage() {
           dense
         >
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <ContentSkeleton />
+            <InlineLoading />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

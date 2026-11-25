@@ -1,7 +1,7 @@
 'use client';
 
 
-import { ContentSkeleton } from '@/app/components/Skeletons';
+import { ContentSkeleton, InlineLoading } from '@/app/components/Skeletons';
 import { notify } from '@/lib/notify';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -957,7 +957,7 @@ export default function AIDrugInteractionPage() {
                 
                 {isAnalyzing ? (
                   <div className="py-6 text-center">
-                    <ContentSkeleton />
+                    <InlineLoading />
                     <p className="text-sm text-gray-600">{t('ai.drugInteraction.analyzingDrugInteractions')}</p>
                   </div>
                 ) : aiAnalysis ? (

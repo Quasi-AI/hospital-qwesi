@@ -28,7 +28,7 @@ export default function NewServiceItemPage() {
       <ProtectedRoute>
         <SidebarLayout title="..." description="" dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

@@ -159,7 +159,7 @@ export default function PrescriptionPage() {
     return (
       <SidebarLayout dense>
         <div className="flex h-48 items-center justify-center">
-          <ContentSkeleton />
+          <ContentSkeleton variant="form" />
         </div>
       </SidebarLayout>
     );

@@ -1,7 +1,7 @@
 'use client';
 
 
-import { ContentSkeleton } from '@/app/components/Skeletons';
+import { ContentSkeleton, InlineLoading } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -404,7 +404,7 @@ Base your predictions on current trends and epidemiological patterns.`,
           dense
         >
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <ContentSkeleton />
+            <InlineLoading />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -475,7 +475,7 @@ Base your predictions on current trends and epidemiological patterns.`,
               {/* Trend Summary Cards */}
               {isLoadingData ? (
                 <div className="flex items-center justify-center gap-2 py-10">
-                  <ContentSkeleton />
+                  <InlineLoading />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
@@ -610,7 +610,7 @@ Base your predictions on current trends and epidemiological patterns.`,
             <div className="space-y-4">
               {isLoadingData ? (
                 <div className="flex items-center justify-center gap-2 py-10">
-                  <ContentSkeleton />
+                  <InlineLoading />
                 </div>
               ) : (
                 <>
@@ -719,7 +719,7 @@ Base your predictions on current trends and epidemiological patterns.`,
             <div className="space-y-4">
               {isAnalyzingPredictions ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-10">
-                  <ContentSkeleton />
+                  <InlineLoading />
                   <span className="text-xs text-gray-600">Generating AI predictions…</span>
                 </div>
               ) : (
@@ -793,7 +793,7 @@ Base your predictions on current trends and epidemiological patterns.`,
             <div className="space-y-4">
               {isLoadingData ? (
                 <div className="flex items-center justify-center gap-2 py-10">
-                  <ContentSkeleton />
+                  <InlineLoading />
                 </div>
               ) : (
                 <>

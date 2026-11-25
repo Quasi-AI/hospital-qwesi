@@ -1,7 +1,7 @@
 'use client';
 
 
-import { ContentSkeleton } from '@/app/components/Skeletons';
+import { ContentSkeleton, InlineLoading } from '@/app/components/Skeletons';
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../protected-route';
 import SidebarLayout from '../components/sidebar-layout';
@@ -261,7 +261,7 @@ export default function AIHealthAnalyticsPage() {
           dense
         >
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <ContentSkeleton />
+            <InlineLoading />
           </div>
         </SidebarLayout>
       </ProtectedRoute>
@@ -507,7 +507,7 @@ export default function AIHealthAnalyticsPage() {
 
                 {isLoading ? (
                   <div className="flex flex-col items-center gap-2 py-8">
-                    <ContentSkeleton />
+                    <InlineLoading />
                     <p className="text-xs text-gray-600 sm:text-sm">{t('ai.healthAnalytics.analyzingPracticeData')}</p>
                   </div>
                 ) : aiInsights ? (
@@ -560,7 +560,7 @@ export default function AIHealthAnalyticsPage() {
               {/* AI Predictions Content */}
               {isLoading ? (
                 <div className="flex flex-col items-center gap-2 py-8">
-                  <ContentSkeleton />
+                  <InlineLoading />
                   <p className="text-xs text-gray-600 sm:text-sm">{t('ai.healthAnalytics.generatingAIPredictions')}</p>
                 </div>
               ) : aiPredictions ? (
@@ -686,7 +686,7 @@ export default function AIHealthAnalyticsPage() {
               {/* AI Optimization Content */}
               {isLoading ? (
                 <div className="flex flex-col items-center gap-2 py-8">
-                  <ContentSkeleton />
+                  <InlineLoading />
                   <p className="text-xs text-gray-600 sm:text-sm">{t('ai.healthAnalytics.generatingAIOptimization')}</p>
                 </div>
               ) : aiOptimizations ? (

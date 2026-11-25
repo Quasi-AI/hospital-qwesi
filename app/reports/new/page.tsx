@@ -22,7 +22,7 @@ export default function NewReportPage() {
     <Suspense
       fallback={
         <div className="flex h-48 items-center justify-center">
-          <ContentSkeleton />
+          <ContentSkeleton variant="form" />
         </div>
       }
     >
@@ -245,7 +245,7 @@ function NewReportPageContent() {
           title="Create New Report" 
           description="Add a new medical report to the system." dense>
           <div className="flex h-48 items-center justify-center">
-            <ContentSkeleton />
+            <ContentSkeleton variant="form" />
           </div>
         </SidebarLayout>
       </ProtectedRoute>

@@ -123,7 +123,7 @@ export default function PatientProfilePage() {
     return (
       <div className="flex min-h-[320px] items-center justify-center">
         <div className="text-center">
-          <ContentSkeleton />
+          <ContentSkeleton variant="form" />
         </div>
       </div>
     );
