@@ -81,7 +81,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     { id: 'medical-records', label: 'Medical Records', icon: FileText, href: '/patient-portal/medical-records' },
     { id: 'messages', label: 'Messages', icon: MessageCircle, href: '/patient-portal/messages' },
     { id: 'family', label: 'Family Members', icon: Users, href: '/patient-portal/family' },
-    { id: 'subscriptions', label: 'Plans & Payments', icon: CreditCard, href: '/patient-portal/subscriptions' },
+    { id: 'subscriptions', label: 'Credits & Payments', icon: CreditCard, href: '/patient-portal/subscriptions' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/patient-portal/profile' },
     { id: 'help', label: 'Help & Support', icon: HelpCircle, href: '/patient-portal/help' },
   ];

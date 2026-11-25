@@ -157,7 +157,7 @@ export default function PatientVitalsPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Patient-entered vitals</p>
             <h1 className="mt-1 text-xl font-bold text-gray-950">Share your latest readings</h1>
             <p className="mt-1 max-w-2xl text-sm leading-relaxed text-gray-600">
-              Add home readings here so your doctors and nurses can review changes before or during your visit.
+              Add home readings here so your doctors can review changes before or during your visit.
             </p>
           </div>
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-700">

@@ -8,7 +8,7 @@ export default function PatientCareTeamPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold text-slate-950">My Care Team</h1>
-        <p className="mt-1 text-sm text-slate-600">Doctors, nurses, and care coordinators connected to your visits.</p>
+        <p className="mt-1 text-sm text-slate-600">Doctors, herbalists and care coordinators connected to your visits.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">

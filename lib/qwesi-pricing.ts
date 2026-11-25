@@ -34,15 +34,6 @@ export const qwesiPaygItems: QwesiPaygItem[] = [
     features: ['Symptom intake', 'Basic guidance', 'Routing to care'],
   },
   {
-    id: 'nurse-virtual-follow-up',
-    name: 'Nurse Virtual Follow-up',
-    priceLabel: 'GHS 20-40',
-    minAmount: 20,
-    maxAmount: 40,
-    currency: 'GHS',
-    features: ['Nurse call/check-in', 'BP/diabetes follow-up', 'Medication reminders'],
-  },
-  {
     id: 'doctor-virtual-consultation',
     name: 'Doctor Virtual Consultation',
     priceLabel: 'GHS 80-150',
@@ -61,16 +52,6 @@ export const qwesiPaygItems: QwesiPaygItem[] = [
     description: 'Depends on specialty.',
     features: ['Specialist review', 'Care recommendations', 'Referral guidance when needed'],
   },
-  {
-    id: 'home-nurse-visit',
-    name: 'Home Nurse Visit',
-    priceLabel: 'GHS 100-250',
-    minAmount: 100,
-    maxAmount: 250,
-    currency: 'GHS',
-    description: 'Depends on distance, time, and complexity.',
-    features: ['Home nursing support', 'Vitals and follow-up checks', 'Medication support'],
-  },
 ];
 
 export const qwesiSubscriptionPlans: QwesiSubscriptionPlan[] = [
@@ -84,7 +65,6 @@ export const qwesiSubscriptionPlans: QwesiSubscriptionPlan[] = [
     audience: 'For general health support.',
     features: [
       'AI health intake',
-      'Nurse review/chat support',
       'Digital health record',
       'Lab and pharmacy coordination',
       'Discounted doctor consultations',
@@ -99,12 +79,10 @@ export const qwesiSubscriptionPlans: QwesiSubscriptionPlan[] = [
     billingInterval: 'month',
     audience: 'For patients with ongoing health needs.',
     features: [
-      'Monthly nurse check-in',
       'BP/diabetes tracking',
       'Access to a Qwesi doctor when needed',
       'Lab and medication coordination',
       'Family health updates',
-      'Discounted home nurse visits',
       'Health Wallet savings: GHS 20-30/month',
     ],
   },
@@ -117,7 +95,6 @@ export const qwesiSubscriptionPlans: QwesiSubscriptionPlan[] = [
     billingInterval: 'month',
     audience: 'For chronic illness, elderly care, and higher-risk patients.',
     features: [
-      'Weekly nurse check-ins',
       'Monthly doctor review',
       'BP/glucose monitoring support',
       'Medication adherence follow-up',
@@ -137,12 +114,10 @@ export const qwesiSubscriptionPlans: QwesiSubscriptionPlan[] = [
     billingInterval: 'month',
     audience: 'For families abroad caring for loved ones back home.',
     features: [
-      'Nurse check-ins for parent/relative',
       'Doctor review access',
       'BP/diabetes monitoring',
       'Lab/pharmacy coordination',
       'Monthly health updates to family abroad',
-      'Optional home nurse visits',
       'Health Wallet savings: GHS 5-10',
     ],
   },
