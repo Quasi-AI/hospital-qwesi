@@ -76,7 +76,8 @@ import {
   Hospital,
   LayoutGrid,
   Languages,
-  Wallet
+  Wallet,
+  Bot
 } from 'lucide-react';
 
 interface SidebarLayoutProps {
@@ -180,6 +181,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
       ]
     },
     { id: 'clinical-notes', label: 'Consultation notes', icon: ClipboardList, href: '/clinical-notes', roles: ['doctor'] },
+    { id: 'ai-assistant', label: 'AI Assistant', icon: Bot, href: '/ai-assistant', roles: ['doctor'] },
     { id: 'wallet', label: 'Earnings & wallet', icon: Wallet, href: '/wallet', roles: ['doctor'] },
     { id: 'my-fee', label: 'My fee & profile', icon: Stethoscope, href: '/profile', roles: ['doctor'] },
 

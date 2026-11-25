@@ -17,6 +17,7 @@ import SidebarLayout from '../components/sidebar-layout';
 import { aiService } from '../../lib/ai-service';
 import { aiConfigManager } from '../../lib/ai-config';
 import { useTranslations } from '../hooks/useTranslations';
+import { AssistantCreditsBar, useAssistantCredits } from '../components/assistant-credits';
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ export default function AIAssistantPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const credits = useAssistantCredits();
 
   // Add welcome message when translations are loaded
   useEffect(() => {
@@ -240,6 +242,9 @@ export default function AIAssistantPage() {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() || isLoading) return;
+
+    // Doctors and staff pay in credits per question (admins are free). No credits = nothing is sent.
+    if (!(await credits.charge(inputMessage))) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -467,6 +472,7 @@ export default function AIAssistantPage() {
       <SidebarLayout 
         title={t('ai.assistant.title')} 
         description={t('ai.assistant.description')} dense>
+        <AssistantCreditsBar credits={credits} />
         {/* AI Assistant Header */}
         <div className="mb-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white shadow-sm">
           <div className="flex items-center gap-3">
