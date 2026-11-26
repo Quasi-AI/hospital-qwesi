@@ -142,13 +142,13 @@ export default function TopNavbar({
           <button
             type="button"
             onClick={() => { setBellOpen((v) => !v); setProfileOpen(false); if (!bellOpen) load(); }}
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+            className={`relative inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${unread > 0 ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100' : 'border-gray-200 bg-white/70 text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
             aria-label={unread > 0 ? `${unread} unread notifications` : 'Notifications'}
             aria-expanded={bellOpen}
           >
             <Bell className="h-5 w-5" />
             {unread > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white shadow-sm">
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold leading-none text-white shadow ring-2 ring-white">
                 {unread > 99 ? '99+' : unread}
               </span>
             )}

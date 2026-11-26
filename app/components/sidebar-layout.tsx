@@ -402,8 +402,18 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
               `}
               onClick={() => setSidebarOpen(false)}
             >
-              <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
+              <span className="relative inline-flex">
+                <item.icon className="h-5 w-5" />
+                {item.href.endsWith('/notifications') && (unreadNotifications ?? 0) > 0 && (
+                  <span className={`absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full ring-2 ${isActive ? 'bg-amber-300 ring-brand-600' : 'bg-red-500 ring-white'}`} />
+                )}
+              </span>
+              <span className="flex-1">{item.label}</span>
+              {item.href.endsWith('/notifications') && (unreadNotifications ?? 0) > 0 && (
+                <span className="ml-auto inline-flex min-w-[1.4rem] items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white shadow-sm">
+                  {(unreadNotifications ?? 0) > 99 ? '99+' : unreadNotifications}
+                </span>
+              )}
             </Link>
                 )}
               </div>

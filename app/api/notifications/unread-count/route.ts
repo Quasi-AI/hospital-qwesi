@@ -34,7 +34,7 @@ export async function GET() {
     const now = new Date();
     const count = await Notification.countDocuments({
       recipientId: session.user.id,
-      status: { $in: ['pending', 'sent'] },
+      status: { $ne: 'read' },
       // reminders scheduled for later are not unread yet
       $or: [{ scheduledFor: { $exists: false } }, { scheduledFor: null }, { scheduledFor: { $lte: now } }],
     });
