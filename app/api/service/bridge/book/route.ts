@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         currency,
         reference,
         callback_url,
-        metadata: { ...metadata, userId: String(patient._id), userRole: 'patient', patientId: patient.patientId, itemType: 'doctor_consultation' },
+        metadata: { ...metadata, application: 'hospital', userId: String(patient._id), userRole: 'patient', patientId: patient.patientId, itemType: 'doctor_consultation' },
       }),
     });
     const data = await res.json();

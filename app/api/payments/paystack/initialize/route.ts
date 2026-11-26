@@ -135,6 +135,8 @@ export async function POST(request: NextRequest) {
         callback_url,
         metadata: {
           ...metadata,
+          // lets the central payment gateway record this payment under the hospital
+          application: 'hospital',
           userId: session.user.id,
           userRole: session.user.role,
           patientId: patient?.patientId || patient?._id?.toString() || session.user.id,
