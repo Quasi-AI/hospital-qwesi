@@ -13,6 +13,8 @@ type Participant = {
   name: string;
   email?: string;
   image?: string;
+  kind?: string;
+  specialization?: string;
 };
 
 function participantKey(participant?: Pick<Participant, 'entityType' | 'entityId'> | null) {
@@ -87,6 +89,10 @@ export function DirectMessages({
   const [error, setError] = useState('');
   const [mobileChat, setMobileChat] = useState(false);
   const [composing, setComposing] = useState(false);
+  const [pickQuery, setPickQuery] = useState('');
+  const [pickOpen, setPickOpen] = useState(false);
+  const [pickKind, setPickKind] = useState('all');
+
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const selectedThread = useMemo(
@@ -110,6 +116,23 @@ export function DirectMessages({
       return `${names} ${last}`.toLowerCase().includes(needle);
     });
   }, [search, threads]);
+
+  useEffect(() => {
+    if (!composing || recipientScope === 'support') return;
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/messages/recipients?q=${encodeURIComponent(pickQuery.trim())}`, { cache: 'no-store' });
+        if (res.ok) {
+          const found: Participant[] = (await res.json()).recipients || [];
+          setRecipients((prev) => {
+            const keep = prev.filter((p) => participantKey(p) === recipientKeyValue && !found.some((f) => participantKey(f) === participantKey(p)));
+            return [...keep, ...found];
+          });
+        }
+      } catch {}
+    }, 250);
+    return () => clearTimeout(t);
+  }, [pickQuery, composing, recipientScope, recipientKeyValue]);
 
   const load = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
@@ -316,18 +339,63 @@ export function DirectMessages({
           {composing ? (
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <span className="text-sm font-semibold text-slate-900">To:</span>
-              <select
-                value={recipientKeyValue}
-                onChange={(event) => setRecipientKeyValue(event.target.value)}
-                className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
-              >
-                <option value="">{recipientScope === 'support' ? 'Choose support' : 'Choose recipient'}</option>
-                {recipients.map((recipient) => (
-                  <option key={participantKey(recipient)} value={participantKey(recipient)}>
-                    {recipient.name} — {recipient.role}
-                  </option>
-                ))}
-              </select>
+              <div className="relative min-w-0 flex-1">
+                {newRecipient && !pickOpen ? (
+                  <button
+                    type="button"
+                    onClick={() => { setPickOpen(true); setPickQuery(''); }}
+                    className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 text-left text-sm text-slate-900"
+                  >
+                    <span className="truncate font-medium">{newRecipient.name}</span>
+                    <span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-violet-700">{newRecipient.kind || newRecipient.role}</span>
+                  </button>
+                ) : (
+                  <input
+                    autoFocus
+                    value={pickQuery}
+                    onFocus={() => setPickOpen(true)}
+                    onChange={(e) => { setPickQuery(e.target.value); setPickOpen(true); }}
+                    placeholder={recipientScope === 'support' ? 'Choose support' : 'Search patient, doctor, herbalist, pharmacist…'}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
+                  />
+                )}
+                {pickOpen && (
+                  <div className="absolute left-0 right-0 top-11 z-50 overflow-hidden rounded-xl border border-slate-200 shadow-xl" style={{ backgroundColor: '#ffffff' }}>
+                    {recipientScope !== 'support' && (
+                      <div className="flex flex-wrap gap-1 border-b border-slate-100 p-2" style={{ backgroundColor: '#ffffff' }}>
+                        {['all', 'patient', 'doctor', 'herbalist', 'pharmacist', 'staff'].map((k) => (
+                          <button key={k} type="button" onClick={() => setPickKind(k)}
+                            className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${pickKind === k ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                            {k === 'all' ? 'Everyone' : k === 'staff' ? 'Staff & nurses' : `${k}s`}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <ul className="max-h-64 overflow-y-auto" style={{ backgroundColor: '#ffffff' }}>
+                      {(() => {
+                        const needle = pickQuery.trim().toLowerCase();
+                        const list = recipients.filter((r) =>
+                          (pickKind === 'all' || (r.kind || r.role) === pickKind) &&
+                          (!needle || `${r.name} ${r.email || ''}`.toLowerCase().includes(needle)));
+                        if (!list.length) return <li className="px-3 py-4 text-center text-sm text-slate-500">No one found</li>;
+                        return list.map((r) => (
+                          <li key={participantKey(r)}>
+                            <button type="button"
+                              onClick={() => { setRecipientKeyValue(participantKey(r)); setPickOpen(false); setPickQuery(''); }}
+                              className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-violet-50">
+                              <span className="min-w-0">
+                                <span className="block truncate text-sm font-medium text-slate-900">{r.name}</span>
+                                <span className="block truncate text-xs text-slate-500">{r.email || r.specialization}</span>
+                              </span>
+                              <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-slate-700">{r.kind || r.role}</span>
+                            </button>
+                          </li>
+                        ));
+                      })()}
+                    </ul>
+                  </div>
+                )}
+              </div>
               <button type="button" onClick={() => { setComposing(false); setMobileChat(false); }} className="rounded-full p-2 text-slate-500 hover:bg-slate-100" aria-label="Cancel new message">
                 <X className="h-4 w-4" />
               </button>

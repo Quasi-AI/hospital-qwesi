@@ -50,7 +50,7 @@ export default function TopNavbar({
     try {
       const [c, l] = await Promise.all([
         fetch('/api/notifications/unread-count', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { count: 0 })),
-        fetch('/api/notifications?limit=10', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { notifications: [] })),
+        fetch('/api/notifications?limit=10&scope=mine', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { notifications: [] })),
       ]);
       const count = typeof c.count === 'number' ? c.count : 0;
       // a higher unread count than before (found by polling) means something new arrived
@@ -176,11 +176,23 @@ export default function TopNavbar({
                   items.map((n) => (
                     <div key={n._id} className={`flex gap-3 border-b border-gray-50 px-4 py-3 ${isUnread(n) ? 'bg-brand-50/60' : ''}`}>
                       <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${isUnread(n) ? 'bg-brand-600' : 'bg-transparent'}`} />
+                      {n.type === 'direct_message' ? (
+                        <Link
+                          href={role === 'patient' ? '/patient-portal/messages' : '/messages'}
+                          onClick={() => { if (isUnread(n)) markRead(n._id); setBellOpen(false); }}
+                          className="min-w-0 flex-1"
+                        >
+                          <p className="truncate text-sm font-medium text-gray-900">{n.title}</p>
+                          <p className="line-clamp-2 text-xs text-gray-600">{n.message}</p>
+                          <p className="mt-1 text-[11px] text-gray-400">{ago(n.createdAt)} · Open message</p>
+                        </Link>
+                      ) : (
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-gray-900">{n.title}</p>
                         <p className="line-clamp-2 text-xs text-gray-600">{n.message}</p>
                         <p className="mt-1 text-[11px] text-gray-400">{ago(n.createdAt)}</p>
                       </div>
+                      )}
                       {isUnread(n) && (
                         <button type="button" onClick={() => markRead(n._id)} className="h-8 shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-white hover:text-brand-700" title="Mark as read" aria-label="Mark as read">
                           <Check className="h-4 w-4" />

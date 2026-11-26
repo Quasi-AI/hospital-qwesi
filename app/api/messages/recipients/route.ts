@@ -74,17 +74,44 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    if (!['admin', 'doctor', 'staff'].includes(session.user.role || '')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const role = session.user.role || '';
+    if (role !== 'admin') {
+      // Everyone else on the team can reply to / reach the admin team.
+      if (!['doctor', 'staff', 'nurse', 'pharmacy'].includes(role)) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      if (role === 'pharmacy') {
+        const admins = await User.find({ $or: [{ role: 'admin' }, { email: 'info@qwesi.org' }] }).select('name email role image').lean();
+        return NextResponse.json({
+          recipients: admins.map((u: any) => ({
+            entityType: 'user', entityId: String(u._id), role: u.role, kind: 'admin',
+            name: u.email === 'info@qwesi.org' ? 'Qwesi Support' : u.name, email: u.email, image: u.image || '', specialization: 'Support',
+          })),
+        });
+      }
     }
 
+    const q = (searchParams.get('q') || '').trim().slice(0, 60);
+    const rx = q ? new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : null;
+    const userFilter: any = {
+      email: { $ne: session.user.email },
+      deletedAt: { $exists: false },
+      role: { $in: role === 'admin' ? ['doctor', 'staff', 'nurse', 'pharmacy', 'admin'] : ['doctor', 'staff', 'admin'] },
+    };
+    if (rx) userFilter.$or = [{ name: rx }, { email: rx }];
+
     const [users, patients] = await Promise.all([
-      User.find({ role: { $in: ['doctor', 'staff'] }, email: { $ne: session.user.email }, deletedAt: { $exists: false } })
-        .select('name email role image specialization department')
-        .sort({ name: 1 })
-        .lean(),
-      Patient.find({ deletedAt: { $exists: false } }).select('name email patientId').sort({ name: 1 }).limit(200).lean(),
+      User.find(userFilter).select('name email role image specialization department practitionerType').sort({ name: 1 }).limit(150).lean(),
+      role === 'admin' || role === 'doctor' || role === 'staff'
+        ? Patient.find({ deletedAt: { $exists: false }, ...(rx ? { $or: [{ name: rx }, { email: rx }, { patientId: rx }] } : {}) })
+            .select('name email patientId').sort({ name: 1 }).limit(rx ? 100 : 50).lean()
+        : Promise.resolve([]),
     ]);
+
+    const kindOf = (u: any) =>
+      u.role === 'doctor' ? (u.practitionerType === 'herbalist' ? 'herbalist' : 'doctor')
+      : u.role === 'pharmacy' ? 'pharmacist'
+      : u.role === 'admin' ? 'admin' : 'staff';
 
     return NextResponse.json({
       recipients: [
@@ -92,15 +119,17 @@ export async function GET(request: NextRequest) {
           entityType: 'user',
           entityId: String(user._id),
           role: user.role,
+          kind: kindOf(user),
           name: user.name,
           email: user.email,
           image: user.image || '',
           specialization: user.specialization || user.department || '',
         })),
-        ...patients.map((patient: any) => ({
+        ...(patients as any[]).map((patient: any) => ({
           entityType: 'patient',
           entityId: String(patient._id),
           role: 'patient',
+          kind: 'patient',
           name: patient.name,
           email: patient.email,
           image: '',

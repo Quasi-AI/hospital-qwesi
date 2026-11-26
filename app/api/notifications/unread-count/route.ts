@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/Notification';
+import { myRecipientIds } from '@/lib/notificationRecipients';
 import { processScheduledNotifications } from '@/lib/notifications/notification-service';
 
 // Sends due reminders even when no external cron is configured (at most once a minute per server instance).
@@ -33,7 +34,7 @@ export async function GET() {
 
     const now = new Date();
     const count = await Notification.countDocuments({
-      recipientId: session.user.id,
+      recipientId: { $in: await myRecipientIds(session) },
       status: { $ne: 'read' },
       // reminders scheduled for later are not unread yet
       $or: [{ scheduledFor: { $exists: false } }, { scheduledFor: null }, { scheduledFor: { $lte: now } }],

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
+import { myRecipientIds } from '@/lib/notificationRecipients';
 import Notification from '@/models/Notification';
 import { sendNotification, markAsRead } from '@/lib/notifications/notification-service';
 import { emitRealtimeEvent, notificationTargets } from '@/lib/realtime';
@@ -26,7 +27,7 @@ export async function GET(
     }
 
     // Non-admin users can only see their own notifications
-    if (session.user?.role !== 'admin' && notification.recipientId !== session.user?.id) {
+    if (session.user?.role !== 'admin' && !(await myRecipientIds(session)).includes(String(notification.recipientId))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -62,7 +63,7 @@ export async function PUT(
     }
 
     // Non-admin users can only update their own notifications
-    if (session.user?.role !== 'admin' && notification.recipientId !== session.user?.id) {
+    if (session.user?.role !== 'admin' && !(await myRecipientIds(session)).includes(String(notification.recipientId))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

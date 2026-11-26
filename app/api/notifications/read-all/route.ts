@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/Notification';
+import { myRecipientIds } from '@/lib/notificationRecipients';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,7 @@ export async function POST() {
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   await dbConnect();
   const r = await Notification.updateMany(
-    { recipientId: session.user.id, status: { $in: ['pending', 'sent'] } },
+    { recipientId: { $in: await myRecipientIds(session) }, status: { $ne: 'read' } },
     { $set: { status: 'read', readAt: new Date() } },
   );
   return NextResponse.json({ ok: true, updated: r.modifiedCount });

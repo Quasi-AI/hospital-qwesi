@@ -26,7 +26,7 @@ async function recipientParticipant(entityType: 'user' | 'patient', entityId: st
   }
 
   const user = await User.findById(entityId).select('name email role image').lean();
-  if (!user || !['admin', 'doctor', 'staff'].includes(user.role)) return null;
+  if (!user || !['admin', 'doctor', 'staff', 'nurse', 'pharmacy'].includes(user.role)) return null;
   return {
     entityType,
     entityId: user._id,
@@ -38,8 +38,8 @@ async function recipientParticipant(entityType: 'user' | 'patient', entityId: st
 }
 
 function pairAllowed(senderRole: string, recipientRole: string) {
-  if (senderRole === 'admin') return true;
-  if (senderRole === 'patient' && recipientRole === 'admin') return true;
+  // The admin can write to anyone, and anyone can answer the admin.
+  if (senderRole === 'admin' || recipientRole === 'admin') return true;
   const key = [senderRole, recipientRole].sort().join(':');
   return ['doctor:doctor', 'doctor:staff', 'doctor:patient'].includes(key);
 }

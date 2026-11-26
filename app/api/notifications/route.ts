@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/Notification';
+import { myRecipientIds } from '@/lib/notificationRecipients';
 import { createNotification } from '@/lib/notifications/notification-service';
 
 export async function GET(request: NextRequest) {
@@ -26,8 +27,9 @@ export async function GET(request: NextRequest) {
     const query: any = {};
 
     // Non-admin users can only see their own notifications
-    if (session.user?.role !== 'admin') {
-      query.recipientId = session.user?.id;
+    // The bell (scope=mine) always shows the signed-in person's own items, admins included.
+    if (session.user?.role !== 'admin' || searchParams.get('scope') === 'mine') {
+      query.recipientId = { $in: await myRecipientIds(session) };
     } else if (recipientId) {
       query.recipientId = recipientId;
     }
