@@ -78,7 +78,8 @@ import {
   Languages,
   Wallet,
   Bot,
-  UserX
+  UserX,
+  Mail
 } from 'lucide-react';
 
 interface SidebarLayoutProps {
@@ -162,6 +163,7 @@ function SidebarLayoutInner({ children, title, description, topRight, dense, wid
     { id: 'doctors', label: 'Doctors & herbalists', icon: UserPlus, href: '/doctors', roles: ['admin'] },
     { id: 'patients', label: t('navigation.patients'), icon: Users, href: '/patients', roles: ['admin', 'doctor'] },
     { id: 'appointments', label: t('navigation.appointments'), icon: Calendar, href: '/appointments', roles: ['admin', 'doctor'] },
+    { id: 'broadcast', label: 'Email broadcast', icon: Mail, href: '/broadcast', roles: ['admin'] },
     { id: 'accounts', label: 'Manage accounts', icon: UserX, href: '/accounts', roles: ['admin'] },
     { id: 'payments', label: 'Payments', icon: Receipt, href: '/billing', roles: ['admin'] },
     { id: 'ai-doctor-settings', label: 'AI Doctor avatar', icon: Video, href: '/ai-doctor-settings', roles: ['admin'] },
