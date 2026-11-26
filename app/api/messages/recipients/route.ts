@@ -91,6 +91,63 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Paged directory used by the "New message" picker: one group at a time, with counts.
+    const kindParam = searchParams.get('kind');
+    if (kindParam && role !== 'pharmacy') {
+      const q0 = (searchParams.get('q') || '').trim().slice(0, 60);
+      const rx0 = q0 ? new RegExp(q0.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : null;
+      const page = Math.max(0, Number(searchParams.get('page')) || 0);
+      const limit = 30;
+      const live = { deletedAt: { $exists: false } };
+      const nameMatch = (extra: string[] = []) => (rx0 ? { $or: [{ name: rx0 }, { email: rx0 }, ...extra.map((f) => ({ [f]: rx0 }))] } : {});
+      const userFilters: Record<string, any> = {
+        doctor: { role: 'doctor', practitionerType: { $ne: 'herbalist' } },
+        herbalist: { role: 'doctor', practitionerType: 'herbalist' },
+        pharmacist: { role: 'pharmacy' },
+        staff: { role: { $in: ['staff', 'nurse'] } },
+        admin: { role: 'admin' },
+      };
+      const selfOut = { email: { $ne: session.user.email } };
+      const mapUser = (u: any, kind: string) => ({
+        entityType: 'user', entityId: String(u._id), role: u.role, kind, name: u.name, email: u.email,
+        image: u.image || '', specialization: u.specialization || u.department || '',
+      });
+      let recipients: any[] = [];
+      let total = 0;
+      if (kindParam === 'patient') {
+        if (role !== 'admin' && role !== 'doctor' && role !== 'staff') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const f = { ...live, ...nameMatch(['patientId']) };
+        const [rows, n] = await Promise.all([
+          Patient.find(f).select('name email patientId').sort({ name: 1 }).skip(page * limit).limit(limit).lean(),
+          Patient.countDocuments(f),
+        ]);
+        total = n;
+        recipients = (rows as any[]).map((pt) => ({
+          entityType: 'patient', entityId: String(pt._id), role: 'patient', kind: 'patient', name: pt.name, email: pt.email, image: '', specialization: pt.patientId || '',
+        }));
+      } else if (userFilters[kindParam]) {
+        const f = { ...userFilters[kindParam], ...live, ...selfOut, ...nameMatch() };
+        const [rows, n] = await Promise.all([
+          User.find(f).select('name email role image specialization department').sort({ name: 1 }).skip(page * limit).limit(limit).lean(),
+          User.countDocuments(f),
+        ]);
+        total = n;
+        recipients = (rows as any[]).map((u) => mapUser(u, kindParam));
+      } else {
+        return NextResponse.json({ error: 'Unknown group' }, { status: 400 });
+      }
+      let counts: Record<string, number> | undefined;
+      if (page === 0 && !q0) {
+        const keys = Object.keys(userFilters).filter((k) => k !== 'admin');
+        const [pc, ...uc] = await Promise.all([
+          Patient.countDocuments(live),
+          ...keys.map((k) => User.countDocuments({ ...userFilters[k], ...live, ...selfOut })),
+        ]);
+        counts = { patient: pc, ...Object.fromEntries(keys.map((k, i) => [k, uc[i]])) };
+      }
+      return NextResponse.json({ recipients, total, hasMore: (page + 1) * limit < total, counts });
+    }
+
     const q = (searchParams.get('q') || '').trim().slice(0, 60);
     const rx = q ? new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : null;
     const userFilter: any = {

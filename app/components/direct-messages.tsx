@@ -38,6 +38,154 @@ function Avatar({ name, size = 'md' }: { name?: string; size?: 'sm' | 'md' | 'lg
   );
 }
 
+const KIND_STYLE: Record<string, string> = {
+  patient: 'bg-sky-100 text-sky-800',
+  doctor: 'bg-violet-100 text-violet-800',
+  herbalist: 'bg-emerald-100 text-emerald-800',
+  pharmacist: 'bg-amber-100 text-amber-800',
+  staff: 'bg-slate-200 text-slate-700',
+  nurse: 'bg-slate-200 text-slate-700',
+  admin: 'bg-rose-100 text-rose-800',
+  pharmacy: 'bg-amber-100 text-amber-800',
+};
+function KindBadge({ kind }: { kind?: string }) {
+  if (!kind) return null;
+  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${KIND_STYLE[kind] || 'bg-slate-100 text-slate-700'}`}>{kind}</span>;
+}
+
+const PICK_TABS: { id: string; label: string }[] = [
+  { id: 'patient', label: 'Patients' },
+  { id: 'doctor', label: 'Doctors' },
+  { id: 'herbalist', label: 'Herbalists' },
+  { id: 'pharmacist', label: 'Pharmacists' },
+  { id: 'staff', label: 'Staff & nurses' },
+];
+
+function RecipientPicker({
+  support, localList, onPick, onClose,
+}: { support: boolean; localList: Participant[]; onPick: (p: Participant) => void; onClose: () => void }) {
+  const [tab, setTab] = useState('patient');
+  const [q, setQ] = useState('');
+  const [rows, setRows] = useState<Participant[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const req = useRef(0);
+
+  const fetchPage = useCallback(async (pg: number, replace: boolean) => {
+    const id = ++req.current;
+    setBusy(true);
+    setFailed(false);
+    try {
+      const res = await fetch(`/api/messages/recipients?kind=${tab}&q=${encodeURIComponent(q.trim())}&page=${pg}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('bad');
+      const data = await res.json();
+      if (id !== req.current) return;
+      setRows((prev) => (replace ? data.recipients : [...prev, ...data.recipients]));
+      setHasMore(!!data.hasMore);
+      setTotal(data.total || 0);
+      setPage(pg);
+      if (data.counts) setCounts(data.counts);
+    } catch {
+      if (id === req.current) setFailed(true);
+    } finally {
+      if (id === req.current) setBusy(false);
+    }
+  }, [tab, q]);
+
+  useEffect(() => {
+    if (support) return;
+    const t = setTimeout(() => fetchPage(0, true), q ? 250 : 0);
+    return () => clearTimeout(t);
+  }, [fetchPage, support, q]);
+
+  const list = support ? localList : rows;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-w-xl sm:rounded-2xl" style={{ backgroundColor: '#ffffff' }}>
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div>
+            <h3 className="text-base font-bold text-slate-950">New message</h3>
+            <p className="text-xs text-slate-500">{support ? 'Choose who to contact' : 'Pick a group, then search or scroll to find the person'}</p>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-full p-2 text-slate-500 hover:bg-slate-100" aria-label="Close"><X className="h-5 w-5" /></button>
+        </div>
+
+        {!support && (
+          <div className="space-y-3 border-b border-slate-100 px-5 py-3">
+            <div className="flex flex-wrap gap-1.5">
+              {PICK_TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => { setTab(t.id); setRows([]); }}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${tab === t.id ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                >
+                  {t.label}
+                  {counts[t.id] !== undefined && (
+                    <span className={`rounded-full px-1.5 text-[11px] font-semibold ${tab === t.id ? 'bg-white/25 text-white' : 'bg-white text-slate-600'}`}>{counts[t.id]}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <input
+                autoFocus
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={`Search ${PICK_TABS.find((t) => t.id === tab)?.label.toLowerCase()} by name, email${tab === 'patient' ? ' or patient ID' : ''}`}
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="min-h-[240px] flex-1 overflow-y-auto" style={{ backgroundColor: '#ffffff' }}>
+          {failed ? (
+            <div className="px-6 py-12 text-center text-sm text-slate-600">
+              Couldn’t load people.{' '}
+              <button type="button" className="font-semibold text-violet-700" onClick={() => fetchPage(0, true)}>Try again</button>
+            </div>
+          ) : list.length === 0 && !busy ? (
+            <div className="px-6 py-12 text-center text-sm text-slate-500">{q ? `No one matches “${q}”.` : 'No one here yet.'}</div>
+          ) : (
+            <ul className="divide-y divide-slate-50">
+              {list.map((r) => (
+                <li key={participantKey(r)}>
+                  <button type="button" onClick={() => onPick(r)} className="flex w-full items-center gap-3 px-5 py-3 text-left transition hover:bg-violet-50">
+                    <Avatar name={r.name} size="lg" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-slate-900">{r.name}</span>
+                      <span className="block truncate text-xs text-slate-500">{[r.email, r.specialization].filter(Boolean).join(' · ')}</span>
+                    </span>
+                    <KindBadge kind={r.kind || r.role} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {busy && <p className="px-5 py-4 text-center text-xs text-slate-500">Loading…</p>}
+          {!support && hasMore && !busy && (
+            <div className="p-4 text-center">
+              <button type="button" onClick={() => fetchPage(page + 1, false)} className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-200">
+                Show more ({rows.length} of {total})
+              </button>
+            </div>
+          )}
+        </div>
+        {!support && total > 0 && !busy && (
+          <p className="border-t border-slate-100 px-5 py-2 text-xs text-slate-500">Showing {rows.length} of {total}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function RoleBadge({ role }: { role?: string }) {
   if (!role) return null;
   return (
@@ -89,9 +237,8 @@ export function DirectMessages({
   const [error, setError] = useState('');
   const [mobileChat, setMobileChat] = useState(false);
   const [composing, setComposing] = useState(false);
-  const [pickQuery, setPickQuery] = useState('');
-  const [pickOpen, setPickOpen] = useState(false);
-  const [pickKind, setPickKind] = useState('all');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [picked, setPicked] = useState<Participant | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,23 +263,6 @@ export function DirectMessages({
       return `${names} ${last}`.toLowerCase().includes(needle);
     });
   }, [search, threads]);
-
-  useEffect(() => {
-    if (!composing || recipientScope === 'support') return;
-    const t = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/messages/recipients?q=${encodeURIComponent(pickQuery.trim())}`, { cache: 'no-store' });
-        if (res.ok) {
-          const found: Participant[] = (await res.json()).recipients || [];
-          setRecipients((prev) => {
-            const keep = prev.filter((p) => participantKey(p) === recipientKeyValue && !found.some((f) => participantKey(f) === participantKey(p)));
-            return [...keep, ...found];
-          });
-        }
-      } catch {}
-    }, 250);
-    return () => clearTimeout(t);
-  }, [pickQuery, composing, recipientScope, recipientKeyValue]);
 
   const load = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
@@ -184,7 +314,7 @@ export function DirectMessages({
   const sendMessage = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
-    const explicitRecipient = recipients.find((item) => participantKey(item) === recipientKeyValue);
+    const explicitRecipient = (picked && participantKey(picked) === recipientKeyValue ? picked : null) || recipients.find((item) => participantKey(item) === recipientKeyValue);
     const recipient = explicitRecipient || otherParticipant;
     if (!recipient) {
       setError('Choose a recipient.');
@@ -226,7 +356,7 @@ export function DirectMessages({
     setSending(false);
   };
 
-  const newRecipient = recipients.find((item) => participantKey(item) === recipientKeyValue);
+  const newRecipient = (picked && participantKey(picked) === recipientKeyValue ? picked : null) || recipients.find((item) => participantKey(item) === recipientKeyValue);
   const headerPerson = composing ? newRecipient || null : otherParticipant;
   const showChat = mobileChat || composing;
 
@@ -266,7 +396,9 @@ export function DirectMessages({
                 setComposing(true);
                 setSelectedThreadId('');
                 setRecipientKeyValue('');
+                setPicked(null);
                 setMobileChat(true);
+                setPickerOpen(true);
               }}
               className="inline-flex h-9 items-center gap-1.5 rounded-full bg-violet-600 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-violet-700"
             >
@@ -325,6 +457,18 @@ export function DirectMessages({
         </div>
       </aside>
 
+      {pickerOpen && (
+        <RecipientPicker
+          support={recipientScope === 'support'}
+          localList={recipients}
+          onClose={() => { setPickerOpen(false); if (!recipientKeyValue) { setComposing(false); setMobileChat(false); } }}
+          onPick={(r) => {
+            setPicked(r);
+            setRecipientKeyValue(participantKey(r));
+            setPickerOpen(false);
+          }}
+        />
+      )}
       {/* Chat pane */}
       <section className={`${showChat ? 'flex' : 'hidden lg:flex'} min-h-0 min-w-0 flex-col bg-slate-50`}>
         <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-3 py-3 sm:px-4">
@@ -339,63 +483,28 @@ export function DirectMessages({
           {composing ? (
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <span className="text-sm font-semibold text-slate-900">To:</span>
-              <div className="relative min-w-0 flex-1">
-                {newRecipient && !pickOpen ? (
-                  <button
-                    type="button"
-                    onClick={() => { setPickOpen(true); setPickQuery(''); }}
-                    className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 text-left text-sm text-slate-900"
-                  >
-                    <span className="truncate font-medium">{newRecipient.name}</span>
-                    <span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-violet-700">{newRecipient.kind || newRecipient.role}</span>
-                  </button>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 text-left transition hover:border-violet-300"
+              >
+                {newRecipient ? (
+                  <>
+                    <Avatar name={newRecipient.name} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-slate-900">{newRecipient.name}</span>
+                      <span className="block truncate text-[11px] text-slate-500">{newRecipient.email}</span>
+                    </span>
+                    <KindBadge kind={newRecipient.kind || newRecipient.role} />
+                    <span className="text-xs font-semibold text-violet-700">Change</span>
+                  </>
                 ) : (
-                  <input
-                    autoFocus
-                    value={pickQuery}
-                    onFocus={() => setPickOpen(true)}
-                    onChange={(e) => { setPickQuery(e.target.value); setPickOpen(true); }}
-                    placeholder={recipientScope === 'support' ? 'Choose support' : 'Search patient, doctor, herbalist, pharmacist…'}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
-                  />
+                  <>
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <span className="flex-1 text-sm text-slate-500">Choose who to message…</span>
+                  </>
                 )}
-                {pickOpen && (
-                  <div className="absolute left-0 right-0 top-11 z-50 overflow-hidden rounded-xl border border-slate-200 shadow-xl" style={{ backgroundColor: '#ffffff' }}>
-                    {recipientScope !== 'support' && (
-                      <div className="flex flex-wrap gap-1 border-b border-slate-100 p-2" style={{ backgroundColor: '#ffffff' }}>
-                        {['all', 'patient', 'doctor', 'herbalist', 'pharmacist', 'staff'].map((k) => (
-                          <button key={k} type="button" onClick={() => setPickKind(k)}
-                            className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${pickKind === k ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
-                            {k === 'all' ? 'Everyone' : k === 'staff' ? 'Staff & nurses' : `${k}s`}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <ul className="max-h-64 overflow-y-auto" style={{ backgroundColor: '#ffffff' }}>
-                      {(() => {
-                        const needle = pickQuery.trim().toLowerCase();
-                        const list = recipients.filter((r) =>
-                          (pickKind === 'all' || (r.kind || r.role) === pickKind) &&
-                          (!needle || `${r.name} ${r.email || ''}`.toLowerCase().includes(needle)));
-                        if (!list.length) return <li className="px-3 py-4 text-center text-sm text-slate-500">No one found</li>;
-                        return list.map((r) => (
-                          <li key={participantKey(r)}>
-                            <button type="button"
-                              onClick={() => { setRecipientKeyValue(participantKey(r)); setPickOpen(false); setPickQuery(''); }}
-                              className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-violet-50">
-                              <span className="min-w-0">
-                                <span className="block truncate text-sm font-medium text-slate-900">{r.name}</span>
-                                <span className="block truncate text-xs text-slate-500">{r.email || r.specialization}</span>
-                              </span>
-                              <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-slate-700">{r.kind || r.role}</span>
-                            </button>
-                          </li>
-                        ));
-                      })()}
-                    </ul>
-                  </div>
-                )}
-              </div>
+              </button>
               <button type="button" onClick={() => { setComposing(false); setMobileChat(false); }} className="rounded-full p-2 text-slate-500 hover:bg-slate-100" aria-label="Cancel new message">
                 <X className="h-4 w-4" />
               </button>
