@@ -37,11 +37,14 @@ async function recipientParticipant(entityType: 'user' | 'patient', entityId: st
   };
 }
 
-function pairAllowed(senderRole: string, recipientRole: string) {
-  // The admin can write to anyone, and anyone can answer the admin.
-  if (senderRole === 'admin' || recipientRole === 'admin') return true;
-  const key = [senderRole, recipientRole].sort().join(':');
-  return ['doctor:doctor', 'doctor:staff', 'doctor:patient'].includes(key);
+const ADMIN_LIKE = ['admin', 'hospital'];
+const norm = (r: string) => (r === 'nurse' ? 'staff' : r);
+
+function pairAllowed(senderRole: string, recipientRole: string, sessionRole?: string) {
+  // The admin (by account or by sign-in) can write to anyone, and anyone can answer the admin.
+  if (ADMIN_LIKE.includes(senderRole) || ADMIN_LIKE.includes(sessionRole || '') || ADMIN_LIKE.includes(recipientRole)) return true;
+  const key = [norm(senderRole), norm(recipientRole)].sort().join(':');
+  return ['doctor:doctor', 'doctor:staff', 'doctor:patient', 'staff:staff'].includes(key);
 }
 
 function supportThreadFilter(currentEntityId: unknown) {
@@ -106,7 +109,7 @@ export async function POST(request: NextRequest) {
     if (!sender || !recipient) {
       return NextResponse.json({ error: 'Recipient not found' }, { status: 404 });
     }
-    if (!pairAllowed(sender.role, recipient.role)) {
+    if (!pairAllowed(sender.role, recipient.role, (session.user as any)?.role)) {
       return NextResponse.json({ error: 'This message route is not allowed' }, { status: 403 });
     }
 
