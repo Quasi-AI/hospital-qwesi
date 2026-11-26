@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const role = session.user.role || '';
+    const role = session.user.role === 'hospital' ? 'admin' : (session.user.role || '');
     if (role !== 'admin') {
       // Everyone else on the team can reply to / reach the admin team.
       if (!['doctor', 'staff', 'nurse', 'pharmacy'].includes(role)) {
